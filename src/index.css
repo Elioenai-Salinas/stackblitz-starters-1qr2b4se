@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+  DESIGN SYSTEM - Centro Educativo El Buen Pastor Golden Heaven
+  Paleta basada en colores pastel alegres + azul marino institucional
+*/
+
+@layer base {
+  :root {
+    /* Colores principales */
+    --background: 0 0% 100%;
+    --foreground: 220 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 15%;
+
+    /* Azul marino institucional */
+    --primary: 217 71% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Celeste pastel */
+    --secondary: 200 85% 92%;
+    --secondary-foreground: 217 71% 25%;
+
+    /* Muted - gris cálido */
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Rosa pastel - accent */
+    --accent: 340 75% 92%;
+    --accent-foreground: 340 50% 35%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Bordes e inputs */
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 217 71% 45%;
+
+    --radius: 0.75rem;
+
+    /* Colores extendidos */
+    --pastel-pink: 340 75% 92%;
+    --pastel-blue: 200 85% 92%;
+    --pastel-green: 145 60% 88%;
+    --pastel-yellow: 45 90% 88%;
+    --pastel-lavender: 270 60% 92%;
+    
+    --golden: 43 90% 55%;
+    --golden-light: 43 85% 75%;
+    
+    /* Gradientes */
+    --gradient-hero: linear-gradient(135deg, hsl(200 85% 92%), hsl(340 75% 92%), hsl(45 90% 88%));
+    --gradient-primary: linear-gradient(135deg, hsl(217 71% 35%), hsl(217 71% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(340 75% 92%), hsl(200 85% 92%));
+    --gradient-warm: linear-gradient(135deg, hsl(45 90% 88%), hsl(340 75% 92%));
+    
+    /* Sombras */
+    --shadow-soft: 0 4px 20px -4px hsl(217 71% 35% / 0.15);
+    --shadow-card: 0 8px 30px -8px hsl(217 71% 35% / 0.12);
+    --shadow-elevated: 0 12px 40px -12px hsl(217 71% 35% / 0.18);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 217 71% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 85% 92%;
+    --sidebar-accent-foreground: 217 71% 25%;
+    --sidebar-border: 210 20% 90%;
+    --sidebar-ring: 217 71% 45%;
+  }
+
+  .dark {
+    --background: 220 30% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 220 30% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 220 30% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 200 85% 70%;
+    --primary-foreground: 220 30% 10%;
+
+    --secondary: 217 50% 20%;
+    --secondary-foreground: 200 85% 85%;
+
+    --muted: 220 25% 18%;
+    --muted-foreground: 210 15% 60%;
+
+    --accent: 340 50% 25%;
+    --accent-foreground: 340 75% 85%;
+
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 200 85% 60%;
+
+    --sidebar-background: 220 30% 10%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 200 85% 70%;
+    --sidebar-primary-foreground: 220 30% 10%;
+    --sidebar-accent: 217 50% 20%;
+    --sidebar-accent-foreground: 200 85% 85%;
+    --sidebar-border: 220 25% 20%;
+    --sidebar-ring: 200 85% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Hero section styles */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+  
+  .hero-text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .card-hover:hover {
+    @apply -translate-y-1;
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Pastel badges */
+  .badge-pastel-pink {
+    @apply bg-pastel-pink text-accent-foreground;
+  }
+  
+  .badge-pastel-blue {
+    @apply bg-pastel-blue text-secondary-foreground;
+  }
+  
+  .badge-pastel-green {
+    @apply bg-pastel-green text-green-800;
+  }
+  
+  .badge-pastel-yellow {
+    @apply bg-pastel-yellow text-amber-800;
+  }
+
+  /* Section backgrounds */
+  .section-gradient {
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(200 85% 97%) 100%);
+  }
+
+  /* WhatsApp button */
+  .whatsapp-float {
+    @apply fixed bottom-6 right-6 z-50 bg-green-500 text-white rounded-full p-4 shadow-lg hover:bg-green-600 transition-all duration-300 hover:scale-110;
+  }
+
+  /* Animated underline */
+  .animated-underline {
+    @apply relative;
+  }
+  
+  .animated-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300;
+  }
+  
+  .animated-underline:hover::after {
+    @apply w-full;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-fade-up {
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+  
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
