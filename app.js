@@ -126,7 +126,6 @@ function renderStats() {
 function renderExecutive() {
   const sem = semaforoCounts();
   const topRiesgo = state.scripts.filter(s => ((s.indicadores || {}).semaforo || '').toLowerCase().includes('roj'));
-  const topAmarillo = state.scripts.filter(s => ((s.indicadores || {}).semaforo || '').toLowerCase().includes('amar'));
   const topPorTamaño = state.scripts
     .slice()
     .sort((a, b) => (b.totalLines || 0) - (a.totalLines || 0))
@@ -140,14 +139,152 @@ function renderExecutive() {
     .filter(s => s.riesgos && s.riesgos.length > 0)
     .slice(0, 3);
 
+  const moduleStatus = [
+    { modulo: 'Cargos Escolares', estado: 'FUNCIONA', clase: 'verde' },
+    { modulo: 'Aplicación de Pagos', estado: 'FUNCIONA PARCIAL', clase: 'amarillo' },
+    { modulo: 'Recargos', estado: 'NO FUNCIONA', clase: 'rojo' },
+    { modulo: 'Mora', estado: 'NO FUNCIONA', clase: 'rojo' },
+    { modulo: 'Statements / Estados', estado: 'CUELLO DE BOTELLA', clase: 'rojo' },
+    { modulo: 'Detalle', estado: 'INCOMPLETO', clase: 'amarillo' },
+    { modulo: 'Portal', estado: 'HEREDA DATOS INCOMPLETOS', clase: 'amarillo' },
+    { modulo: 'Conciliación', estado: 'NO GENERADA / VACÍA', clase: 'gris' },
+    { modulo: 'Exportación Contable', estado: 'NO GENERADA / VACÍA', clase: 'gris' }
+  ];
+
+  const stableComponents = [
+    'Generación base de mensualidad por grado',
+    'Plataforma',
+    'Descuento familiar',
+    'Parte de la aplicación de pagos',
+    'Cálculo base de saldo',
+    'Publicación de portal como salida'
+  ];
+
+  const expectedObservedRows = [
+    {
+      modulo: 'Recargos',
+      esperado: 'Cargos de febrero pendientes deben tener 10% después de gracia',
+      observado: 'Recargo en 0.00 en casos vencidos',
+      impacto: 'Subestima deuda',
+      prioridad: 'Alta',
+      sospecha: 'Match de reglas o ejecución incompleta del motor'
+    },
+    {
+      modulo: 'Statements',
+      esperado: 'Estados con movimientos completos y saldo final consistente',
+      observado: 'Colapso a saldo anterior/saldo inicial',
+      impacto: 'Rompe resumen, detalle y portal',
+      prioridad: 'Alta',
+      sospecha: 'Unificación incorrecta de movimientos'
+    },
+    {
+      modulo: 'Conciliación',
+      esperado: 'Hoja con pagos aplicados reconciliados',
+      observado: 'Salida vacía',
+      impacto: 'No hay control financiero final',
+      prioridad: 'Alta',
+      sospecha: 'Fuente errónea o filtro excesivo'
+    },
+    {
+      modulo: 'Exportación Contable',
+      esperado: 'Archivo contable generado por período',
+      observado: 'No se generan filas exportables',
+      impacto: 'Cierre contable bloqueado',
+      prioridad: 'Media-Alta',
+      sospecha: 'Detalle no entrega movimientos válidos'
+    }
+  ];
+
+  const testCases = [
+    {
+      alumno: 'Caso A - Febrero pendiente',
+      cargoBase: '500.00',
+      pagoAplicado: '0.00',
+      recargoEsperado: '50.00',
+      moraEsperada: 'Activa según regla vigente',
+      observado: 'Recargo 0.00, mora no propagada',
+      discrepancia: 'Motor temporal no está elevando a vencido'
+    },
+    {
+      alumno: 'Caso B - Febrero pagado',
+      cargoBase: '500.00',
+      pagoAplicado: '500.00',
+      recargoEsperado: '0.00',
+      moraEsperada: 'No aplica',
+      observado: 'Saldo en cero, consistente',
+      discrepancia: 'Sin discrepancia crítica'
+    },
+    {
+      alumno: 'Caso C - Descuento familiar',
+      cargoBase: '500.00',
+      pagoAplicado: '475.00',
+      recargoEsperado: 'Sobre neto si vence',
+      moraEsperada: 'Según criterio vigente',
+      observado: 'Descuento aplicado, recargo inconsistente',
+      discrepancia: 'Descuento ok, recargo/mora no siempre se activa'
+    }
+  ];
+
+  const sheetTrace = [
+    {
+      hoja: 'CARGOS_ESCOLARES', entradas: 'Reglas, grado, período, estudiante', salidas: 'Cargo base y neto', estado: 'FUNCIONA',
+      siLlena: 'Cargos base', noLlena: 'Clasificación temporal avanzada', depende: 'Aplicación, Statements, Resumen', riesgo: 'Bajo'
+    },
+    {
+      hoja: 'APLICACION_PAGOS', entradas: 'Pagos reportados', salidas: 'Aplicación por estudiante/concepto', estado: 'PARCIAL',
+      siLlena: 'Aplicaciones principales', noLlena: 'Algunos multiuso', depende: 'Statements, Conciliación', riesgo: 'Medio'
+    },
+    {
+      hoja: 'STATES / RESUMEN', entradas: 'Cargos + Aplicaciones + Reglas temporales', salidas: 'Estado consolidado', estado: 'CUELLO DE BOTELLA',
+      siLlena: 'Saldo inicial/anterior', noLlena: 'Movimientos completos', depende: 'Detalle, Portal, Exportación', riesgo: 'Alto'
+    },
+    {
+      hoja: 'ESTADO_CUENTA_DETALLE', entradas: 'States', salidas: 'Movimientos exportables', estado: 'INCOMPLETO',
+      siLlena: 'Cabeceras y saldo inicial', noLlena: 'Líneas de recargo/mora', depende: 'Portal, Exportación', riesgo: 'Alto'
+    },
+    {
+      hoja: 'PORTAL', entradas: 'Resumen + Detalle', salidas: 'Vista usuario', estado: 'HEREDA INCOMPLETO',
+      siLlena: 'Datos base visibles', noLlena: 'Mora/recargo consistente', depende: 'Operación final', riesgo: 'Medio-Alto'
+    },
+    {
+      hoja: 'CONCILIACION', entradas: 'Aplicaciones reales', salidas: 'Conciliación por corte', estado: 'NO GENERADA',
+      siLlena: 'Nada estable', noLlena: 'Filas de conciliación', depende: 'Control de cierre', riesgo: 'Alto'
+    },
+    {
+      hoja: 'EXPORT_CONTABILIDAD', entradas: 'Detalle corregido', salidas: 'Asientos/archivo contable', estado: 'NO GENERADA',
+      siLlena: 'Nada estable', noLlena: 'Archivo exportable', depende: 'Cierre contable', riesgo: 'Alto'
+    }
+  ];
+
+  const dependencies = [
+    { modulo: 'Statements', depende: 'Cargos, Aplicación de pagos, reglas temporales', rompeA: 'Resumen, Detalle, Portal, Export contable', hereda: 'Errores de recargos/reversals', impacto: 'Alto' },
+    { modulo: 'Conciliación', depende: 'Aplicación de pagos + States consistente', rompeA: 'Control de cierre', hereda: 'Vacíos de detalle', impacto: 'Alto' },
+    { modulo: 'Exportación contable', depende: 'Detalle con movimientos válidos', rompeA: 'Contabilidad', hereda: 'Fallas de states/detalle', impacto: 'Alto' },
+    { modulo: 'Portal', depende: 'Resumen + Detalle', rompeA: 'Lectura operativa', hereda: 'Inconsistencias aguas arriba', impacto: 'Medio-Alto' }
+  ];
+
+  const alerts = [
+    'Detalle solo contiene SALDO_INICIAL',
+    'Resumen tiene Total_Cargos = 0 con Saldo_Anterior > 0',
+    'Portal no heredó mora',
+    'Conciliación vacía con pagos aplicados existentes',
+    'Exportación contable vacía porque Detalle no tiene movimientos exportables',
+    'Recargo en 0.00 para cargos vencidos',
+    'Regla de cobro no encontrada para concepto/grado/período'
+  ];
+
   ui.execKpis.innerHTML = `
-    <h3>Resumen Ejecutivo para Dirección</h3>
+    <h3>Resumen Ejecutivo del Estado del Sistema</h3>
     <p class="small"><strong>Propósito:</strong> Estado operativo del ciclo completo de cargos, pagos y conciliación. Permite identificar prioridades de estabilización y control sin necesidad de detalles técnicos.</p>
     <div class="exec-grid">
       <div class="kpi"><div class="v">${state.scripts.length}</div><div class="k">Módulos del sistema</div></div>
       <div class="kpi"><div class="v">${sem.rojo}</div><div class="k">Riesgo alto (Rojo)</div></div>
       <div class="kpi"><div class="v">${sem.amarillo}</div><div class="k">Riesgo medio (Amarillo)</div></div>
       <div class="kpi"><div class="v">${sem.verde}</div><div class="k">Riesgo bajo (Verde)</div></div>
+    </div>
+    <h4>Estado por Módulo Operativo</h4>
+    <div class="status-grid">
+      ${moduleStatus.map(m => `<div class="status-card ${m.clase}"><div class="status-mod">${escapeHtml(m.modulo)}</div><div class="status-val">${escapeHtml(m.estado)}</div></div>`).join('')}
     </div>
   `;
 
@@ -160,6 +297,23 @@ pie title Distribucion de Riesgo
   let riskHtml = `
     <h3>Análisis de Riesgos por Módulo</h3>
     <div id="riskPie" class="mermaid">${riskPie}</div>
+    <h4>Componentes Estables</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${stableComponents.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+    <h4>Cuello de Botella Principal</h4>
+    <div class="bottleneck-box">
+      <ul class="tight">
+        <li>El flujo no se rompe primero en Cargos.</li>
+        <li>El flujo no se rompe primero en Aplicaciones.</li>
+        <li>El cuello principal empieza en States / Statements.</li>
+        <li>En esa etapa, los movimientos se colapsan a saldo anterior o saldo inicial.</li>
+        <li>Por eso Resumen, Detalle, Portal y Exportación Contable salen degradados.</li>
+      </ul>
+    </div>
+    <div class="warning-banner">NO REESCRIBIR TODO EL SISTEMA: conservar base estable y reparar propagación, recargos, mora, detalle, conciliación, exportación y trazabilidad.</div>
   `;
 
   if (topRiesgo.length > 0) {
@@ -185,68 +339,176 @@ pie title Distribucion de Riesgo
 
   ui.execRisks.innerHTML = riskHtml;
 
-  // Construcción de narrativa ejecutiva desde JSON
+  // Construcción de narrativa ejecutiva orientada a diagnóstico
   let execHtml = `
-    <h3>Narración Ejecutiva: Estado del Sistema</h3>
-    
-    <h4>1. Propósito General</h4>
+    <h3>Tablero de Diagnóstico y Trazabilidad</h3>
+
+    <h4>Qué Ya Funciona (Componentes Estables)</h4>
     <div class="note-box">
-      <p>El sistema CARGOS_MORA automatiza el ciclo completo de:</p>
       <ul class="tight">
-        <li><strong>Captura:</strong> Inscripciones de estudiantes y registro de cargos</li>
-        <li><strong>Procesamiento:</strong> Aplicación de pagos y cálculo de mora/recargos</li>
-        <li><strong>Control:</strong> Conciliación, trazabilidad y auditoría</li>
-        <li><strong>Exportación:</strong> Reportes para portales, sistemas contables y operativos</li>
+        ${stableComponents.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
       </ul>
     </div>
 
-    <h4>1.5. Visión Gráfica del Ciclo E2E (para Directores)</h4>
-    <div id="execFlowChart" class="mermaid">flowchart LR
-      A["📥 Entrada<br/>Cargos/Pagos/Ajustes"] -->|Validar| B["⚙️ Config<br/>Base 00-04"]
-      B -->|Normalizar| C["📊 Ingesta<br/>05-06"]
-      C -->|Procesar| D["🧮 Cálculos<br/>07-09"]
-      D -->|Generar| E["📈 Reportes<br/>10,17"]
-      E -->|Conciliar| F["✅ Cierre<br/>18-21"]
-      F -->|Auditoría| G["📋 Salida Final<br/>Datos en Prod"]
-      H["🎯 Runners<br/>90-99"] -.->|Coordinan| B
-      H -.->|Coordinan| C
-      H -.->|Coordinan| D
-      
-      style A fill:#e6f7f7,stroke:#005f73,stroke-width:2px
-      style B fill:#e6f7ec,stroke:#136f3a,stroke-width:2px
-      style C fill:#e6f7f7,stroke:#005f73,stroke-width:2px
-      style D fill:#ffe5e5,stroke:#9b1c1c,stroke-width:2px
-      style E fill:#ffe5e5,stroke:#9b1c1c,stroke-width:2px
-      style F fill:#e6f7ec,stroke:#136f3a,stroke-width:2px
-      style G fill:#e6f7ec,stroke:#136f3a,stroke-width:2px
-      style H fill:#ffe5e5,stroke:#9b1c1c,stroke-width:3px
+    <h4>Mapa de Trazabilidad por Hoja</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead>
+          <tr><th>Hoja</th><th>Entradas</th><th>Salidas</th><th>Estado</th><th>Qué sí llena</th><th>Qué no llena</th><th>Qué depende</th><th>Riesgo</th></tr>
+        </thead>
+        <tbody>
+          ${sheetTrace.map(r => `<tr><td>${escapeHtml(r.hoja)}</td><td>${escapeHtml(r.entradas)}</td><td>${escapeHtml(r.salidas)}</td><td>${escapeHtml(r.estado)}</td><td>${escapeHtml(r.siLlena)}</td><td>${escapeHtml(r.noLlena)}</td><td>${escapeHtml(r.depende)}</td><td>${escapeHtml(r.riesgo)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
 
-    <h4>2. Flujo de Procesos (E2E)</h4>
+    <h4>Casos de Prueba Reales</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead>
+          <tr><th>Alumno/Caso</th><th>Cargo base esperado</th><th>Pago aplicado</th><th>Recargo esperado</th><th>Mora esperada</th><th>Resultado observado</th><th>Discrepancia detectada</th></tr>
+        </thead>
+        <tbody>
+          ${testCases.map(r => `<tr><td>${escapeHtml(r.alumno)}</td><td>${escapeHtml(r.cargoBase)}</td><td>${escapeHtml(r.pagoAplicado)}</td><td>${escapeHtml(r.recargoEsperado)}</td><td>${escapeHtml(r.moraEsperada)}</td><td>${escapeHtml(r.observado)}</td><td>${escapeHtml(r.discrepancia)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Esperado vs Observado</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead>
+          <tr><th>Módulo</th><th>Resultado esperado</th><th>Resultado observado</th><th>Impacto</th><th>Prioridad</th><th>Sospecha técnica</th></tr>
+        </thead>
+        <tbody>
+          ${expectedObservedRows.map(r => `<tr><td>${escapeHtml(r.modulo)}</td><td>${escapeHtml(r.esperado)}</td><td>${escapeHtml(r.observado)}</td><td>${escapeHtml(r.impacto)}</td><td>${escapeHtml(r.prioridad)}</td><td>${escapeHtml(r.sospecha)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Reglas de Negocio Vigentes</h4>
+    <div class="note-box">
+      <ul class="tight">
+        <li>Febrero a noviembre</li>
+        <li>5 días de gracia</li>
+        <li>Recargo 10%</li>
+        <li>Descuento del 5% al hermano menor</li>
+        <li>Descuento primero, recargo después sobre el neto</li>
+        <li>Mora según criterio vigente del proyecto</li>
+      </ul>
+    </div>
+
+    <h4>Lógica Temporal</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Estado temporal</th><th>Condición esperada</th><th>Riesgo actual</th></tr></thead>
+        <tbody>
+          <tr><td>Pendiente</td><td>Cargo vigente sin vencer</td><td>Clasificación inconsistente entre módulos</td></tr>
+          <tr><td>Vencido</td><td>Supera gracia y debe recargo</td><td>Recargo puede quedar en 0.00</td></tr>
+          <tr><td>Con recargo</td><td>Recargo 10% sobre neto</td><td>Aplicación parcial por reglas no encontradas</td></tr>
+          <tr><td>En mora</td><td>Criterio temporal vigente cumplido</td><td>No siempre propagado a portal/resumen</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Fuente de Verdad</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Dominio</th><th>Fuente actual / objetivo</th></tr></thead>
+        <tbody>
+          <tr><td>Cargos</td><td>CARGOS_ESCOLARES</td></tr>
+          <tr><td>Pagos aplicados</td><td>APLICACION_PAGOS</td></tr>
+          <tr><td>Estados</td><td>STATES / RESUMEN</td></tr>
+          <tr><td>Portal</td><td>PORTAL</td></tr>
+          <tr><td>Conciliación</td><td>Debe tomar APLICACION_PAGOS + STATES válido</td></tr>
+          <tr><td>Exportación contable</td><td>Debe alimentarse de DETALLE ya corregido</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Dependencias Entre Módulos</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Módulo</th><th>Depende de</th><th>Rompe a</th><th>Hereda de</th><th>Impacto si falla</th></tr></thead>
+        <tbody>
+          ${dependencies.map(r => `<tr><td>${escapeHtml(r.modulo)}</td><td>${escapeHtml(r.depende)}</td><td>${escapeHtml(r.rompeA)}</td><td>${escapeHtml(r.hereda)}</td><td>${escapeHtml(r.impacto)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Auditoría de Runner / Ejecución</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Campo</th><th>Valor de referencia</th></tr></thead>
+        <tbody>
+          <tr><td>Hora inicio</td><td>06:00:12</td></tr>
+          <tr><td>Hora fin</td><td>06:02:43</td></tr>
+          <tr><td>Módulos ejecutados</td><td>00,01,02,03,04,05,06,07,08,09,10,17,90</td></tr>
+          <tr><td>Módulos omitidos</td><td>18,20,21 (según corrida)</td></tr>
+          <tr><td>Módulos con error</td><td>09 States, 20 Conciliación</td></tr>
+          <tr><td>Módulos con salida vacía</td><td>Conciliación, Exportación contable</td></tr>
+          <tr><td>Filas leídas</td><td>3,842</td></tr>
+          <tr><td>Filas escritas</td><td>1,167</td></tr>
+          <tr><td>Registros descartados</td><td>219</td></tr>
+          <tr><td>Motivo de descarte</td><td>Regla no encontrada / período inconsistente</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Contadores Visibles</h4>
+    <div class="exec-grid">
+      <div class="kpi"><div class="v">2360</div><div class="k">Cargos generados</div></div>
+      <div class="kpi"><div class="v">1948</div><div class="k">Pagos aplicados</div></div>
+      <div class="kpi"><div class="v">143</div><div class="k">Pagos pendientes de conciliar</div></div>
+      <div class="kpi"><div class="v">0</div><div class="k">Cargos con recargo (anómalo)</div></div>
+      <div class="kpi"><div class="v">0</div><div class="k">Alumnos en mora (anómalo)</div></div>
+      <div class="kpi"><div class="v">328</div><div class="k">Filas en detalle</div></div>
+      <div class="kpi"><div class="v">0</div><div class="k">Filas en conciliación</div></div>
+      <div class="kpi"><div class="v">0</div><div class="k">Filas en exportación contable</div></div>
+    </div>
+
+    <h4>Clasificación de Saldos Negativos</h4>
+    <div class="line-grid">
+      <div class="mini-card"><h5>Crédito a favor</h5><p class="small">Pago válido mayor al cargo del período.</p></div>
+      <div class="mini-card"><h5>Excedente</h5><p class="small">Saldo positivo trasladable a siguiente período.</p></div>
+      <div class="mini-card"><h5>Pago pendiente de aplicar</h5><p class="small">Pago existente sin match final.</p></div>
+      <div class="mini-card"><h5>Saldo negativo técnico</h5><p class="small">Error de cálculo o secuencia, no crédito real.</p></div>
+      <div class="mini-card"><h5>Saldo reclasificado</h5><p class="small">Saldo revisado y movido a categoría correcta.</p></div>
+    </div>
+
+    <h4>Alertas Automáticas</h4>
+    <div class="alert-box">
+      <ul class="tight">
+        ${alerts.map(a => `<li>${escapeHtml(a)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Orden Recomendado de Reparación</h4>
     <div class="note-box">
       <ol class="tight">
-        <li><strong>Base y configuración (módulos 00-04):</strong> Inicializa parámetros, esquema, configuración. Si falla aquí, toda operación posterior será inconsistente.</li>
-        <li><strong>Ingestión (módulos 05-06):</strong> Captura pagos y solicitudes de estudiantes. Datos incorrectos aquí generan errores en cascada.</li>
-        <li><strong>Cargos y ajustes (módulos 07-09):</strong> Calcula cargos, aplica mora, recargos y genera estados de cuenta. Es donde la precisión operativa es crítica.</li>
-        <li><strong>Exportación (módulos 10, 17):</strong> Prepara datos para sistemas externos (portal, contabilidad). Si aquí hay cortes o transformaciones mal hechas, los reportes finales serán incorrectos.</li>
-        <li><strong>Cierre y auditoría (módulos 18-21):</strong> Conciliación, pruebas de humo y validaciones. Protege la confiabilidad del ciclo.</li>
-        <li><strong>Orquestación (módulos 90-99):</strong> Ejecuta el flujo completo. Es el "director de orquesta"; cualquier error aquí interrumpe todo.</li>
+        <li>Reparar Statements / Estados</li>
+        <li>Alinear lógica temporal entre Reversals y Statements</li>
+        <li>Reparar Conciliación usando Aplicación_Pagos como fuente real</li>
+        <li>Reparar Exportación Contable a partir de Detalle ya corregido</li>
+        <li>Revisar motor de recargos contra reglas vivas</li>
+        <li>Mejorar clasificación semántica de saldos negativos</li>
       </ol>
     </div>
 
-    <h4>3. Puntos de Choque Críticos</h4>
-    <div class="line-grid">
-      <div class="mini-card">
-        <h5>Acoplamiento Alto</h5>
-        <p class="small">Muchos módulos dependen unos de otros. Cambios en un solo lugar pueden romper múltiples procesos. Requiere pruebas de punta a punta antes de cada despliegue.</p>
-      </div>
-      <div class="mini-card">
-        <h5>Módulos Grandes</h5>
-        <p class="small">Scripts con más de 1000 líneas concentran mucha lógica. Mayor probabilidad de bugs ocultos. Prioridad: pruebas exhaustivas y refactoring a futuro.</p>
-      </div>
-      <div class="mini-card">
-        <h5>Dependencias no Formales</h5>
-        <p class="small">No hay contratos escritos entre módulos. Si uno cambia el formato de datos, otros pueden fallar sin notificación. Requiere coordinación explícita.</p>
-      </div>
+    <h4>No Cambiar Lo Que Ya Funciona</h4>
+    <div class="warning-banner">
+      Conservar: cargos base, descuentos, pagos aplicados, saldos base y publicación del portal. Reparar solo propagación en estados, recargos, mora, detalle, conciliación, exportación, semántica de saldos y trazabilidad.
+    </div>
+
+    <h4>Preguntas Abiertas</h4>
+    <div class="note-box">
+      <ul class="tight">
+        <li>¿Cuál es la fuente de verdad final para conciliación?</li>
+        <li>¿Cuál es el criterio exacto vigente de mora?</li>
+        <li>¿Recargo debe depender 100% de reglas vivas?</li>
+        <li>¿Pago multiuso debe conciliarse por aplicación y no por período reportado?</li>
+        <li>¿Saldos negativos deben mostrarse como crédito a favor?</li>
+      </ul>
     </div>
   `;
 
@@ -267,41 +529,9 @@ pie title Distribucion de Riesgo
     `;
   }
 
-  execHtml += `
-    <h4>5. Plan de Verificación Recomendado</h4>
-    <div class="note-box">
-      <ol class="tight">
-        <li><strong>Pruebas unitarias:</strong> Validar funciones críticas en rojo y amarillo por separado.</li>
-        <li><strong>Pruebas de integración:</strong> Ejecutar flujos E2E simulando datos reales (cargos, pagos, ajustes).</li>
-        <li><strong>Pruebas de datos:</strong> Reconciliar totales y saldos antes/después de cada operación.</li>
-        <li><strong>Control de cambios:</strong> Matriz impacto-módulo: antes de desplegar, mapear qué módulos se tocan y qué pueden romper.</li>
-        <li><strong>Auditoría post-ejecución:</strong> Hoja de logs detallada; trazabilidad de cada pago, cargo, ajuste aplicado.</li>
-      </ol>
-    </div>
-
-    <h4>6. Indicadores de Salud (KPIs a Monitorear)</h4>
-    <div class="line-grid">
-      <div class="mini-card">
-        <h5>Consistencia</h5>
-        <p class="small">Saldos iniciales = Sum(cargos) + Sum(pagos) + Sum(ajustes). Si no cuadra, hay error en cálculo.</p>
-      </div>
-      <div class="mini-card">
-        <h5>Latencia</h5>
-        <p class="small">Tiempo de ejecución por runner. Si sube anormalmente, posible cuello de botella.</p>
-      </div>
-      <div class="mini-card">
-        <h5>Errores Silenciosos</h5>
-        <p class="small">Funciones que no lanzan excepción pero retornan resultados vacíos/malformados. Revisar logs detallados.</p>
-      </div>
-      <div class="mini-card">
-        <h5>Trazabilidad</h5>
-        <p class="small">Cada operación debe tener identificador único, timestamp, usuario, resultado. Sin esto, auditoría es imposible.</p>
-      </div>
-    </div>
-  `;
-
   ui.execNarrative.innerHTML = execHtml;
-  mermaid.run({ nodes: [document.getElementById('riskPie'), document.getElementById('execFlowChart')] });
+  const riskNode = document.getElementById('riskPie');
+  if (riskNode) mermaid.run({ nodes: [riskNode] });
 }
 
 function renderSolutions() {
@@ -477,120 +707,72 @@ function renderConflicts() {
 }
 
 function renderFlow() {
-  // Diagrama principal E2E del flujo de negocio
-  const mainFlow = `flowchart TD
-    A1["📋 ENTRADA DE DATOS<br/>Formularios/Archivos/API"] --> A2{Validar<br/>Estructura}
-    A2 -->|OK| B["🔵 MÓDULOS BASE 00-04<br/>Config, Schemas, Utilitarios<br/>Inicializar sistema"]
-    A2 -->|Error| A3["❌ Rechazar<br/>Log error"]
-    
-    B --> C["🟢 INGESTA 05-06<br/>Leer Cargos, Pagos<br/>Normalizar datos"]
-    C --> D{Datos<br/>Válidos?}
-    D -->|Sí| E["⚠️ PROCESAMIENTO 07-09<br/>Calcular intereses<br/>Aplicar ajustes<br/>Reversals"]
-    D -->|No| A3
-    
-    E --> F["🟡 ESTADOS 09<br/>Actualizar estatus<br/>Generar snapshots"]
-    F --> G["🔴 PORTAL 10,17<br/>Reportes visuales<br/>Exportar datos"]
-    G --> H["✅ CIERRE 18-21<br/>Conciliar totales<br/>QA<br/>Sign-off"]
-    
-    I["🎯 ORQUESTADORES 90-99<br/>Runners principales<br/>Coordinan toda la cadena"] -.->|Dispara| B
-    I -.->|Dispara| C
-    I -.->|Dispara| E
-    I -.->|Dispara| F
-    I -.->|Dispara| G
-    I -.->|Dispara| H
-    I -.->|Escucha| A3
-    
-    H --> J["📊 SALIDA FINAL<br/>Reportes, Auditoría<br/>Datos en producción"]
-    
-    style A1 fill:#e6f7f7,stroke:#005f73,stroke-width:3px,color:#003844
-    style A2 fill:#e6f7f7,stroke:#005f73,stroke-width:2px
-    style A3 fill:#ffe5e5,stroke:#9b1c1c,stroke-width:3px,color:#600909
-    style B fill:#e6f7ec,stroke:#136f3a,stroke-width:3px,color:#0a3d1a
-    style C fill:#e6f7f7,stroke:#005f73,stroke-width:3px,color:#003844
-    style D fill:#fff7dd,stroke:#8a6a00,stroke-width:2px
-    style E fill:#ffe5e5,stroke:#9b1c1c,stroke-width:3px,color:#600909
-    style F fill:#fff7dd,stroke:#8a6a00,stroke-width:3px,color:#5a4200
-    style G fill:#ffe5e5,stroke:#9b1c1c,stroke-width:3px,color:#600909
-    style H fill:#e6f7ec,stroke:#136f3a,stroke-width:3px,color:#0a3d1a
-    style I fill:#ffe5e5,stroke:#9b1c1c,stroke-width:4px,color:#600909
-    style J fill:#e6f7ec,stroke:#136f3a,stroke-width:3px,color:#0a3d1a`;
+  // Mapa de propagación de datos con estado de cada flecha
+  const mainFlow = `flowchart LR
+    A["CARGOS_ESCOLARES"] -->|OK| B["APLICACION_PAGOS"]
+    B -->|PARCIAL| C["RECARGOS / REVERSALS"]
+    C -->|DEGRADA| D["STATES / STATEMENTS"]
+    D -->|PARCIAL| E["RESUMEN"]
+    E -->|PARCIAL| F["DETALLE"]
+    F -->|PARCIAL| G["PORTAL"]
+    G -->|VACIO| H["CONCILIACION"]
+    H -->|VACIO| I["EXPORT_CONTABILIDAD"]
+
+    style A fill:#e6f7ec,stroke:#136f3a,stroke-width:3px
+    style B fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style C fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style D fill:#ffe5e5,stroke:#9b1c1c,stroke-width:4px
+    style E fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style F fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style G fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style H fill:#ececec,stroke:#616161,stroke-width:3px
+    style I fill:#ececec,stroke:#616161,stroke-width:3px`;
 
   ui.mermaidFlow.textContent = mainFlow;
   mermaid.run({ nodes: [ui.mermaidFlow] });
 
-  // Notas detalladas sobre cada etapa
   ui.flowNotes.innerHTML = `
     <div class="flow-container">
-      <h3>📊 Flujo Detallado: E2E CARGOS_MORA</h3>
-      
+      <h3>Mapa de Propagación y Trazabilidad</h3>
+
       <div class="flow-stage">
-        <h4>Etapa 1️⃣ - ENTRADA (Datos brutos)</h4>
+        <h4>Leyenda de Flechas</h4>
         <div class="flow-detail">
-          <p><strong>¿Qué entra?</strong> Cargos académicos, pagos de estudiantes, ajustes manuales via formularios/CSV/API</p>
-          <p><strong>Crítico:</strong> Si entra basura, todo sale basura. Validación estructural aquí es obligatoria.</p>
-          <p><strong>Módulos:</strong> 00-04 (Config, Schemas, Validadores)</p>
-          <p><strong>Riesgo:</strong> 🟢 BASE - debe estar funcional 100%</p>
+          <p><strong>OK:</strong> pasa datos correctamente</p>
+          <p><strong>PARCIAL:</strong> pasa datos parcialmente</p>
+          <p><strong>VACIO:</strong> no pasa datos</p>
+          <p><strong>DEGRADA:</strong> reubica datos de forma incorrecta</p>
         </div>
       </div>
 
       <div class="flow-stage">
-        <h4>Etapa 2️⃣ - INGESTA (Lectura y normalización)</h4>
-        <div class="flow-detail">
-          <p><strong>¿Qué pasa?</strong> Leer cargos/pagos desde hojas, normalizar fechas, valores, referencias</p>
-          <p><strong>Crítico:</strong> Aquí se interpolan los datos. Si hay duplicados o cortes de línea, generan cascadas de conflictos.</p>
-          <p><strong>Módulos:</strong> 05-06 (Lectura, Normalización)</p>
-          <p><strong>Riesgo:</strong> 🔵 ALTO - acoplado fuerte a estructura de hojas</p>
+        <h4>Trazabilidad por Hoja (entrada/salida/dependencia)</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead>
+              <tr><th>Hoja</th><th>Entradas</th><th>Salidas</th><th>Estado</th><th>Qué sí llena</th><th>Qué no llena</th><th>Qué depende de esta hoja</th><th>Riesgo</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CARGOS_ESCOLARES</td><td>Reglas y estudiantes</td><td>Cargos base</td><td>Funciona</td><td>Mensualidad y descuentos</td><td>Temporalidad avanzada</td><td>Aplicación, Statements</td><td>Bajo</td></tr>
+              <tr><td>APLICACION_PAGOS</td><td>Pagos reportados</td><td>Aplicaciones</td><td>Funciona parcial</td><td>Aplicación principal</td><td>Casos multiuso</td><td>States, Conciliación</td><td>Medio</td></tr>
+              <tr><td>STATES / RESUMEN</td><td>Cargos + pagos + reglas</td><td>Estados consolidados</td><td>Cuello de botella</td><td>Saldos iniciales</td><td>Movimientos completos</td><td>Detalle, Portal, Export</td><td>Alto</td></tr>
+              <tr><td>ESTADO_CUENTA_DETALLE</td><td>States</td><td>Detalle por movimiento</td><td>Incompleto</td><td>Estructura base</td><td>Recargo/mora propagada</td><td>Portal, Exportación</td><td>Alto</td></tr>
+              <tr><td>PORTAL</td><td>Resumen + detalle</td><td>Salida usuario</td><td>Hereda incompleto</td><td>Datos base</td><td>Mora/recargo consistente</td><td>Operación final</td><td>Medio-alto</td></tr>
+              <tr><td>CONCILIACION</td><td>Aplicaciones reales</td><td>Cierre reconciliado</td><td>No generada</td><td>N/A</td><td>Filas de salida</td><td>Control financiero</td><td>Alto</td></tr>
+              <tr><td>EXPORT_CONTABILIDAD</td><td>Detalle corregido</td><td>Archivo contable</td><td>No generada</td><td>N/A</td><td>Asientos exportables</td><td>Contabilidad</td><td>Alto</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <div class="flow-stage">
-        <h4>Etapa 3️⃣ - PROCESAMIENTO (Lógica de negocio)</h4>
+        <h4>Conclusión Operativa del Flujo</h4>
         <div class="flow-detail">
-          <p><strong>¿Qué pasa?</strong> Calcular intereses, aplicar ajustes, detectar/revertir pagos dobles, generar estados de cuenta</p>
-          <p><strong>Crítico:</strong> La lógica acá es compleja. Cambios sin pruebas pueden desalinear saldos de toda la base de datos.</p>
-          <p><strong>Módulos:</strong> 07-09 (Cálculos, Reversals, Estados)</p>
-          <p><strong>Riesgo:</strong> 🔴 CRÍTICO - aquí está el 80% de los bugs</p>
+          <p>El proyecto no necesita reescritura completa.</p>
+          <p>Necesita visibilidad de flujo, trazabilidad de propagación y alertas de ruptura entre módulos.</p>
+          <p>Origen de ruptura principal: States / Statements.</p>
+          <p>Módulos finales degradados por herencia: Resumen, Detalle, Portal, Conciliación y Exportación.</p>
         </div>
-      </div>
-
-      <div class="flow-stage">
-        <h4>Etapa 4️⃣ - PORTAL Y REPORTES (Visualización)</h4>
-        <div class="flow-detail">
-          <p><strong>¿Qué pasa?</strong> Generar reportes visuales, exportar datos, actualizar dashboards</p>
-          <p><strong>Crítico:</strong> Si los datos que llegan aquí son correctos, todo funciona. Si no, los reportes engañan a directores.</p>
-          <p><strong>Módulos:</strong> 10, 17 (Portal, Reportes)</p>
-          <p><strong>Riesgo:</strong> 🟠 MEDIA - si procesa datos malos, reportes son inútiles</p>
-        </div>
-      </div>
-
-      <div class="flow-stage">
-        <h4>Etapa 5️⃣ - CIERRE Y QA (Control y verificación)</h4>
-        <div class="flow-detail">
-          <p><strong>¿Qué pasa?</strong> Conciliar totales, generar auditoría, firmar cambios</p>
-          <p><strong>Crítico:</strong> Última línea de defensa. Si pasa aquí sin error, es oficial en prod.</p>
-          <p><strong>Módulos:</strong> 18-21 (Cierre, Auditoría, QA)</p>
-          <p><strong>Riesgo:</strong> 🟢 CONTROL - debe ser robusto 100%</p>
-        </div>
-      </div>
-
-      <div class="flow-stage">
-        <h4>⚡ ORQUESTADORES (Runners 90-99)</h4>
-        <div class="flow-detail">
-          <p><strong>¿Por qué aquí?</strong> NO son módulos de lógica, son COORDINADORES. Disparan toda la cadena en orden correcto.</p>
-          <p><strong>Crítico:</strong> Si un runner falla, toda la cadena se detiene. Si coordina mal, etapas se ejecutan en desorden.</p>
-          <p><strong>Riesgo:</strong> 🔴 CRÍTICO - cualquier error aquí paraliza TODO</p>
-        </div>
-      </div>
-
-      <div class="flow-stage" style="background:#fff7dd; border-left: 6px solid #8a6a00;">
-        <h4>🔑 Claves para Entender el Flujo</h4>
-        <ul class="tight">
-          <li><strong>Dependencia:</strong> Cada etapa depende de que la anterior sea correcta.</li>
-          <li><strong>Cascada de fallos:</strong> Un error en etapa 1 (entrada) propaga hasta etapa 5 (salida corrupta).</li>
-          <li><strong>Paralelización limitada:</strong> Runners pueden disparar en paralelo, pero cada runner debe respetar el orden lógico.</li>
-          <li><strong>Reversibilidad:</strong> Reversals (etapa 3) permiten corregir errores SIN reprocessar todo.</li>
-          <li><strong>Auditoría obligatoria:</strong> Cada paso debe loguear entrada/salida para trazabilidad.</li>
-        </ul>
       </div>
     </div>
   `;

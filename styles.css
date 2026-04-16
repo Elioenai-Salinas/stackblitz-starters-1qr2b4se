@@ -258,6 +258,122 @@ pre.wrap {
   color: #003844;
 }
 
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.status-card {
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: #fff;
+  padding: 10px;
+}
+
+.status-card .status-mod {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.status-card .status-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.status-card.verde {
+  background: #e6f7ec;
+  border-color: #b6e3c8;
+  color: #136f3a;
+}
+
+.status-card.amarillo {
+  background: #fff7dd;
+  border-color: #efd48a;
+  color: #8a6a00;
+}
+
+.status-card.rojo {
+  background: #ffe5e5;
+  border-color: #f3b5b5;
+  color: #9b1c1c;
+}
+
+.status-card.gris {
+  background: #efefef;
+  border-color: #d0d0d0;
+  color: #555;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.diag-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  background: #fff;
+}
+
+.diag-table th,
+.diag-table td {
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  padding: 8px;
+  vertical-align: top;
+}
+
+.diag-table th:last-child,
+.diag-table td:last-child {
+  border-right: none;
+}
+
+.diag-table th {
+  background: #f2f8fa;
+  color: #003844;
+  text-align: left;
+  font-weight: 700;
+}
+
+.diag-table tr:last-child td {
+  border-bottom: none;
+}
+
+.bottleneck-box {
+  border: 2px solid #9b1c1c;
+  border-left: 6px solid #9b1c1c;
+  border-radius: 10px;
+  background: #fff3f3;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.warning-banner {
+  border: 2px dashed #b45309;
+  background: #fffbeb;
+  color: #78350f;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.alert-box {
+  border: 2px solid #dc2626;
+  background: #fff1f2;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.alert-box li {
+  color: #7f1d1d;
+  margin-bottom: 4px;
+}
+
 .solution-problems, .solution-steps, .solution-impact, .solution-depends {
   margin: 8px 0;
   padding: 8px;
