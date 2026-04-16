@@ -1,0 +1,1867 @@
+# 00_V3_ActivacionMinima.gs.js
+
+- Prop?sito probable: generar sobre mora, cargo.
+- Se?ales usadas: funciones v3ActivacionMinima, v3ActivacionMinimaConSchema, runSyncPreview, runSyncReal, runChargesPreviewFeb2026....
+- Flujo observado por llamadas: v3SchemaAsegurarEstructura, v3ConfigSetupInicializarBase, v3SyncInicializarConfigBase, v3PaymentsInicializarConfigBase, asegurarHoja, v3SyncAsegurarHeadersAlumnos_....
+
+- L?nea 1 a 6: pre?mbulo de constantes/configuraci?n; define o prepara: V3_MIN_VERSION.
+- L?nea 7 a 57: funci?n `v3ActivacionMinima`; arranque l?gico en firstCodeLine=8; ejecuta flujo con llamadas a: v3SchemaAsegurarEstructura, v3ConfigSetupInicializarBase, v3SyncInicializarConfigBase, v3PaymentsInicializarConfigBase, asegurarHoja, v3SyncAsegurarHeadersAlumnos_, base.
+- L?nea 58 a 62: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 63 a 75: funci?n `v3ActivacionMinimaConSchema`; arranque l?gico en firstCodeLine=64; ejecuta flujo con llamadas a: v3ActivacionMinima, v3SchemaAsegurarEstructura.
+- L?nea 76 a 76: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 77 a 79: funci?n `runSyncPreview`; arranque l?gico en firstCodeLine=78; ejecuta flujo con llamadas a: v3SyncPrevisualizarAlumnosDesdeFuente.
+- L?nea 80 a 80: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 81 a 83: funci?n `runSyncReal`; arranque l?gico en firstCodeLine=82; ejecuta flujo con llamadas a: v3SyncAlumnosDesdeFuente.
+- L?nea 84 a 84: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 85 a 87: funci?n `runChargesPreviewFeb2026`; arranque l?gico en firstCodeLine=86; ejecuta flujo con llamadas a: v3ChargesPreviewFeb2026.
+- L?nea 88 a 88: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 89 a 91: funci?n `runChargesGenerateFeb2026`; arranque l?gico en firstCodeLine=90; ejecuta flujo con llamadas a: v3ChargesGenerarFeb2026.
+- L?nea 92 a 92: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 93 a 95: funci?n `runMoraPreviewHoy`; arranque l?gico en firstCodeLine=94; ejecuta flujo con llamadas a: v3ReversalsPrevisualizarMora.
+- L?nea 96 a 96: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 97 a 99: funci?n `runMoraAplicarHoy`; arranque l?gico en firstCodeLine=98; ejecuta flujo con llamadas a: v3ReversalsAplicarMora.
+- L?nea 100 a 100: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 101 a 103: funci?n `runPaymentsPreview`; arranque l?gico en firstCodeLine=102; ejecuta flujo con llamadas a: v3PaymentsPrevisualizarImportacion.
+- L?nea 104 a 104: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 105 a 107: funci?n `runPaymentsImport`; arranque l?gico en firstCodeLine=106; ejecuta flujo con llamadas a: v3PaymentsImportarPagosReportadosDesdeFormulario.
+- L?nea 108 a 108: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 109 a 111: funci?n `runPaymentsApplyPendientes`; arranque l?gico en firstCodeLine=110; ejecuta flujo con llamadas a: v3ApplicationsAplicarPagosPendientes.
+- L?nea 112 a 112: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 113 a 130: funci?n `v3BootstrapCrearCargosEscolares`; arranque l?gico en firstCodeLine=114; ejecuta flujo con llamadas a: asegurarHoja, v3ChargesAsegurarHeaders_.
+- L?nea 131 a 131: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 132 a 136: funci?n `runDiagnosticoCargosFeb2026`; arranque l?gico en firstCodeLine=133; ejecuta flujo con llamadas a: v3ChargesPreviewFeb2026.
+- L?nea 137 a 137: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 138 a 142: funci?n `runDiagnosticoCargosAno2026`; arranque l?gico en firstCodeLine=139; ejecuta flujo con llamadas a: v3ChargesPreviewAno2026.
+- L?nea 143 a 143: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 144 a 148: funci?n `runDiagnosticoMoraHoy`; arranque l?gico en firstCodeLine=145; ejecuta flujo con llamadas a: v3ReversalsPrevisualizarMora.
+- L?nea 149 a 149: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 150 a 154: funci?n `runAplicarPagosPendientesAhora`; arranque l?gico en firstCodeLine=151; ejecuta flujo con llamadas a: v3ApplicationsAplicarPagosPendientes.
+
+# 01_V3_Core.gs.js
+
+- Prop?sito probable: generar, registrar, obtener sobre fecha, factura.
+- Se?ales usadas: funciones obtenerSpreadsheetActivoSeguro, obtenerHojaPorNombre, asegurarHoja, leerConfig, escribirConfig....
+- Flujo observado por llamadas: obtenerSpreadsheetActivoSeguro, valorSeguroTexto, obtenerHojaPorNombre, asegurarHoja, _asegurarEncabezadoConfig_, _asegurarEncabezadoAuditoria_....
+
+- L?nea 1 a 112: pre?mbulo de constantes/configuraci?n; define o prepara: V3_VERSION, ALUMNOS, CARGOS_ESCOLARES, PAGOS_REPORTADOS, CONCILIACION, PARAMETROS, CONFIG, REGLAS_COBRO, APLICACION_PAGOS, AUDITORIA_FINANCIERA, ESTADO_CUENTA_DETALLE, ESTADO_CUENTA_RESUMEN, PORTAL_PADRES_EXPORT, EXPORT_CONTABILIDAD, FACTURAS_EMITIDAS, COLA_ENVIO_FACTURAS, EMAIL_FACTURACION_ALIAS, EMAIL_FACTURACION_REPLYTO, FACTURAS_FOLDER_NUEVAS_ID, FACTURAS_FOLDER_ENVIADAS_ID, FACTURAS_FOLDER_ERROR_ID, FACTURAS_FOLDER_ARCHIVO_ID, PLANTILLA_RECIBO_ID, MODO_ENVIO_FACTURAS, MODO_SISTEMA, V3_CORE.
+- L?nea 113 a 123: funci?n `obtenerSpreadsheetActivoSeguro`; arranque l?gico en firstCodeLine=114; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 124 a 129: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 130 a 137: funci?n `obtenerHojaPorNombre`; arranque l?gico en firstCodeLine=131; ejecuta flujo con llamadas a: obtenerSpreadsheetActivoSeguro, valorSeguroTexto, obtenerHojaPorNombre.
+- L?nea 138 a 144: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 145 a 167: funci?n `asegurarHoja`; arranque l?gico en firstCodeLine=146; ejecuta flujo con llamadas a: obtenerSpreadsheetActivoSeguro, valorSeguroTexto, asegurarHoja, _asegurarEncabezadoConfig_, _asegurarEncabezadoAuditoria_.
+- L?nea 168 a 175: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 176 a 207: funci?n `leerConfig`; arranque l?gico en firstCodeLine=177; ejecuta flujo con llamadas a: valorSeguroTexto, leerConfig, obtenerHojaPorNombre.
+- L?nea 208 a 216: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 217 a 244: funci?n `escribirConfig`; arranque l?gico en firstCodeLine=218; ejecuta flujo con llamadas a: valorSeguroTexto, escribirConfig, asegurarHoja, _asegurarEncabezadoConfig_.
+- L?nea 245 a 250: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 251 a 254: funci?n `esModoProduccion`; arranque l?gico en firstCodeLine=252; ejecuta flujo con llamadas a: valorSeguroTexto, leerConfig.
+- L?nea 255 a 261: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 262 a 294: funci?n `exigirNoProduccionOOverride`; arranque l?gico en firstCodeLine=263; ejecuta flujo con llamadas a: valorSeguroTexto, esModoProduccion, registrarAuditoria, leerConfig.
+- L?nea 295 a 301: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 302 a 353: funci?n `normalizarFecha`; arranque l?gico en firstCodeLine=303; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 354 a 358: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 359 a 362: funci?n `hoySinHora`; arranque l?gico en firstCodeLine=360; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 363 a 368: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 369 a 375: funci?n `generarId`; arranque l?gico en firstCodeLine=370; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 376 a 382: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 383 a 411: funci?n `convertirANumeroSeguro`; arranque l?gico en firstCodeLine=384; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 412 a 417: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 418 a 421: funci?n `valorSeguroTexto`; arranque l?gico en firstCodeLine=419; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 422 a 426: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 427 a 429: funci?n `obtenerAliasFacturacion`; arranque l?gico en firstCodeLine=428; ejecuta flujo con llamadas a: leerConfig.
+- L?nea 430 a 440: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 441 a 468: funci?n `registrarAuditoria`; arranque l?gico en firstCodeLine=442; ejecuta flujo con llamadas a: asegurarHoja, _asegurarEncabezadoAuditoria_, _obtenerUsuarioEjecutor_, valorSeguroTexto, _serializarDatosExtraSeguro_.
+- L?nea 469 a 478: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 479 a 495: funci?n `_asegurarEncabezadoConfig_`; arranque l?gico en firstCodeLine=480; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 496 a 501: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 502 a 521: funci?n `_asegurarEncabezadoAuditoria_`; arranque l?gico en firstCodeLine=503; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 522 a 526: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 527 a 533: funci?n `_obtenerUsuarioEjecutor_`; arranque l?gico en firstCodeLine=528; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 534 a 539: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 540 a 552: funci?n `_serializarDatosExtraSeguro_`; arranque l?gico en firstCodeLine=541; ejecuta flujo con llamadas a: valorSeguroTexto.
+
+# 02_V3_Schema.gs.js
+
+- Prop?sito probable: generar, registrar, obtener sobre datos transaccionales.
+- Se?ales usadas: funciones v3SchemaAsegurarEstructura, v3SchemaAsegurarValidaciones, v3SchemaVerificarEstructura, v3SchemaObtenerDefiniciones_, v3SchemaAsegurarHojaConDefinicion_....
+- Flujo observado por llamadas: generarId, v3SchemaObtenerDefiniciones_, v3SchemaAsegurarHojaConDefinicion_, registrarAuditoria, obtenerHojaPorNombre, v3SchemaObtenerMapaEncabezados_....
+
+- L?nea 1 a 26: pre?mbulo de constantes/configuraci?n; define o prepara: V3_SCHEMA_ROWS_VALIDATION_DEFAULT, V3_SCHEMA_HEADER_BG, V3_SCHEMA_HEADER_FG, V3_SCHEMA_DATE_FORMAT, V3_SCHEMA_MONEY_FORMAT, V3_SCHEMA_PERCENT_FORMAT, V3_SCHEMA_NUMBER_FORMAT.
+- L?nea 27 a 70: funci?n `v3SchemaAsegurarEstructura`; arranque l?gico en firstCodeLine=28; ejecuta flujo con llamadas a: generarId, v3SchemaObtenerDefiniciones_, v3SchemaAsegurarHojaConDefinicion_, registrarAuditoria.
+- L?nea 71 a 76: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 77 a 132: funci?n `v3SchemaAsegurarValidaciones`; arranque l?gico en firstCodeLine=78; ejecuta flujo con llamadas a: generarId, v3SchemaObtenerDefiniciones_, obtenerHojaPorNombre, v3SchemaObtenerMapaEncabezados_, v3SchemaAplicarFormatos_, v3SchemaAplicarValidaciones_, registrarAuditoria.
+- L?nea 133 a 138: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 139 a 191: funci?n `v3SchemaVerificarEstructura`; arranque l?gico en firstCodeLine=140; ejecuta flujo con llamadas a: generarId, v3SchemaObtenerDefiniciones_, obtenerHojaPorNombre, v3SchemaObtenerMapaEncabezados_, registrarAuditoria.
+- L?nea 192 a 196: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 197 a 486: funci?n `v3SchemaObtenerDefiniciones_`; arranque l?gico en firstCodeLine=198; ejecuta flujo con llamadas a: sin llamadas detectadas.
+  - fase inicial (197-292): sin llamadas clave asignables.
+  - fase media (293-389): sin llamadas clave asignables.
+  - fase final (390-486): sin llamadas clave asignables.
+- L?nea 487 a 491: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 492 a 514: funci?n `v3SchemaAsegurarHojaConDefinicion_`; arranque l?gico en firstCodeLine=493; ejecuta flujo con llamadas a: asegurarHoja, v3SchemaAsegurarEncabezadosNoDestructivos_, v3SchemaAsegurarFormatoBasicoCabecera_, v3SchemaObtenerMapaEncabezados_, v3SchemaAplicarFormatos_, v3SchemaAplicarValidaciones_.
+- L?nea 515 a 515: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 516 a 532: funci?n `v3SchemaAsegurarEncabezadosNoDestructivos_`; arranque l?gico en firstCodeLine=517; ejecuta flujo con llamadas a: v3SchemaObtenerMapaEncabezados_, v3SchemaFilaCabeceraVacia_, v3SchemaFormatearCeldaCabecera_.
+- L?nea 533 a 533: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 534 a 543: funci?n `v3SchemaFilaCabeceraVacia_`; arranque l?gico en firstCodeLine=535; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 544 a 544: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 545 a 562: funci?n `v3SchemaObtenerMapaEncabezados_`; arranque l?gico en firstCodeLine=546; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 563 a 563: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 564 a 572: funci?n `v3SchemaAsegurarFormatoBasicoCabecera_`; arranque l?gico en firstCodeLine=565; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 573 a 573: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 574 a 580: funci?n `v3SchemaFormatearCeldaCabecera_`; arranque l?gico en firstCodeLine=575; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 581 a 585: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 586 a 601: funci?n `v3SchemaAplicarFormatos_`; arranque l?gico en firstCodeLine=587; ejecuta flujo con llamadas a: v3SchemaObtenerRangoDatosColumna_.
+- L?nea 602 a 606: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 607 a 648: funci?n `v3SchemaAplicarValidaciones_`; arranque l?gico en firstCodeLine=608; ejecuta flujo con llamadas a: v3SchemaObtenerRangoDatosColumna_, v3SchemaResolverRangoFuente_.
+- L?nea 649 a 649: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 650 a 663: funci?n `v3SchemaResolverRangoFuente_`; arranque l?gico en firstCodeLine=651; ejecuta flujo con llamadas a: obtenerHojaPorNombre.
+- L?nea 664 a 664: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 665 a 672: funci?n `v3SchemaObtenerRangoDatosColumna_`; arranque l?gico en firstCodeLine=666; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 03_V3_ConfigSetup.gs.js
+
+- Prop?sito probable: generar, cargar, registrar, obtener sobre periodo.
+- Se?ales usadas: funciones v3ConfigSetupInicializarBase, v3ConfigSetupCargarConfigBase, v3ConfigSetupCargarParametrosBase, v3ConfigSetupCargarReglasCobroBase, v3ConfigSetupListarPendientesConfig....
+- Flujo observado por llamadas: generarId, v3ConfigSetupCargarConfigBase_, v3ConfigSetupCargarParametrosBase_, v3ConfigSetupAsegurarReglasCobroNueva_, v3ConfigSetupListarPendientesConfig, registrarAuditoria....
+
+- L?nea 1 a 88: pre?mbulo de constantes/configuraci?n; define o prepara: V3_CONFIGSETUP_VERSION, V3_PLACEHOLDER, V3_PARAMETROS_BASE.
+- L?nea 89 a 127: funci?n `v3ConfigSetupInicializarBase`; arranque l?gico en firstCodeLine=90; ejecuta flujo con llamadas a: generarId, v3ConfigSetupCargarConfigBase_, v3ConfigSetupCargarParametrosBase_, v3ConfigSetupAsegurarReglasCobroNueva_, v3ConfigSetupListarPendientesConfig, registrarAuditoria.
+- L?nea 128 a 133: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 134 a 161: funci?n `v3ConfigSetupCargarConfigBase`; arranque l?gico en firstCodeLine=135; ejecuta flujo con llamadas a: generarId, v3ConfigSetupCargarConfigBase_, registrarAuditoria.
+- L?nea 162 a 167: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 168 a 195: funci?n `v3ConfigSetupCargarParametrosBase`; arranque l?gico en firstCodeLine=169; ejecuta flujo con llamadas a: generarId, v3ConfigSetupCargarParametrosBase_, registrarAuditoria.
+- L?nea 196 a 201: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 202 a 229: funci?n `v3ConfigSetupCargarReglasCobroBase`; arranque l?gico en firstCodeLine=203; ejecuta flujo con llamadas a: generarId, v3ConfigSetupAsegurarReglasCobroNueva_, registrarAuditoria.
+- L?nea 230 a 235: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 236 a 262: funci?n `v3ConfigSetupListarPendientesConfig`; arranque l?gico en firstCodeLine=237; ejecuta flujo con llamadas a: asegurarHoja, v3ConfigSetupAsegurarHeadersConfig_, valorSeguroTexto, v3ConfigSetupEsPlaceholderControlado_.
+- L?nea 263 a 267: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 268 a 339: funci?n `v3ConfigSetupCargarConfigBase_`; arranque l?gico en firstCodeLine=269; ejecuta flujo con llamadas a: asegurarHoja, v3ConfigSetupAsegurarHeadersConfig_, v3ConfigSetupUpsertConfigNoDestructivo_, leerConfig, v3ConfigSetupEsPlaceholderControlado_.
+  - fase inicial (268-291): asegurarHoja.
+  - fase media (292-315): v3ConfigSetupAsegurarHeadersConfig_, v3ConfigSetupUpsertConfigNoDestructivo_.
+  - fase final (316-339): leerConfig, v3ConfigSetupEsPlaceholderControlado_.
+- L?nea 340 a 340: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 341 a 359: funci?n `v3ConfigSetupAsegurarHeadersConfig_`; arranque l?gico en firstCodeLine=342; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 360 a 360: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 361 a 391: funci?n `v3ConfigSetupUpsertConfigNoDestructivo_`; arranque l?gico en firstCodeLine=362; ejecuta flujo con llamadas a: asegurarHoja, v3ConfigSetupAsegurarHeadersConfig_, valorSeguroTexto.
+- L?nea 392 a 396: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 397 a 448: funci?n `v3ConfigSetupCargarParametrosBase_`; arranque l?gico en firstCodeLine=398; ejecuta flujo con llamadas a: asegurarHoja, v3ConfigSetupAsegurarHeadersNoDestructivos_, v3ConfigSetupConstruirPeriodosBase_, v3ConfigSetupObtenerMapaHeaders_, v3ConfigSetupAppendUniqueValuesEnColumna_.
+- L?nea 449 a 449: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 450 a 461: funci?n `v3ConfigSetupConstruirPeriodosBase_`; arranque l?gico en firstCodeLine=451; ejecuta flujo con llamadas a: hoySinHora.
+- L?nea 462 a 466: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 467 a 550: funci?n `v3ConfigSetupAsegurarReglasCobroNueva_`; arranque l?gico en firstCodeLine=468; ejecuta flujo con llamadas a: asegurarHoja, v3ConfigSetupAsegurarHeadersNoDestructivos_, v3ConfigSetupObtenerMapaHeaders_, v3ConfigSetupNorm_, valorSeguroTexto.
+  - fase inicial (467-494): asegurarHoja.
+  - fase media (495-522): v3ConfigSetupAsegurarHeadersNoDestructivos_, v3ConfigSetupObtenerMapaHeaders_.
+  - fase final (523-550): v3ConfigSetupNorm_, valorSeguroTexto.
+- L?nea 551 a 552: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 553 a 555: funci?n `v3ConfigSetupCargarReglasCobroBase_`; arranque l?gico en firstCodeLine=554; ejecuta flujo con llamadas a: v3ConfigSetupAsegurarReglasCobroNueva_.
+- L?nea 556 a 556: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 557 a 559: funci?n `v3ConfigSetupConstruirReglasCobroBase_`; arranque l?gico en firstCodeLine=558; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 560 a 560: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 561 a 563: funci?n `v3ConfigSetupUpsertReglaCobroNoDestructiva_`; arranque l?gico en firstCodeLine=562; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 564 a 568: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 569 a 593: funci?n `v3ConfigSetupAsegurarHeadersNoDestructivos_`; arranque l?gico en firstCodeLine=570; ejecuta flujo con llamadas a: v3ConfigSetupFilaCabeceraVacia_, v3ConfigSetupObtenerMapaHeaders_.
+- L?nea 594 a 594: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 595 a 604: funci?n `v3ConfigSetupFilaCabeceraVacia_`; arranque l?gico en firstCodeLine=596; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 605 a 605: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 606 a 623: funci?n `v3ConfigSetupObtenerMapaHeaders_`; arranque l?gico en firstCodeLine=607; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 624 a 624: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 625 a 648: funci?n `v3ConfigSetupAppendUniqueValuesEnColumna_`; arranque l?gico en firstCodeLine=626; ejecuta flujo con llamadas a: v3ConfigSetupLeerValoresUnicosColumna_, valorSeguroTexto, v3ConfigSetupNorm_.
+- L?nea 649 a 649: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 650 a 668: funci?n `v3ConfigSetupLeerValoresUnicosColumna_`; arranque l?gico en firstCodeLine=651; ejecuta flujo con llamadas a: v3ConfigSetupNorm_.
+- L?nea 669 a 669: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 670 a 680: funci?n `v3ConfigSetupEsPlaceholderControlado_`; arranque l?gico en firstCodeLine=671; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 681 a 681: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 682 a 690: funci?n `v3ConfigSetupNorm_`; arranque l?gico en firstCodeLine=683; ejecuta flujo con llamadas a: valorSeguroTexto.
+
+# 04_V3_Sync.gs.js
+
+- Prop?sito probable: generar, actualizar, validar, registrar sobre fecha.
+- Se?ales usadas: funciones v3SyncInicializarConfigBase, v3SyncVerificarConfiguracionFuente, v3SyncPrevisualizarAlumnosDesdeFuente, v3SyncAlumnosDesdeFuente, v3SyncEjecutar_....
+- Flujo observado por llamadas: generarId, v3SyncInicializarConfigBase_, registrarAuditoria, v3SyncLeerConfigFuente_, v3SyncConfigPendiente_, v3SyncAbrirSpreadsheetFuente_....
+
+- L?nea 1 a 42: pre?mbulo de constantes/configuraci?n; define o prepara: V3_SYNC_VERSION, V3_SYNC_CONFIG, V3_SYNC_DEFAULTS, V3_SYNC_REQUIRED_SOURCE_HEADERS.
+- L?nea 43 a 70: funci?n `v3SyncInicializarConfigBase`; arranque l?gico en firstCodeLine=44; ejecuta flujo con llamadas a: generarId, v3SyncInicializarConfigBase_, registrarAuditoria.
+- L?nea 71 a 76: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 77 a 128: funci?n `v3SyncVerificarConfiguracionFuente`; arranque l?gico en firstCodeLine=78; ejecuta flujo con llamadas a: generarId, v3SyncInicializarConfigBase_, v3SyncLeerConfigFuente_, v3SyncConfigPendiente_, v3SyncAbrirSpreadsheetFuente_, v3SyncLeerHeadersHoja_, registrarAuditoria.
+- L?nea 129 a 134: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 135 a 137: funci?n `v3SyncPrevisualizarAlumnosDesdeFuente`; arranque l?gico en firstCodeLine=136; ejecuta flujo con llamadas a: v3SyncEjecutar_.
+- L?nea 138 a 146: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 147 a 149: funci?n `v3SyncAlumnosDesdeFuente`; arranque l?gico en firstCodeLine=148; ejecuta flujo con llamadas a: v3SyncEjecutar_.
+- L?nea 150 a 154: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 155 a 317: funci?n `v3SyncEjecutar_`; arranque l?gico en firstCodeLine=156; ejecuta flujo con llamadas a: generarId, v3SyncInicializarConfigBase_, v3SyncLeerConfigFuente_, v3SyncConfigPendiente_, v3SyncAbrirSpreadsheetFuente_, valorSeguroTexto, v3SyncBuildHeaderIndex_, v3SyncValidarHeadersFuente_, asegurarHoja, v3SyncAsegurarHeadersAlumnos_, v3SyncLeerHeadersHoja_, v3SyncHeadersAlumnos_, v3SyncConstruirIndicesDestino_, v3SyncObtenerSiguienteNumeroId_, v3SyncFilaVacia_, v3SyncConstruirRegistroAlumnoDesdeFuente_, v3SyncBuscarFilaExistente_, v3SyncFusionarFilaAlumno_, v3SyncHayCambiosEnFila_, v3SyncActualizarIndicesDestino_, v3SyncConstruirNuevoId_, v3SyncAplicarFormatoBasicoAlumnos_, registrarAuditoria.
+  - fase inicial (155-208): generarId, v3SyncInicializarConfigBase_, v3SyncLeerConfigFuente_, v3SyncConfigPendiente_, v3SyncAbrirSpreadsheetFuente_, valorSeguroTexto, v3SyncBuildHeaderIndex_.
+  - fase media (209-262): v3SyncValidarHeadersFuente_, asegurarHoja, v3SyncAsegurarHeadersAlumnos_, v3SyncLeerHeadersHoja_, v3SyncHeadersAlumnos_, v3SyncConstruirIndicesDestino_, v3SyncObtenerSiguienteNumeroId_, v3SyncFilaVacia_.
+  - fase final (263-317): v3SyncConstruirRegistroAlumnoDesdeFuente_, v3SyncBuscarFilaExistente_, v3SyncFusionarFilaAlumno_, v3SyncHayCambiosEnFila_, v3SyncActualizarIndicesDestino_, v3SyncConstruirNuevoId_, v3SyncAplicarFormatoBasicoAlumnos_, registrarAuditoria.
+- L?nea 318 a 322: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 323 a 358: funci?n `v3SyncInicializarConfigBase_`; arranque l?gico en firstCodeLine=324; ejecuta flujo con llamadas a: leerConfig, valorSeguroTexto, escribirConfig.
+- L?nea 359 a 359: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 360 a 390: funci?n `v3SyncConfigPendiente_`; arranque l?gico en firstCodeLine=361; ejecuta flujo con llamadas a: leerConfig, valorSeguroTexto.
+- L?nea 391 a 391: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 392 a 410: funci?n `v3SyncLeerConfigFuente_`; arranque l?gico en firstCodeLine=393; ejecuta flujo con llamadas a: leerConfig, valorSeguroTexto.
+- L?nea 411 a 411: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 412 a 425: funci?n `v3SyncAbrirSpreadsheetFuente_`; arranque l?gico en firstCodeLine=413; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 426 a 430: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 431 a 471: funci?n `v3SyncHeadersAlumnos_`; arranque l?gico en firstCodeLine=432; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 472 a 472: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 473 a 499: funci?n `v3SyncAsegurarHeadersAlumnos_`; arranque l?gico en firstCodeLine=474; ejecuta flujo con llamadas a: v3SyncHeadersAlumnos_, v3SyncLeerHeadersHoja_, v3SyncBuildHeaderIndex_, valorSeguroTexto.
+- L?nea 500 a 500: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 501 a 505: funci?n `v3SyncAplicarFormatoBasicoAlumnos_`; arranque l?gico en firstCodeLine=502; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 506 a 510: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 511 a 623: funci?n `v3SyncConstruirRegistroAlumnoDesdeFuente_`; arranque l?gico en firstCodeLine=512; ejecuta flujo con llamadas a: v3SyncBuildStudentFullName_, valorSeguroTexto, v3SyncGetByHeader_, normalizarFecha, v3SyncNormalizarGrado_, v3SyncResolverCorreoResponsable_, v3SyncBuildSourceKey_, v3SyncBuildObservaciones_.
+  - fase inicial (511-547): v3SyncBuildStudentFullName_, valorSeguroTexto.
+  - fase media (548-585): v3SyncGetByHeader_, normalizarFecha, v3SyncNormalizarGrado_.
+  - fase final (586-623): v3SyncResolverCorreoResponsable_, v3SyncBuildSourceKey_, v3SyncBuildObservaciones_.
+- L?nea 624 a 624: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 625 a 672: funci?n `v3SyncFusionarFilaAlumno_`; arranque l?gico en firstCodeLine=626; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 673 a 677: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 678 a 691: funci?n `v3SyncConstruirIndicesDestino_`; arranque l?gico en firstCodeLine=679; ejecuta flujo con llamadas a: v3SyncActualizarIndicesDestino_.
+- L?nea 692 a 692: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 693 a 709: funci?n `v3SyncActualizarIndicesDestino_`; arranque l?gico en firstCodeLine=694; ejecuta flujo con llamadas a: v3SyncNormalizeKey_, v3SyncGetCellByHeader_.
+- L?nea 710 a 710: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 711 a 729: funci?n `v3SyncBuscarFilaExistente_`; arranque l?gico en firstCodeLine=712; ejecuta flujo con llamadas a: v3SyncNormalizeKey_.
+- L?nea 730 a 734: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 735 a 743: funci?n `v3SyncValidarHeadersFuente_`; arranque l?gico en firstCodeLine=736; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 744 a 744: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 745 a 751: funci?n `v3SyncLeerHeadersHoja_`; arranque l?gico en firstCodeLine=746; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 752 a 752: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 753 a 762: funci?n `v3SyncBuildHeaderIndex_`; arranque l?gico en firstCodeLine=754; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 763 a 763: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 764 a 768: funci?n `v3SyncGetByHeader_`; arranque l?gico en firstCodeLine=765; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 769 a 769: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 770 a 774: funci?n `v3SyncGetCellByHeader_`; arranque l?gico en firstCodeLine=771; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 775 a 775: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 776 a 783: funci?n `v3SyncBuildStudentFullName_`; arranque l?gico en firstCodeLine=777; ejecuta flujo con llamadas a: valorSeguroTexto, v3SyncGetByHeader_.
+- L?nea 784 a 784: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 785 a 803: funci?n `v3SyncResolverCorreoResponsable_`; arranque l?gico en firstCodeLine=786; ejecuta flujo con llamadas a: v3SyncNormalizeText_.
+- L?nea 804 a 804: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 805 a 811: funci?n `v3SyncBuildSourceKey_`; arranque l?gico en firstCodeLine=806; ejecuta flujo con llamadas a: v3SyncNormalizeKey_, v3SyncNormalizeDateKey_.
+- L?nea 812 a 812: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 813 a 829: funci?n `v3SyncBuildObservaciones_`; arranque l?gico en firstCodeLine=814; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 830 a 830: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 831 a 838: funci?n `v3SyncNormalizeText_`; arranque l?gico en firstCodeLine=832; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 839 a 839: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 840 a 842: funci?n `v3SyncNormalizeKey_`; arranque l?gico en firstCodeLine=841; ejecuta flujo con llamadas a: v3SyncNormalizeText_.
+- L?nea 843 a 843: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 844 a 850: funci?n `v3SyncNormalizeDateKey_`; arranque l?gico en firstCodeLine=845; ejecuta flujo con llamadas a: normalizarFecha, v3SyncNormalizeText_.
+- L?nea 851 a 851: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 852 a 887: funci?n `v3SyncNormalizarGrado_`; arranque l?gico en firstCodeLine=853; ejecuta flujo con llamadas a: v3SyncNormalizeText_, valorSeguroTexto.
+- L?nea 888 a 888: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 889 a 893: funci?n `v3SyncFilaVacia_`; arranque l?gico en firstCodeLine=890; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 894 a 898: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 899 a 916: funci?n `v3SyncObtenerSiguienteNumeroId_`; arranque l?gico en firstCodeLine=900; ejecuta flujo con llamadas a: valorSeguroTexto, v3SyncGetCellByHeader_, v3SyncEscapeRegExp_.
+- L?nea 917 a 917: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 918 a 920: funci?n `v3SyncConstruirNuevoId_`; arranque l?gico en firstCodeLine=919; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 921 a 921: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 922 a 924: funci?n `v3SyncEscapeRegExp_`; arranque l?gico en firstCodeLine=923; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 925 a 925: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 926 a 936: funci?n `v3SyncHayCambiosEnFila_`; arranque l?gico en firstCodeLine=927; ejecuta flujo con llamadas a: v3SyncValorComparable_.
+- L?nea 937 a 937: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 938 a 949: funci?n `v3SyncValorComparable_`; arranque l?gico en firstCodeLine=939; ejecuta flujo con llamadas a: normalizarFecha, valorSeguroTexto.
+
+# 05A_V3_PaymentsForm.gs.js
+
+- Prop?sito probable: registrar, obtener, guardar sobre datos transaccionales.
+- Se?ales usadas: funciones v3PaymentsFormCrearInterno, v3PaymentsFormVerificarInterno, v3PaymentsFormObtenerExistente_, v3PaymentsFormConstruirPreguntas_, v3PaymentsFormAgregarDetalle_....
+- Flujo observado por llamadas: exigirNoProduccionOOverride, v3PaymentsInicializarConfigBase_, v3PaymentsInicializarConfigBase, v3PaymentsFormObtenerExistente_, v3PaymentsFormConstruirPreguntas_, v3PaymentsFormDetectarHojaRespuestas_....
+
+- L?nea 1 a 70: pre?mbulo de constantes/configuraci?n; define o prepara: V3_PAYMENTS_FORMBUILDER_VERSION, V3_PAYMENTS_FORMBUILDER.
+- L?nea 71 a 152: funci?n `v3PaymentsFormCrearInterno`; arranque l?gico en firstCodeLine=72; ejecuta flujo con llamadas a: exigirNoProduccionOOverride, v3PaymentsInicializarConfigBase_, v3PaymentsInicializarConfigBase, v3PaymentsFormObtenerExistente_, v3PaymentsFormConstruirPreguntas_, v3PaymentsFormDetectarHojaRespuestas_, v3PaymentsFormNombreHojaDisponible_, v3PaymentsFormGuardarConfig_, v3PaymentsFormAsegurarTrigger_, registrarAuditoria.
+  - fase inicial (71-97): exigirNoProduccionOOverride, v3PaymentsInicializarConfigBase_, v3PaymentsInicializarConfigBase.
+  - fase media (98-124): v3PaymentsFormObtenerExistente_, v3PaymentsFormConstruirPreguntas_, v3PaymentsFormDetectarHojaRespuestas_.
+  - fase final (125-152): v3PaymentsFormNombreHojaDisponible_, v3PaymentsFormGuardarConfig_, v3PaymentsFormAsegurarTrigger_, registrarAuditoria.
+- L?nea 153 a 153: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 154 a 182: funci?n `v3PaymentsFormVerificarInterno`; arranque l?gico en firstCodeLine=155; ejecuta flujo con llamadas a: v3PaymentsFormLeerConfig_, v3PaymentsFormExisteTrigger_.
+- L?nea 183 a 183: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 184 a 204: funci?n `v3PaymentsFormObtenerExistente_`; arranque l?gico en firstCodeLine=185; ejecuta flujo con llamadas a: v3PaymentsFormLeerConfig_, v3PaymentsFormExisteTrigger_.
+- L?nea 205 a 205: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 206 a 285: funci?n `v3PaymentsFormConstruirPreguntas_`; arranque l?gico en firstCodeLine=207; ejecuta flujo con llamadas a: v3PaymentsFormAgregarDetalle_.
+  - fase inicial (206-231): sin llamadas clave asignables.
+  - fase media (232-258): sin llamadas clave asignables.
+  - fase final (259-285): v3PaymentsFormAgregarDetalle_.
+- L?nea 286 a 286: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 287 a 302: funci?n `v3PaymentsFormAgregarDetalle_`; arranque l?gico en firstCodeLine=288; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 303 a 303: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 304 a 324: funci?n `v3PaymentsFormDetectarHojaRespuestas_`; arranque l?gico en firstCodeLine=305; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 325 a 325: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 326 a 334: funci?n `v3PaymentsFormNombreHojaDisponible_`; arranque l?gico en firstCodeLine=327; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 335 a 335: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 336 a 378: funci?n `v3PaymentsFormGuardarConfig_`; arranque l?gico en firstCodeLine=337; ejecuta flujo con llamadas a: v3PaymentsFormEscribirConfig_.
+- L?nea 379 a 379: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 380 a 408: funci?n `v3PaymentsFormEscribirConfig_`; arranque l?gico en firstCodeLine=381; ejecuta flujo con llamadas a: escribirConfig.
+- L?nea 409 a 409: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 410 a 426: funci?n `v3PaymentsFormLeerConfig_`; arranque l?gico en firstCodeLine=411; ejecuta flujo con llamadas a: leerConfig.
+- L?nea 427 a 427: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 428 a 460: funci?n `v3PaymentsFormAsegurarTrigger_`; arranque l?gico en firstCodeLine=429; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 461 a 461: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 462 a 470: funci?n `v3PaymentsFormExisteTrigger_`; arranque l?gico en firstCodeLine=463; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 05_V3_Payments.gs.js
+
+- Prop?sito probable: generar, actualizar, validar, obtener sobre periodo, fecha.
+- Se?ales usadas: funciones v3PaymentsInicializarConfigBase, v3PaymentsPrevisualizarImportacion, v3PaymentsImportarPagosReportadosDesdeFormulario, runPaymentsPreviewV15, runPaymentsImportV15....
+- Flujo observado por llamadas: v3PaymentsInicializarConfigBase_, v3PaymentsImportarDesdeFormulario_, v3PaymentsPrevisualizarImportacion, v3PaymentsImportarPagosReportadosDesdeFormulario, runConstruirComprobantesCargados, runPaymentsManualPreview....
+
+- L?nea 1 a 156: pre?mbulo de constantes/configuraci?n; define o prepara: V3_PAYMENTS_VERSION, V3_PAYMENTS_CONFIG_KEYS, V3_PAYMENTS_DEFAULTS, V3_PAYMENTS_TARGET_HEADERS, V3_PAYMENTS_HEADER_ALIASES.
+- L?nea 157 a 159: funci?n `v3PaymentsInicializarConfigBase`; arranque l?gico en firstCodeLine=158; ejecuta flujo con llamadas a: v3PaymentsInicializarConfigBase_.
+- L?nea 160 a 160: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 161 a 163: funci?n `v3PaymentsPrevisualizarImportacion`; arranque l?gico en firstCodeLine=162; ejecuta flujo con llamadas a: v3PaymentsImportarDesdeFormulario_.
+- L?nea 164 a 164: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 165 a 167: funci?n `v3PaymentsImportarPagosReportadosDesdeFormulario`; arranque l?gico en firstCodeLine=166; ejecuta flujo con llamadas a: v3PaymentsImportarDesdeFormulario_.
+- L?nea 168 a 168: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 169 a 173: funci?n `runPaymentsPreviewV15`; arranque l?gico en firstCodeLine=170; ejecuta flujo con llamadas a: v3PaymentsPrevisualizarImportacion.
+- L?nea 174 a 174: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 175 a 179: funci?n `runPaymentsImportV15`; arranque l?gico en firstCodeLine=176; ejecuta flujo con llamadas a: v3PaymentsImportarPagosReportadosDesdeFormulario.
+- L?nea 180 a 180: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 181 a 185: funci?n `runPaymentsManualPreview`; arranque l?gico en firstCodeLine=182; ejecuta flujo con llamadas a: v3PaymentsImportarDesdeFormulario_.
+- L?nea 186 a 186: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 187 a 200: funci?n `runPaymentsManualImport`; arranque l?gico en firstCodeLine=188; ejecuta flujo con llamadas a: v3PaymentsImportarDesdeFormulario_, runConstruirComprobantesCargados.
+- L?nea 201 a 201: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 202 a 215: funci?n `runPaymentsManualFlowCompleto`; arranque l?gico en firstCodeLine=203; ejecuta flujo con llamadas a: runPaymentsManualPreview, runPaymentsManualImport.
+- L?nea 216 a 216: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 217 a 221: funci?n `runPaymentsReconstruirHojaBase`; arranque l?gico en firstCodeLine=218; ejecuta flujo con llamadas a: v3PaymentsReconstruirPagosReportadosDesdeCero.
+- L?nea 222 a 226: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 227 a 339: funci?n `v3PaymentsImportarDesdeFormulario_`; arranque l?gico en firstCodeLine=228; ejecuta flujo con llamadas a: convertirANumeroSeguro, v3PaymentsInicializarConfigBase_, v3PaymentsLeerConfig_, v3PaymentsAbrirFuente_, valorSeguroTexto, v3PaymentsBuildHeaderIndex_, asegurarHoja, v3PaymentsLeerHeadersHoja_, v3PaymentsValidarEstructuraDestino_, v3PaymentsConstruirIndicesPagosExistentes_, v3PaymentsConstruirIndicesAlumnos_, v3PaymentsFilaVacia_, v3PaymentsConstruirLineasPagoDesdeFila_, v3PaymentsEvaluarDuplicidad_, v3PaymentsConstruirFilaDestino_, v3PaymentsActualizarIndicesConPayment_, v3PaymentsAplicarFormatosPagos_.
+  - fase inicial (227-263): convertirANumeroSeguro, v3PaymentsInicializarConfigBase_, v3PaymentsLeerConfig_, v3PaymentsAbrirFuente_, valorSeguroTexto.
+  - fase media (264-301): v3PaymentsBuildHeaderIndex_, asegurarHoja, v3PaymentsLeerHeadersHoja_, v3PaymentsValidarEstructuraDestino_, v3PaymentsConstruirIndicesPagosExistentes_, v3PaymentsConstruirIndicesAlumnos_.
+  - fase final (302-339): v3PaymentsFilaVacia_, v3PaymentsConstruirLineasPagoDesdeFila_, v3PaymentsEvaluarDuplicidad_, v3PaymentsConstruirFilaDestino_, v3PaymentsActualizarIndicesConPayment_, v3PaymentsAplicarFormatosPagos_.
+- L?nea 340 a 344: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 345 a 509: funci?n `v3PaymentsConstruirLineasPagoDesdeFila_`; arranque l?gico en firstCodeLine=346; ejecuta flujo con llamadas a: v3PaymentsResolverColumnaFuente_, v3PaymentsGetValueByColumn_, normalizarFecha, hoySinHora, valorSeguroTexto, v3PaymentsEnriquecerAlumno_, pushIf, v3PaymentsNormalizarMontoComprobante_, convertirANumeroSeguro, v3PaymentsSanitizarConcepto_, v3PaymentsNormalizarPeriodoFlexible_, v3PaymentsConstruirObservacionSistema_, v3PaymentsJoinObs_, generarId, v3PaymentsRedondear2_, v3PaymentsUsuarioActivo_, v3PaymentsConceptoGeneral_, v3PaymentsHashParts_, v3PaymentsNormalizarFechaKey_, v3PaymentsNormalizarNumeroKey_, nimos.
+  - fase inicial (345-399): v3PaymentsResolverColumnaFuente_, v3PaymentsGetValueByColumn_, normalizarFecha, hoySinHora, valorSeguroTexto, v3PaymentsEnriquecerAlumno_, pushIf.
+  - fase media (400-454): v3PaymentsNormalizarMontoComprobante_, convertirANumeroSeguro, v3PaymentsSanitizarConcepto_, v3PaymentsNormalizarPeriodoFlexible_, v3PaymentsConstruirObservacionSistema_, v3PaymentsJoinObs_, generarId.
+  - fase final (455-509): v3PaymentsRedondear2_, v3PaymentsUsuarioActivo_, v3PaymentsConceptoGeneral_, v3PaymentsHashParts_, v3PaymentsNormalizarFechaKey_, v3PaymentsNormalizarNumeroKey_, nimos.
+- L?nea 510 a 514: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 515 a 562: funci?n `v3PaymentsConstruirIndicesPagosExistentes_`; arranque l?gico en firstCodeLine=516; ejecuta flujo con llamadas a: valorSeguroTexto, v3PaymentsGetCellByHeader_, v3PaymentsNormalizarNumeroKey_, v3PaymentsConstruirLogicalKey_.
+- L?nea 563 a 563: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 564 a 576: funci?n `v3PaymentsEvaluarDuplicidad_`; arranque l?gico en firstCodeLine=565; ejecuta flujo con llamadas a: v3PaymentsConstruirSourceKey_, v3PaymentsConstruirLogicalKey_.
+- L?nea 577 a 577: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 578 a 585: funci?n `v3PaymentsActualizarIndicesConPayment_`; arranque l?gico en firstCodeLine=579; ejecuta flujo con llamadas a: v3PaymentsConstruirSourceKey_, v3PaymentsConstruirLogicalKey_.
+- L?nea 586 a 590: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 591 a 617: funci?n `v3PaymentsConstruirIndicesAlumnos_`; arranque l?gico en firstCodeLine=592; ejecuta flujo con llamadas a: obtenerHojaPorNombre, v3PaymentsLeerHeadersHoja_, v3PaymentsBuildHeaderIndex_, valorSeguroTexto, v3PaymentsGetCellByHeader_, get, v3PaymentsNormalizarClaveTexto_.
+- L?nea 618 a 618: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 619 a 652: funci?n `v3PaymentsEnriquecerAlumno_`; arranque l?gico en firstCodeLine=620; ejecuta flujo con llamadas a: valorSeguroTexto, v3PaymentsNormalizarClaveTexto_.
+- L?nea 653 a 657: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 658 a 662: funci?n `v3PaymentsAsegurarHeadersPagosReportados_`; arranque l?gico en firstCodeLine=661; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 663 a 663: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 664 a 701: funci?n `v3PaymentsReconstruirPagosReportadosDesdeCero`; arranque l?gico en firstCodeLine=665; ejecuta flujo con llamadas a: asegurarHoja, obtenerSpreadsheetActivoSeguro, v3PaymentsBuildHeaderIndex_, v3PaymentsLeerHeadersHoja_, v3PaymentsAplicarFormatosPagos_.
+- L?nea 702 a 702: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 703 a 715: funci?n `v3PaymentsAplicarFormatosPagos_`; arranque l?gico en firstCodeLine=704; ejecuta flujo con llamadas a: v3PaymentsFindHeaderColumn_.
+- L?nea 716 a 716: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 717 a 746: funci?n `v3PaymentsConstruirFilaDestino_`; arranque l?gico en firstCodeLine=718; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 747 a 747: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 748 a 776: funci?n `v3PaymentsValidarEstructuraDestino_`; arranque l?gico en firstCodeLine=749; ejecuta flujo con llamadas a: v3PaymentsLeerHeadersHoja_, valorSeguroTexto, v3PaymentsNormHeader_, v3PaymentsFindHeaderColumn_.
+- L?nea 777 a 781: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 782 a 797: funci?n `v3PaymentsInicializarConfigBase_`; arranque l?gico en firstCodeLine=783; ejecuta flujo con llamadas a: leerConfig, valorSeguroTexto, escribirConfig.
+- L?nea 798 a 798: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 799 a 837: funci?n `v3PaymentsLeerConfig_`; arranque l?gico en firstCodeLine=800; ejecuta flujo con llamadas a: leerConfig.
+- L?nea 838 a 838: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 839 a 845: funci?n `v3PaymentsAbrirFuente_`; arranque l?gico en firstCodeLine=840; ejecuta flujo con llamadas a: valorSeguroTexto, obtenerSpreadsheetActivoSeguro.
+- L?nea 846 a 850: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 851 a 854: funci?n `v3PaymentsLeerHeadersHoja_`; arranque l?gico en firstCodeLine=852; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 855 a 855: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 856 a 867: funci?n `v3PaymentsBuildHeaderIndex_`; arranque l?gico en firstCodeLine=857; ejecuta flujo con llamadas a: valorSeguroTexto, v3PaymentsNormHeader_.
+- L?nea 868 a 868: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 869 a 872: funci?n `v3PaymentsGetValueByColumn_`; arranque l?gico en firstCodeLine=870; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 873 a 873: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 874 a 878: funci?n `v3PaymentsGetCellByHeader_`; arranque l?gico en firstCodeLine=875; ejecuta flujo con llamadas a: v3PaymentsFindHeaderColumn_.
+- L?nea 879 a 879: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 880 a 886: funci?n `v3PaymentsFindHeaderColumn_`; arranque l?gico en firstCodeLine=881; ejecuta flujo con llamadas a: v3PaymentsNormHeader_.
+- L?nea 887 a 887: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 888 a 895: funci?n `v3PaymentsNormHeader_`; arranque l?gico en firstCodeLine=889; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 896 a 896: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 897 a 905: funci?n `v3PaymentsResolverColumnaFuente_`; arranque l?gico en firstCodeLine=898; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 906 a 906: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 907 a 909: funci?n `v3PaymentsNormalizarMontoComprobante_`; arranque l?gico en firstCodeLine=908; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+- L?nea 910 a 910: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 911 a 913: funci?n `v3PaymentsRedondear2_`; arranque l?gico en firstCodeLine=912; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+- L?nea 914 a 914: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 915 a 922: funci?n `v3PaymentsSanitizarConcepto_`; arranque l?gico en firstCodeLine=916; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 923 a 923: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 924 a 932: funci?n `v3PaymentsNormalizarPeriodoFlexible_`; arranque l?gico en firstCodeLine=925; ejecuta flujo con llamadas a: valorSeguroTexto, normalizarFecha.
+- L?nea 933 a 933: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 934 a 941: funci?n `v3PaymentsNormalizarClaveTexto_`; arranque l?gico en firstCodeLine=935; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 942 a 942: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 943 a 947: funci?n `v3PaymentsNormalizarFechaKey_`; arranque l?gico en firstCodeLine=944; ejecuta flujo con llamadas a: normalizarFecha, v3PaymentsNormalizarClaveTexto_.
+- L?nea 948 a 948: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 949 a 951: funci?n `v3PaymentsNormalizarNumeroKey_`; arranque l?gico en firstCodeLine=950; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+- L?nea 952 a 952: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 953 a 957: funci?n `v3PaymentsHashParts_`; arranque l?gico en firstCodeLine=954; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 958 a 958: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 959 a 970: funci?n `v3PaymentsConstruirSourceKey_`; arranque l?gico en firstCodeLine=960; ejecuta flujo con llamadas a: valorSeguroTexto, v3PaymentsNormalizarNumeroKey_.
+- L?nea 971 a 971: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 972 a 981: funci?n `v3PaymentsConstruirLogicalKey_`; arranque l?gico en firstCodeLine=973; ejecuta flujo con llamadas a: v3PaymentsNormalizarClaveTexto_, v3PaymentsNormalizarFechaKey_, v3PaymentsNormalizarNumeroKey_.
+- L?nea 982 a 982: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 983 a 993: funci?n `v3PaymentsConceptoGeneral_`; arranque l?gico en firstCodeLine=984; ejecuta flujo con llamadas a: v3PaymentsSanitizarConcepto_.
+- L?nea 994 a 994: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 995 a 997: funci?n `v3PaymentsFilaVacia_`; arranque l?gico en firstCodeLine=996; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 998 a 998: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 999 a 1004: funci?n `v3PaymentsJoinObs_`; arranque l?gico en firstCodeLine=1000; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1005 a 1005: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1006 a 1018: funci?n `v3PaymentsConstruirObservacionSistema_`; arranque l?gico en firstCodeLine=1007; ejecuta flujo con llamadas a: valorSeguroTexto, v3PaymentsRedondear2_, lineas, total.
+- L?nea 1019 a 1019: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1020 a 1034: funci?n `v3PaymentsUsuarioActivo_`; arranque l?gico en firstCodeLine=1021; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 06_V3_Applications.gs.js
+
+- Prop?sito probable: generar, procesar, registrar, obtener sobre cargo, fecha.
+- Se?ales usadas: funciones v3ApplicationsPrevisualizarAplicacionPagoReportado, v3ApplicationsAplicarPagoReportado, v3ApplicationsPrevisualizarPagosPendientes, v3ApplicationsPrevisualizarCorreccionAplicacionesErradas, v3ApplicationsCorregirAplicacionesErradas....
+- Flujo observado por llamadas: v3ApplicationsProcesarPagoReportado_, v3ApplicationsProcesarPagosPendientes_, v3ApplicationsProcesarCorreccionAplicacionesErradas_, generarId, convertirANumeroSeguro, v3ApplicationsAsegurarHojaPagos_....
+
+- L?nea 1 a 59: pre?mbulo de constantes/configuraci?n; define o prepara: V3_APPLICATIONS_VERSION, V3_APPLICATIONS_HEADERS, V3_APPLICATIONS_VALID_STATES_TO_COUNT, V3_APPLICATIONS_IGNORE_STATES, V3_APPLICATIONS_CONCEPTOS_RECURRENTES.
+- L?nea 60 a 62: funci?n `v3ApplicationsPrevisualizarAplicacionPagoReportado`; arranque l?gico en firstCodeLine=61; ejecuta flujo con llamadas a: v3ApplicationsProcesarPagoReportado_.
+- L?nea 63 a 69: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 70 a 72: funci?n `v3ApplicationsAplicarPagoReportado`; arranque l?gico en firstCodeLine=71; ejecuta flujo con llamadas a: v3ApplicationsProcesarPagoReportado_.
+- L?nea 73 a 80: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 81 a 83: funci?n `v3ApplicationsPrevisualizarPagosPendientes`; arranque l?gico en firstCodeLine=82; ejecuta flujo con llamadas a: v3ApplicationsProcesarPagosPendientes_.
+- L?nea 84 a 91: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 92 a 94: funci?n `v3ApplicationsPrevisualizarCorreccionAplicacionesErradas`; arranque l?gico en firstCodeLine=93; ejecuta flujo con llamadas a: v3ApplicationsProcesarCorreccionAplicacionesErradas_.
+- L?nea 95 a 103: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 104 a 106: funci?n `v3ApplicationsCorregirAplicacionesErradas`; arranque l?gico en firstCodeLine=105; ejecuta flujo con llamadas a: v3ApplicationsProcesarCorreccionAplicacionesErradas_.
+- L?nea 107 a 114: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 115 a 117: funci?n `v3ApplicationsAplicarPagosPendientes`; arranque l?gico en firstCodeLine=116; ejecuta flujo con llamadas a: v3ApplicationsProcesarPagosPendientes_.
+- L?nea 118 a 118: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 119 a 231: funci?n `v3ApplicationsProcesarPagosPendientes_`; arranque l?gico en firstCodeLine=120; ejecuta flujo con llamadas a: generarId, convertirANumeroSeguro, v3ApplicationsAsegurarHojaPagos_, v3ApplicationsBuildHeaderIndex_, v3ApplicationsLeerHeaders_, valorSeguroTexto, v3ApplicationsGetCellByHeader_, v3AppConceptoEsRecurrente_, v3ApplicationsObtenerAplicacionesPorPago_, v3ApplicationsProcesarPagoReportado_, registrarAuditoria.
+  - fase inicial (119-155): generarId, convertirANumeroSeguro, v3ApplicationsAsegurarHojaPagos_.
+  - fase media (156-193): v3ApplicationsBuildHeaderIndex_, v3ApplicationsLeerHeaders_, valorSeguroTexto, v3ApplicationsGetCellByHeader_.
+  - fase final (194-231): v3AppConceptoEsRecurrente_, v3ApplicationsObtenerAplicacionesPorPago_, v3ApplicationsProcesarPagoReportado_, registrarAuditoria.
+- L?nea 232 a 232: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 233 a 376: funci?n `v3ApplicationsProcesarCorreccionAplicacionesErradas_`; arranque l?gico en firstCodeLine=234; ejecuta flujo con llamadas a: generarId, convertirANumeroSeguro, v3ApplicationsAsegurarHojaPagos_, v3ApplicationsAsegurarHojaAplicaciones_, v3ApplicationsAsegurarHojaCargos_, v3ApplicationsBuildHeaderIndex_, v3ApplicationsLeerHeaders_, valorSeguroTexto, v3ApplicationsGetCellByHeader_, v3AppConceptoEsRecurrente_, v3ApplicationsEsFilaPendienteErrada_, v3ApplicationsResolverAlumnoDelPago_, v3ApplicationsConstruirObjetoPago_, v3ApplicationsConstruirCreditosPorCargo_, v3ApplicationsConstruirCargosAlumno_, v3ApplicationsConstruirPlanAplicacion_, v3ApplicationsMarcarFilasAplicacionComoReversadas_, v3ApplicationsProcesarPagoReportado_, registrarAuditoria.
+  - fase inicial (233-280): generarId, convertirANumeroSeguro, v3ApplicationsAsegurarHojaPagos_, v3ApplicationsAsegurarHojaAplicaciones_, v3ApplicationsAsegurarHojaCargos_, v3ApplicationsBuildHeaderIndex_.
+  - fase media (281-328): v3ApplicationsLeerHeaders_, valorSeguroTexto, v3ApplicationsGetCellByHeader_, v3AppConceptoEsRecurrente_, v3ApplicationsEsFilaPendienteErrada_, v3ApplicationsResolverAlumnoDelPago_.
+  - fase final (329-376): v3ApplicationsConstruirObjetoPago_, v3ApplicationsConstruirCreditosPorCargo_, v3ApplicationsConstruirCargosAlumno_, v3ApplicationsConstruirPlanAplicacion_, v3ApplicationsMarcarFilasAplicacionComoReversadas_, v3ApplicationsProcesarPagoReportado_, registrarAuditoria.
+- L?nea 377 a 381: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 382 a 535: funci?n `v3ApplicationsProcesarPagoReportado_`; arranque l?gico en firstCodeLine=383; ejecuta flujo con llamadas a: valorSeguroTexto, generarId, v3ApplicationsAsegurarHojaPagos_, v3ApplicationsAsegurarHojaAplicaciones_, v3ApplicationsAsegurarHojaCargos_, v3ApplicationsLeerHeaders_, v3ApplicationsBuildHeaderIndex_, v3ApplicationsBuscarPagoPorId_, v3ApplicationsGetCellByHeader_, v3AppConceptoEsRecurrente_, v3ApplicationsObtenerAplicacionesPorPago_, v3ApplicationsResolverAlumnoDelPago_, v3ApplicationsConstruirObjetoPago_, v3ApplicationsConstruirCreditosPorCargo_, v3ApplicationsConstruirCargosAlumno_, v3ApplicationsConstruirPlanAplicacion_, v3ApplicationsConstruirActualizacionesEstadoCargo_, v3ApplicationsConstruirActualizacionPago_, v3ApplicationsConstruirFilaAplicacion_, v3ApplicationsAplicarFormatosAplicaciones_, v3ApplicationsAplicarActualizacionesCargo_, v3ApplicationsAplicarActualizacionPago_, registrarAuditoria.
+  - fase inicial (382-432): valorSeguroTexto, generarId, v3ApplicationsAsegurarHojaPagos_, v3ApplicationsAsegurarHojaAplicaciones_, v3ApplicationsAsegurarHojaCargos_, v3ApplicationsLeerHeaders_, v3ApplicationsBuildHeaderIndex_.
+  - fase media (433-483): v3ApplicationsBuscarPagoPorId_, v3ApplicationsGetCellByHeader_, v3AppConceptoEsRecurrente_, v3ApplicationsObtenerAplicacionesPorPago_, v3ApplicationsResolverAlumnoDelPago_, v3ApplicationsConstruirObjetoPago_, v3ApplicationsConstruirCreditosPorCargo_, v3ApplicationsConstruirCargosAlumno_.
+  - fase final (484-535): v3ApplicationsConstruirPlanAplicacion_, v3ApplicationsConstruirActualizacionesEstadoCargo_, v3ApplicationsConstruirActualizacionPago_, v3ApplicationsConstruirFilaAplicacion_, v3ApplicationsAplicarFormatosAplicaciones_, v3ApplicationsAplicarActualizacionesCargo_, v3ApplicationsAplicarActualizacionPago_, registrarAuditoria.
+- L?nea 536 a 540: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 541 a 656: funci?n `v3ApplicationsConstruirPlanAplicacion_`; arranque l?gico en firstCodeLine=542; ejecuta flujo con llamadas a: v3ApplicationsUsuarioActivo_, hoySinHora, v3ApplicationsConstruirFilaPendiente_, v3ApplicationsDistribuirMontoEnCargo_, generarId, v3ApplicationsConstruirObservacionAplicacion_.
+  - fase inicial (541-578): v3ApplicationsUsuarioActivo_, hoySinHora.
+  - fase media (579-617): v3ApplicationsConstruirFilaPendiente_, v3ApplicationsDistribuirMontoEnCargo_.
+  - fase final (618-656): generarId, v3ApplicationsConstruirObservacionAplicacion_.
+- L?nea 657 a 657: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 658 a 696: funci?n `v3ApplicationsDistribuirMontoEnCargo_`; arranque l?gico en firstCodeLine=659; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 697 a 701: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 702 a 785: funci?n `v3ApplicationsConstruirCargosAlumno_`; arranque l?gico en firstCodeLine=703; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsGetCellByHeader_, normalizarFecha, convertirANumeroSeguro, v3ApplicationsConstruirCargoReferenceId_, v3ApplicationsResolverFechaLimiteSinRecargo_, v3ApplicationsCompararPrioridadCargo_, v3ApplicationsFiltrarCargosSegunPago_.
+  - fase inicial (702-729): valorSeguroTexto, v3ApplicationsGetCellByHeader_.
+  - fase media (730-757): normalizarFecha, convertirANumeroSeguro, v3ApplicationsConstruirCargoReferenceId_.
+  - fase final (758-785): v3ApplicationsResolverFechaLimiteSinRecargo_, v3ApplicationsCompararPrioridadCargo_, v3ApplicationsFiltrarCargosSegunPago_.
+- L?nea 786 a 786: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 787 a 807: funci?n `v3ApplicationsConstruirCreditosPorCargo_`; arranque l?gico en firstCodeLine=788; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsGetCellByHeader_, convertirANumeroSeguro.
+- L?nea 808 a 808: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 809 a 821: funci?n `v3ApplicationsCompararPrioridadCargo_`; arranque l?gico en firstCodeLine=810; ejecuta flujo con llamadas a: v3ApplicationsPrioridadCargo_.
+- L?nea 822 a 822: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 823 a 846: funci?n `v3ApplicationsPrioridadCargo_`; arranque l?gico en firstCodeLine=824; ejecuta flujo con llamadas a: v3ApplicationsNormValorAplicacion_.
+- L?nea 847 a 847: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 848 a 884: funci?n `v3ApplicationsFiltrarCargosSegunPago_`; arranque l?gico en firstCodeLine=849; ejecuta flujo con llamadas a: v3ApplicationsNormValorAplicacion_.
+- L?nea 885 a 889: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 890 a 917: funci?n `v3ApplicationsConstruirActualizacionesEstadoCargo_`; arranque l?gico en firstCodeLine=891; ejecuta flujo con llamadas a: hoySinHora.
+- L?nea 918 a 918: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 919 a 941: funci?n `v3ApplicationsAplicarActualizacionesCargo_`; arranque l?gico en firstCodeLine=920; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsAppendObs_.
+- L?nea 942 a 942: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 943 a 962: funci?n `v3ApplicationsConstruirActualizacionPago_`; arranque l?gico en firstCodeLine=944; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 963 a 963: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 964 a 977: funci?n `v3ApplicationsAplicarActualizacionPago_`; arranque l?gico en firstCodeLine=965; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsAppendObs_.
+- L?nea 978 a 982: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 983 a 1006: funci?n `v3ApplicationsBuscarPagoPorId_`; arranque l?gico en firstCodeLine=984; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsGetCellByHeader_.
+- L?nea 1007 a 1007: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1008 a 1034: funci?n `v3ApplicationsConstruirObjetoPago_`; arranque l?gico en firstCodeLine=1009; ejecuta flujo con llamadas a: convertirANumeroSeguro, v3ApplicationsGetCellByHeader_, valorSeguroTexto, normalizarFecha, hoySinHora.
+- L?nea 1035 a 1035: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1036 a 1086: funci?n `v3ApplicationsResolverAlumnoDelPago_`; arranque l?gico en firstCodeLine=1037; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsGetCellByHeader_, obtenerHojaPorNombre, v3ApplicationsLeerHeaders_, v3ApplicationsBuildHeaderIndex_, v3ApplicationsNormalizarClaveTexto_.
+- L?nea 1087 a 1087: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1088 a 1116: funci?n `v3ApplicationsObtenerAplicacionesPorPago_`; arranque l?gico en firstCodeLine=1089; ejecuta flujo con llamadas a: v3ApplicationsAsegurarHojaAplicaciones_, v3ApplicationsBuildHeaderIndex_, v3ApplicationsLeerHeaders_, valorSeguroTexto, v3ApplicationsGetCellByHeader_, convertirANumeroSeguro.
+- L?nea 1117 a 1121: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1122 a 1132: funci?n `v3ApplicationsConstruirFilaAplicacion_`; arranque l?gico en firstCodeLine=1123; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1133 a 1133: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1134 a 1157: funci?n `v3ApplicationsConstruirFilaPendiente_`; arranque l?gico en firstCodeLine=1135; ejecuta flujo con llamadas a: generarId.
+- L?nea 1158 a 1158: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1159 a 1166: funci?n `v3ApplicationsEsFilaPendienteErrada_`; arranque l?gico en firstCodeLine=1160; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsGetCellByHeader_, convertirANumeroSeguro.
+- L?nea 1167 a 1167: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1168 a 1186: funci?n `v3ApplicationsMarcarFilasAplicacionComoReversadas_`; arranque l?gico en firstCodeLine=1169; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsAppendObs_.
+- L?nea 1187 a 1187: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1188 a 1204: funci?n `v3ApplicationsConstruirObservacionAplicacion_`; arranque l?gico en firstCodeLine=1189; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1205 a 1209: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1210 a 1214: funci?n `v3ApplicationsAsegurarHojaAplicaciones_`; arranque l?gico en firstCodeLine=1211; ejecuta flujo con llamadas a: asegurarHoja, v3ApplicationsAsegurarHeaders_.
+- L?nea 1215 a 1215: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1216 a 1218: funci?n `v3ApplicationsAsegurarHojaPagos_`; arranque l?gico en firstCodeLine=1217; ejecuta flujo con llamadas a: asegurarHoja.
+- L?nea 1219 a 1219: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1220 a 1222: funci?n `v3ApplicationsAsegurarHojaCargos_`; arranque l?gico en firstCodeLine=1221; ejecuta flujo con llamadas a: asegurarHoja.
+- L?nea 1223 a 1223: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1224 a 1248: funci?n `v3ApplicationsAsegurarHeaders_`; arranque l?gico en firstCodeLine=1225; ejecuta flujo con llamadas a: v3ApplicationsLeerHeaders_, v3ApplicationsBuildHeaderIndex_, valorSeguroTexto.
+- L?nea 1249 a 1249: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1250 a 1270: funci?n `v3ApplicationsAplicarFormatosAplicaciones_`; arranque l?gico en firstCodeLine=1251; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1271 a 1275: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1276 a 1282: funci?n `v3ApplicationsLeerHeaders_`; arranque l?gico en firstCodeLine=1277; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1283 a 1283: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1284 a 1294: funci?n `v3ApplicationsBuildHeaderIndex_`; arranque l?gico en firstCodeLine=1285; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsNormHeader_.
+- L?nea 1295 a 1295: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1296 a 1300: funci?n `v3ApplicationsGetCellByHeader_`; arranque l?gico en firstCodeLine=1297; ejecuta flujo con llamadas a: v3ApplicationsNormHeader_.
+- L?nea 1301 a 1301: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1302 a 1309: funci?n `v3ApplicationsNormHeader_`; arranque l?gico en firstCodeLine=1303; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1310 a 1310: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1311 a 1317: funci?n `v3ApplicationsConstruirCargoReferenceId_`; arranque l?gico en firstCodeLine=1312; ejecuta flujo con llamadas a: valorSeguroTexto, v3ApplicationsGetCellByHeader_.
+- L?nea 1318 a 1318: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1319 a 1326: funci?n `v3ApplicationsNormalizarClaveTexto_`; arranque l?gico en firstCodeLine=1320; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1327 a 1327: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1328 a 1337: funci?n `v3ApplicationsAppendObs_`; arranque l?gico en firstCodeLine=1329; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1338 a 1338: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1339 a 1345: funci?n `v3ApplicationsUsuarioActivo_`; arranque l?gico en firstCodeLine=1340; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1346 a 1346: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1347 a 1354: funci?n `v3AppConceptoNorm_`; arranque l?gico en firstCodeLine=1348; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1355 a 1355: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1356 a 1359: funci?n `v3AppConceptoEsRecurrente_`; arranque l?gico en firstCodeLine=1357; ejecuta flujo con llamadas a: v3AppConceptoNorm_.
+- L?nea 1360 a 1360: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1361 a 1369: funci?n `v3ApplicationsNormValorAplicacion_`; arranque l?gico en firstCodeLine=1362; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1370 a 1370: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1371 a 1392: funci?n `v3ApplicationsResolverFechaLimiteSinRecargo_`; arranque l?gico en firstCodeLine=1372; ejecuta flujo con llamadas a: convertirANumeroSeguro, v3ApplicationsGetCellByHeader_, v3ApplicationsBuscarDiasGraciaRegla_.
+- L?nea 1393 a 1393: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1394 a 1429: funci?n `v3ApplicationsBuscarDiasGraciaRegla_`; arranque l?gico en firstCodeLine=1395; ejecuta flujo con llamadas a: obtenerHojaPorNombre, v3ApplicationsLeerHeaders_, v3ApplicationsBuildHeaderIndex_, v3ApplicationsNormValorAplicacion_, v3ApplicationsGetCellByHeader_, valorSeguroTexto, convertirANumeroSeguro.
+
+# 07_V3_Charges.gs.js
+
+- Prop?sito probable: calcular, generar, validar, cargar sobre cargo, periodo, fecha.
+- Se?ales usadas: funciones v3ChargesPreviewFeb2026, v3ChargesGenerarFeb2026, v3ChargesPrevisualizarAnoLectivo, v3ChargesGenerarAnoLectivo, v3ChargesPrevisualizarReconstruccionHistorica....
+- Flujo observado por llamadas: v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo, v3ChargesProcesarAnoLectivo_, v3ChargesPrevisualizarAnoLectivo, v3ChargesGenerarAnoLectivo, v3ChargesProcesarPeriodo_....
+
+- L?nea 1 a 69: pre?mbulo de constantes/configuraci?n; define o prepara: V3_CHARGES_VERSION, V3_CHARGES_EPSILON, V3_CHARGES_SHEET_ALUMNOS, V3_CHARGES_SHEET_REGLAS, V3_CHARGES_SHEET_CARGOS, V3_CHARGES_HEADERS, V3_CHARGES_DISCOUNT_DEFAULT_TARGET, V3_CHARGES_GRADE_RANK.
+- L?nea 70 a 72: funci?n `v3ChargesPreviewFeb2026`; arranque l?gico en firstCodeLine=71; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 73 a 73: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 74 a 76: funci?n `v3ChargesGenerarFeb2026`; arranque l?gico en firstCodeLine=75; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 77 a 77: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 78 a 83: funci?n `v3ChargesPrevisualizarAnoLectivo`; arranque l?gico en firstCodeLine=79; ejecuta flujo con llamadas a: v3ChargesProcesarAnoLectivo_.
+- L?nea 84 a 84: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 85 a 90: funci?n `v3ChargesGenerarAnoLectivo`; arranque l?gico en firstCodeLine=86; ejecuta flujo con llamadas a: v3ChargesProcesarAnoLectivo_.
+- L?nea 91 a 91: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 92 a 94: funci?n `v3ChargesPrevisualizarReconstruccionHistorica`; arranque l?gico en firstCodeLine=93; ejecuta flujo con llamadas a: v3ChargesPrevisualizarAnoLectivo.
+- L?nea 95 a 95: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 96 a 98: funci?n `v3ChargesGenerarReconstruccionHistorica`; arranque l?gico en firstCodeLine=97; ejecuta flujo con llamadas a: v3ChargesGenerarAnoLectivo.
+- L?nea 99 a 99: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 100 a 102: funci?n `v3ChargesPrevisualizarCargosPeriodo`; arranque l?gico en firstCodeLine=101; ejecuta flujo con llamadas a: v3ChargesProcesarPeriodo_.
+- L?nea 103 a 103: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 104 a 106: funci?n `v3ChargesGenerarCargosPeriodo`; arranque l?gico en firstCodeLine=105; ejecuta flujo con llamadas a: v3ChargesProcesarPeriodo_.
+- L?nea 107 a 111: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 112 a 206: funci?n `v3ChargesProcesarAnoLectivo_`; arranque l?gico en firstCodeLine=113; ejecuta flujo con llamadas a: v3ChargesBuildOptions_, v3ChargesNormalizarPeriodo_, v3ChargesCargarReglas_, v3ChargesReglaActiva_, v3ChargesProcesarPeriodo_, v3ChargesGetSheet_, v3ChargesOrdenarSheetOperativa_, v3ChargesAuditar_.
+  - fase inicial (112-142): v3ChargesBuildOptions_, v3ChargesNormalizarPeriodo_.
+  - fase media (143-174): v3ChargesCargarReglas_, v3ChargesReglaActiva_, v3ChargesProcesarPeriodo_.
+  - fase final (175-206): v3ChargesGetSheet_, v3ChargesOrdenarSheetOperativa_, v3ChargesAuditar_.
+- L?nea 207 a 207: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 208 a 349: funci?n `v3ChargesProcesarPeriodo_`; arranque l?gico en firstCodeLine=209; ejecuta flujo con llamadas a: v3ChargesNormalizarPeriodo_, v3ChargesBuildOptions_, v3ChargesValidarPeriodoObjetivo_, v3ChargesValidarNoReabrirMesConsolidado_, v3ChargesFecha_, v3ChargesHoy_, v3ChargesCargarAlumnos_, v3ChargesCargarReglas_, v3ChargesGetSheet_, v3ChargesAsegurarHeaders_, v3ChargesLeerIndexCargosExistentes_, v3ChargesLeerIndexCargoIdsExistentes_, v3ChargesConstruirFamiliasActivas_, v3ChargesConstruirElegiblesDescuento_, v3ChargesReglaAplicaPeriodo_, v3ChargesAlumnoAplicaRegla_, v3ChargesKeyBase_, v3ChargesGenerarCargoId_, v3ChargesNumero_, v3ChargesCalcularDescuentoRegla_, v3ChargesCalcularVencimiento_, v3ChargesRedondear2_, v3ChargesConstruirDescripcion_, v3ChargesConstruirObservaciones_, v3ChargesTexto_, v3ChargesValidarFilasMismoPeriodo_, v3ChargesValidarRangoEscritoPeriodo_, v3ChargesFormatearSheet_, v3ChargesOrdenarSheetOperativa_, v3ChargesAuditar_.
+  - fase inicial (208-254): v3ChargesNormalizarPeriodo_, v3ChargesBuildOptions_, v3ChargesValidarPeriodoObjetivo_, v3ChargesValidarNoReabrirMesConsolidado_, v3ChargesFecha_, v3ChargesHoy_, v3ChargesCargarAlumnos_, v3ChargesCargarReglas_, v3ChargesGetSheet_, v3ChargesAsegurarHeaders_.
+  - fase media (255-301): v3ChargesLeerIndexCargosExistentes_, v3ChargesLeerIndexCargoIdsExistentes_, v3ChargesConstruirFamiliasActivas_, v3ChargesConstruirElegiblesDescuento_, v3ChargesReglaAplicaPeriodo_, v3ChargesAlumnoAplicaRegla_, v3ChargesKeyBase_, v3ChargesGenerarCargoId_, v3ChargesNumero_, v3ChargesCalcularDescuentoRegla_.
+  - fase final (302-349): v3ChargesCalcularVencimiento_, v3ChargesRedondear2_, v3ChargesConstruirDescripcion_, v3ChargesConstruirObservaciones_, v3ChargesTexto_, v3ChargesValidarFilasMismoPeriodo_, v3ChargesValidarRangoEscritoPeriodo_, v3ChargesFormatearSheet_, v3ChargesOrdenarSheetOperativa_, v3ChargesAuditar_.
+- L?nea 350 a 354: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 355 a 445: funci?n `v3ChargesCargarAlumnos_`; arranque l?gico en firstCodeLine=356; ejecuta flujo con llamadas a: v3ChargesGetSheet_, v3ChargesHeaderIndex_, v3ChargesFindColumn_, v3ChargesFilaVacia_, v3ChargesTexto_, v3ChargesNormalizarGrado_, v3ChargesExtraerApellidosDesdeNombre_, v3ChargesGradeRank_, v3ChargesAlumnoActivo_, v3ChargesConstruirSiblingKey_.
+  - fase inicial (355-384): v3ChargesGetSheet_, v3ChargesHeaderIndex_, v3ChargesFindColumn_.
+  - fase media (385-414): v3ChargesFilaVacia_, v3ChargesTexto_, v3ChargesNormalizarGrado_.
+  - fase final (415-445): v3ChargesExtraerApellidosDesdeNombre_, v3ChargesGradeRank_, v3ChargesAlumnoActivo_, v3ChargesConstruirSiblingKey_.
+- L?nea 446 a 446: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 447 a 510: funci?n `v3ChargesCargarReglas_`; arranque l?gico en firstCodeLine=448; ejecuta flujo con llamadas a: v3ChargesGetSheet_, v3ChargesHeaderIndex_, v3ChargesFindColumn_, v3ChargesFilaVacia_, v3ChargesTexto_, v3ChargesNormalizarGrado_, v3ChargesNumero_.
+  - fase inicial (447-467): v3ChargesGetSheet_, v3ChargesHeaderIndex_.
+  - fase media (468-488): v3ChargesFindColumn_, v3ChargesFilaVacia_.
+  - fase final (489-510): v3ChargesTexto_, v3ChargesNormalizarGrado_, v3ChargesNumero_.
+- L?nea 511 a 515: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 516 a 540: funci?n `v3ChargesConstruirFamiliasActivas_`; arranque l?gico en firstCodeLine=517; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 541 a 541: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 542 a 559: funci?n `v3ChargesConstruirElegiblesDescuento_`; arranque l?gico en firstCodeLine=543; ejecuta flujo con llamadas a: v3ChargesTexto_.
+- L?nea 560 a 560: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 561 a 600: funci?n `v3ChargesCalcularDescuentoRegla_`; arranque l?gico en firstCodeLine=562; ejecuta flujo con llamadas a: v3ChargesEsMensualidad_, v3ChargesNumero_, v3ChargesNorm_, v3ChargesRedondear2_.
+- L?nea 601 a 605: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 606 a 611: funci?n `v3ChargesReglaActiva_`; arranque l?gico en firstCodeLine=607; ejecuta flujo con llamadas a: v3ChargesNorm_.
+- L?nea 612 a 612: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 613 a 637: funci?n `v3ChargesReglaAplicaPeriodo_`; arranque l?gico en firstCodeLine=614; ejecuta flujo con llamadas a: v3ChargesReglaActiva_, v3ChargesNorm_.
+- L?nea 638 a 638: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 639 a 647: funci?n `v3ChargesAlumnoAplicaRegla_`; arranque l?gico en firstCodeLine=640; ejecuta flujo con llamadas a: v3ChargesNormalizarGrado_.
+- L?nea 648 a 648: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 649 a 652: funci?n `v3ChargesAlumnoActivo_`; arranque l?gico en firstCodeLine=650; ejecuta flujo con llamadas a: v3ChargesNorm_.
+- L?nea 653 a 657: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 658 a 664: funci?n `v3ChargesKeyBase_`; arranque l?gico en firstCodeLine=659; ejecuta flujo con llamadas a: v3ChargesTexto_, v3ChargesNormalizarPeriodo_, v3ChargesNorm_.
+- L?nea 665 a 665: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 666 a 671: funci?n `v3ChargesGenerarCargoId_`; arranque l?gico en firstCodeLine=667; ejecuta flujo con llamadas a: v3ChargesNormalizarPeriodo_, v3ChargesTexto_, v3ChargesSanitizarConcepto_.
+- L?nea 672 a 672: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 673 a 679: funci?n `v3ChargesConstruirDescripcion_`; arranque l?gico en firstCodeLine=674; ejecuta flujo con llamadas a: v3ChargesTexto_.
+- L?nea 680 a 680: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 681 a 701: funci?n `v3ChargesConstruirObservaciones_`; arranque l?gico en firstCodeLine=682; ejecuta flujo con llamadas a: v3ChargesEsMensualidad_.
+- L?nea 702 a 702: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 703 a 716: funci?n `v3ChargesCalcularVencimiento_`; arranque l?gico en firstCodeLine=704; ejecuta flujo con llamadas a: v3ChargesNormalizarPeriodo_.
+- L?nea 717 a 717: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 718 a 741: funci?n `v3ChargesLeerIndexCargosExistentes_`; arranque l?gico en firstCodeLine=719; ejecuta flujo con llamadas a: v3ChargesHeaderIndex_, v3ChargesFindColumn_, v3ChargesFilaVacia_, v3ChargesKeyBase_.
+- L?nea 742 a 742: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 743 a 762: funci?n `v3ChargesLeerIndexCargoIdsExistentes_`; arranque l?gico en firstCodeLine=744; ejecuta flujo con llamadas a: v3ChargesHeaderIndex_, v3ChargesFindColumn_, v3ChargesFilaVacia_, v3ChargesTexto_.
+- L?nea 763 a 763: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 764 a 773: funci?n `v3ChargesBuildOptions_`; arranque l?gico en firstCodeLine=765; ejecuta flujo con llamadas a: v3ChargesResolverModo_, v3ChargesNormalizarPeriodo_.
+- L?nea 774 a 774: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 775 a 779: funci?n `v3ChargesResolverModo_`; arranque l?gico en firstCodeLine=776; ejecuta flujo con llamadas a: v3ChargesNorm_.
+- L?nea 780 a 780: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 781 a 787: funci?n `v3ChargesValidarPeriodoObjetivo_`; arranque l?gico en firstCodeLine=782; ejecuta flujo con llamadas a: v3ChargesNormalizarPeriodo_.
+- L?nea 788 a 788: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 789 a 816: funci?n `v3ChargesValidarNoReabrirMesConsolidado_`; arranque l?gico en firstCodeLine=790; ejecuta flujo con llamadas a: v3ChargesHeaderIndex_, v3ChargesFindColumn_, v3ChargesTexto_, v3ChargesNormalizarPeriodo_.
+- L?nea 817 a 817: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 818 a 825: funci?n `v3ChargesValidarFilasMismoPeriodo_`; arranque l?gico en firstCodeLine=819; ejecuta flujo con llamadas a: v3ChargesNormalizarPeriodo_.
+- L?nea 826 a 826: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 827 a 841: funci?n `v3ChargesValidarRangoEscritoPeriodo_`; arranque l?gico en firstCodeLine=828; ejecuta flujo con llamadas a: v3ChargesNormalizarPeriodo_.
+- L?nea 842 a 842: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 843 a 860: funci?n `v3ChargesOrdenarSheetOperativa_`; arranque l?gico en firstCodeLine=844; ejecuta flujo con llamadas a: v3ChargesHeaderIndex_, v3ChargesFindColumn_.
+- L?nea 861 a 865: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 866 a 893: funci?n `v3ChargesAsegurarHeaders_`; arranque l?gico en firstCodeLine=867; ejecuta flujo con llamadas a: v3ChargesHeaderIndex_, v3ChargesNorm_.
+- L?nea 894 a 894: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 895 a 913: funci?n `v3ChargesFormatearSheet_`; arranque l?gico en firstCodeLine=896; ejecuta flujo con llamadas a: v3ChargesHeaderIndex_.
+- L?nea 914 a 914: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 915 a 928: funci?n `v3ChargesGetSheet_`; arranque l?gico en firstCodeLine=916; ejecuta flujo con llamadas a: obtenerHojaPorNombre, asegurarHoja.
+- L?nea 929 a 933: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 934 a 946: funci?n `v3ChargesNormalizarPeriodo_`; arranque l?gico en firstCodeLine=935; ejecuta flujo con llamadas a: v3ChargesTexto_.
+- L?nea 947 a 947: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 948 a 994: funci?n `v3ChargesNormalizarGrado_`; arranque l?gico en firstCodeLine=949; ejecuta flujo con llamadas a: v3ChargesNorm_, v3ChargesTexto_.
+- L?nea 995 a 995: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 996 a 999: funci?n `v3ChargesGradeRank_`; arranque l?gico en firstCodeLine=997; ejecuta flujo con llamadas a: v3ChargesNormalizarGrado_.
+- L?nea 1000 a 1000: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1001 a 1004: funci?n `v3ChargesEsMensualidad_`; arranque l?gico en firstCodeLine=1002; ejecuta flujo con llamadas a: v3ChargesNorm_.
+- L?nea 1005 a 1005: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1006 a 1013: funci?n `v3ChargesSanitizarConcepto_`; arranque l?gico en firstCodeLine=1007; ejecuta flujo con llamadas a: v3ChargesTexto_.
+- L?nea 1014 a 1018: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1019 a 1025: funci?n `v3ChargesHeaderIndex_`; arranque l?gico en firstCodeLine=1020; ejecuta flujo con llamadas a: v3ChargesNorm_.
+- L?nea 1026 a 1026: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1027 a 1033: funci?n `v3ChargesFindColumn_`; arranque l?gico en firstCodeLine=1028; ejecuta flujo con llamadas a: v3ChargesNorm_.
+- L?nea 1034 a 1034: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1035 a 1040: funci?n `v3ChargesTexto_`; arranque l?gico en firstCodeLine=1036; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1041 a 1041: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1042 a 1050: funci?n `v3ChargesNorm_`; arranque l?gico en firstCodeLine=1043; ejecuta flujo con llamadas a: v3ChargesTexto_.
+- L?nea 1051 a 1051: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1052 a 1063: funci?n `v3ChargesNumero_`; arranque l?gico en firstCodeLine=1053; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+- L?nea 1064 a 1064: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1065 a 1077: funci?n `v3ChargesFecha_`; arranque l?gico en firstCodeLine=1066; ejecuta flujo con llamadas a: normalizarFecha.
+- L?nea 1078 a 1078: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1079 a 1085: funci?n `v3ChargesHoy_`; arranque l?gico en firstCodeLine=1080; ejecuta flujo con llamadas a: hoySinHora.
+- L?nea 1086 a 1086: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1087 a 1089: funci?n `v3ChargesRedondear2_`; arranque l?gico en firstCodeLine=1088; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1090 a 1090: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1091 a 1095: funci?n `v3ChargesFilaVacia_`; arranque l?gico en firstCodeLine=1092; ejecuta flujo con llamadas a: v3ChargesTexto_.
+- L?nea 1096 a 1096: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1097 a 1101: funci?n `v3ChargesAuditar_`; arranque l?gico en firstCodeLine=1098; ejecuta flujo con llamadas a: registrarAuditoria.
+- L?nea 1102 a 1106: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1107 a 1130: funci?n `v3ChargesConstruirSiblingKey_`; arranque l?gico en firstCodeLine=1108; ejecuta flujo con llamadas a: v3ChargesTexto_, v3ChargesNorm_.
+- L?nea 1131 a 1131: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1132 a 1147: funci?n `v3ChargesExtraerApellidosDesdeNombre_`; arranque l?gico en firstCodeLine=1133; ejecuta flujo con llamadas a: v3ChargesTexto_.
+
+# 08_V3_Reversals.gs.js
+
+- Prop?sito probable: calcular, generar, actualizar, procesar sobre mora, cargo, periodo, fecha.
+- Se?ales usadas: funciones v3ReversalsPrevisualizarMora, v3ReversalsAplicarMora, v3ReversalsPrevisualizarRegularizacionPagoReportado, v3ReversalsRegularizarPagoReportado, v3ReversalsPrevisualizarRegularizacionPagosPendientes....
+- Flujo observado por llamadas: v3ReversalsProcesarMora_, v3ReversalsProcesarRegularizacionPagoWrapper_, v3ReversalsProcesarRegularizacionMasiva_, v3ReversalsResolverFechaVencimientoSegunRegla_, v3ReversalsObtenerFechaLimiteSinRecargo_, v3ReversalsObtenerFechaInicioMora_....
+
+- L?nea 1 a 111: pre?mbulo de constantes/configuraci?n; define o prepara: V3_REVERSALS_VERSION, V3_REVERSALS_EPSILON, V3_REVERSALS_MORA_GRACIA_MIN_DIAS, V3_REVERSALS_RECARGO_PORCENTAJE_DEFAULT, V3_REVERSALS_SHEET_CARGOS, V3_REVERSALS_SHEET_APPS, V3_REVERSALS_SHEET_REGLAS, V3_REVERSALS_SHEET_PAYMENTS, V3_REVERSALS_CARGOS_HEADERS, V3_REVERSALS_APPS_HEADERS, V3_REVERSALS_RULE_HEADERS, V3_REVERSALS_PAYMENTS_EXPECTED_HEADERS.
+- L?nea 112 a 114: funci?n `v3ReversalsPrevisualizarMora`; arranque l?gico en firstCodeLine=113; ejecuta flujo con llamadas a: v3ReversalsProcesarMora_.
+- L?nea 115 a 115: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 116 a 118: funci?n `v3ReversalsAplicarMora`; arranque l?gico en firstCodeLine=117; ejecuta flujo con llamadas a: v3ReversalsProcesarMora_.
+- L?nea 119 a 119: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 120 a 122: funci?n `v3ReversalsPrevisualizarRegularizacionPagoReportado`; arranque l?gico en firstCodeLine=121; ejecuta flujo con llamadas a: v3ReversalsProcesarRegularizacionPagoWrapper_.
+- L?nea 123 a 123: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 124 a 126: funci?n `v3ReversalsRegularizarPagoReportado`; arranque l?gico en firstCodeLine=125; ejecuta flujo con llamadas a: v3ReversalsProcesarRegularizacionPagoWrapper_.
+- L?nea 127 a 127: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 128 a 130: funci?n `v3ReversalsPrevisualizarRegularizacionPagosPendientes`; arranque l?gico en firstCodeLine=129; ejecuta flujo con llamadas a: v3ReversalsProcesarRegularizacionMasiva_.
+- L?nea 131 a 131: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 132 a 134: funci?n `v3ReversalsRegularizarPagosPendientes`; arranque l?gico en firstCodeLine=133; ejecuta flujo con llamadas a: v3ReversalsProcesarRegularizacionMasiva_.
+- L?nea 135 a 135: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 136 a 162: funci?n `v3ReversalsSelfTestFechasMora`; arranque l?gico en firstCodeLine=137; ejecuta flujo con llamadas a: v3ReversalsResolverFechaVencimientoSegunRegla_, v3ReversalsObtenerFechaLimiteSinRecargo_, v3ReversalsObtenerFechaInicioMora_.
+- L?nea 163 a 163: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 164 a 280: funci?n `v3ReversalsProcesarMora_`; arranque l?gico en firstCodeLine=165; ejecuta flujo con llamadas a: v3ReversalsGenerarId_, v3ReversalsFecha_, v3ReversalsHoy_, v3ReversalsNormalizarPeriodo_, v3ReversalsConstruirContexto_, v3ReversalsNumero_, v3ReversalsEstadoCargoIgnorado_, especiales, v3ReversalsConceptoAplicaRecargoFinanciero_, v3ReversalsResolverPoliticaRecargoOperativa_, v3ReversalsResolverFechaVencimientoSegunRegla_, v3ReversalsObtenerFechaLimiteSinRecargo_, v3ReversalsObtenerFechaInicioMora_, v3ReversalsCalcularRecargo_, v3ReversalsActualizarRecargoEnFila_, v3ReversalsAplicarFormatosCargos_, v3ReversalsRegistrarAuditoria_.
+  - fase inicial (164-202): v3ReversalsGenerarId_, v3ReversalsFecha_, v3ReversalsHoy_, v3ReversalsNormalizarPeriodo_, v3ReversalsConstruirContexto_.
+  - fase media (203-241): v3ReversalsNumero_, v3ReversalsEstadoCargoIgnorado_, especiales, v3ReversalsConceptoAplicaRecargoFinanciero_, v3ReversalsResolverPoliticaRecargoOperativa_, v3ReversalsResolverFechaVencimientoSegunRegla_.
+  - fase final (242-280): v3ReversalsObtenerFechaLimiteSinRecargo_, v3ReversalsObtenerFechaInicioMora_, v3ReversalsCalcularRecargo_, v3ReversalsActualizarRecargoEnFila_, v3ReversalsAplicarFormatosCargos_, v3ReversalsRegistrarAuditoria_.
+- L?nea 281 a 281: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 282 a 291: funci?n `v3ReversalsProcesarRegularizacionPagoWrapper_`; arranque l?gico en firstCodeLine=283; ejecuta flujo con llamadas a: v3ReversalsProcesarRegularizacionPagoCore_.
+- L?nea 292 a 292: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 293 a 443: funci?n `v3ReversalsProcesarRegularizacionPagoCore_`; arranque l?gico en firstCodeLine=294; ejecuta flujo con llamadas a: v3ReversalsTexto_, v3ReversalsGenerarId_, v3ReversalsConstruirContexto_, v3ReversalsEstadoIgnorado_, v3ReversalsNumero_, v3ReversalsResolverPoliticaRecargoOperativa_, v3ReversalsResolverFechaVencimientoSegunRegla_, v3ReversalsObtenerFechaLimiteSinRecargo_, v3ReversalsRedondear2_, v3ReversalsAppendObs_, v3ReversalsSetIfChanged_, v3ReversalsAplicarFormatosCargos_, v3ReversalsAplicarFormatosApps_, v3ReversalsActualizarPagoRegularizado_, v3ReversalsRegistrarAuditoria_.
+  - fase inicial (293-342): v3ReversalsTexto_, v3ReversalsGenerarId_, v3ReversalsConstruirContexto_, v3ReversalsEstadoIgnorado_, v3ReversalsNumero_.
+  - fase media (343-392): v3ReversalsResolverPoliticaRecargoOperativa_, v3ReversalsResolverFechaVencimientoSegunRegla_, v3ReversalsObtenerFechaLimiteSinRecargo_, v3ReversalsRedondear2_, v3ReversalsAppendObs_.
+  - fase final (393-443): v3ReversalsSetIfChanged_, v3ReversalsAplicarFormatosCargos_, v3ReversalsAplicarFormatosApps_, v3ReversalsActualizarPagoRegularizado_, v3ReversalsRegistrarAuditoria_.
+- L?nea 444 a 444: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 445 a 528: funci?n `v3ReversalsProcesarRegularizacionMasiva_`; arranque l?gico en firstCodeLine=446; ejecuta flujo con llamadas a: v3ReversalsGenerarId_, v3ReversalsNormalizarPeriodo_, v3ReversalsNumero_, v3ReversalsConstruirContexto_, v3ReversalsProcesarRegularizacionPagoCore_, v3ReversalsRegistrarAuditoria_.
+  - fase inicial (445-472): v3ReversalsGenerarId_, v3ReversalsNormalizarPeriodo_.
+  - fase media (473-500): v3ReversalsNumero_, v3ReversalsConstruirContexto_.
+  - fase final (501-528): v3ReversalsProcesarRegularizacionPagoCore_, v3ReversalsRegistrarAuditoria_.
+- L?nea 529 a 529: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 530 a 694: funci?n `v3ReversalsConstruirContexto_`; arranque l?gico en firstCodeLine=531; ejecuta flujo con llamadas a: v3ReversalsAsegurarHoja_, v3ReversalsAsegurarHeaders_, v3ReversalsBuildHeaderIndex_, v3ReversalsLeerHeaders_, v3ReversalsConstruirCargoReferenceId_, v3ReversalsNumero_, v3ReversalsGetCellByHeader_, v3ReversalsTexto_, v3ReversalsFecha_.
+  - fase inicial (530-584): v3ReversalsAsegurarHoja_, v3ReversalsAsegurarHeaders_, v3ReversalsBuildHeaderIndex_.
+  - fase media (585-639): v3ReversalsLeerHeaders_, v3ReversalsConstruirCargoReferenceId_, v3ReversalsNumero_.
+  - fase final (640-694): v3ReversalsGetCellByHeader_, v3ReversalsTexto_, v3ReversalsFecha_.
+- L?nea 695 a 695: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 696 a 732: funci?n `v3ReversalsResolverReglaParaCargo_`; arranque l?gico en firstCodeLine=697; ejecuta flujo con llamadas a: v3ReversalsParsePeriodo_, v3ReversalsTexto_.
+- L?nea 733 a 733: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 734 a 759: funci?n `v3ReversalsConstruirReglaFallbackObligatoria_`; arranque l?gico en firstCodeLine=735; ejecuta flujo con llamadas a: v3ReversalsConceptoAplicaRecargoFinanciero_, v3ReversalsFecha_, v3ReversalsTexto_.
+- L?nea 760 a 760: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 761 a 776: funci?n `v3ReversalsResolverPoliticaRecargoOperativa_`; arranque l?gico en firstCodeLine=762; ejecuta flujo con llamadas a: v3ReversalsResolverReglaParaCargo_, v3ReversalsConceptoAplicaRecargoFinanciero_, v3ReversalsNumero_, v3ReversalsConstruirReglaFallbackObligatoria_.
+- L?nea 777 a 777: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 778 a 793: funci?n `v3ReversalsCalcularRecargo_`; arranque l?gico en firstCodeLine=779; ejecuta flujo con llamadas a: v3ReversalsNumero_, v3ReversalsConceptoAplicaRecargoFinanciero_, v3ReversalsTexto_, v3ReversalsRedondear2_.
+- L?nea 794 a 794: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 795 a 807: funci?n `v3ReversalsConceptoAplicaRecargoFinanciero_`; arranque l?gico en firstCodeLine=796; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 808 a 808: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 809 a 811: funci?n `v3ReversalsUltimoDiaMes_`; arranque l?gico en firstCodeLine=810; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 812 a 812: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 813 a 815: funci?n `v3ReversalsFechaNoon_`; arranque l?gico en firstCodeLine=814; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 816 a 816: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 817 a 826: funci?n `v3ReversalsParsePeriodo_`; arranque l?gico en firstCodeLine=818; ejecuta flujo con llamadas a: v3ReversalsNormalizarPeriodo_.
+- L?nea 827 a 827: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 828 a 833: funci?n `v3ReversalsNormalizarPeriodo_`; arranque l?gico en firstCodeLine=829; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 834 a 834: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 835 a 849: funci?n `v3ReversalsResolverFechaVencimientoSegunRegla_`; arranque l?gico en firstCodeLine=836; ejecuta flujo con llamadas a: v3ReversalsParsePeriodo_, v3ReversalsNumero_, v3ReversalsUltimoDiaMes_, v3ReversalsFechaNoon_.
+- L?nea 850 a 850: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 851 a 864: funci?n `v3ReversalsObtenerFechaLimiteSinRecargo_`; arranque l?gico en firstCodeLine=852; ejecuta flujo con llamadas a: v3ReversalsResolverFechaVencimientoSegunRegla_, dias, v3ReversalsNumero_.
+- L?nea 865 a 865: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 866 a 874: funci?n `v3ReversalsObtenerFechaInicioMora_`; arranque l?gico en firstCodeLine=867; ejecuta flujo con llamadas a: v3ReversalsObtenerFechaLimiteSinRecargo_.
+- L?nea 875 a 875: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 876 a 879: funci?n `v3ReversalsEstadoIgnorado_`; arranque l?gico en firstCodeLine=877; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 880 a 880: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 881 a 884: funci?n `v3ReversalsEstadoCargoIgnorado_`; arranque l?gico en firstCodeLine=882; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 885 a 885: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 886 a 893: funci?n `v3ReversalsCalcularMontoAplicado_`; arranque l?gico en firstCodeLine=887; ejecuta flujo con llamadas a: v3ReversalsEstadoIgnorado_, v3ReversalsRedondear2_.
+- L?nea 894 a 894: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 895 a 903: funci?n `v3ReversalsResolverEstadoCargo_`; arranque l?gico en firstCodeLine=896; ejecuta flujo con llamadas a: v3ReversalsNumero_.
+- L?nea 904 a 904: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 905 a 918: funci?n `v3ReversalsActualizarPagoRegularizado_`; arranque l?gico en firstCodeLine=906; ejecuta flujo con llamadas a: v3ReversalsAppendObs_, v3ReversalsSetIfChanged_.
+- L?nea 919 a 919: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 920 a 934: funci?n `v3ReversalsAplicarFormatosApps_`; arranque l?gico en firstCodeLine=921; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 935 a 935: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 936 a 950: funci?n `v3ReversalsAplicarFormatosCargos_`; arranque l?gico en firstCodeLine=937; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 951 a 951: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 952 a 976: funci?n `v3ReversalsAsegurarHeaders_`; arranque l?gico en firstCodeLine=953; ejecuta flujo con llamadas a: v3ReversalsLeerHeaders_, v3ReversalsBuildHeaderIndex_, v3ReversalsTexto_.
+- L?nea 977 a 977: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 978 a 984: funci?n `v3ReversalsLeerHeaders_`; arranque l?gico en firstCodeLine=979; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 985 a 985: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 986 a 993: funci?n `v3ReversalsBuildHeaderIndex_`; arranque l?gico en firstCodeLine=987; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 994 a 994: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 995 a 999: funci?n `v3ReversalsGetCellByHeader_`; arranque l?gico en firstCodeLine=996; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1000 a 1000: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1001 a 1005: funci?n `v3ReversalsConstruirCargoReferenceId_`; arranque l?gico en firstCodeLine=1002; ejecuta flujo con llamadas a: v3ReversalsTexto_, v3ReversalsGetCellByHeader_.
+- L?nea 1006 a 1006: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1007 a 1017: funci?n `v3ReversalsSetIfChanged_`; arranque l?gico en firstCodeLine=1008; ejecuta flujo con llamadas a: v3ReversalsComparable_.
+- L?nea 1018 a 1018: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1019 a 1032: funci?n `v3ReversalsComparable_`; arranque l?gico en firstCodeLine=1020; ejecuta flujo con llamadas a: v3ReversalsFecha_, v3ReversalsRedondear2_, v3ReversalsTexto_, v3ReversalsNumero_.
+- L?nea 1033 a 1033: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1034 a 1036: funci?n `v3ReversalsRedondear2_`; arranque l?gico en firstCodeLine=1035; ejecuta flujo con llamadas a: v3ReversalsNumero_.
+- L?nea 1037 a 1037: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1038 a 1047: funci?n `v3ReversalsAppendObs_`; arranque l?gico en firstCodeLine=1039; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 1048 a 1055: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1056 a 1075: funci?n `v3ReversalsRemoveRecargoDeObs_`; arranque l?gico en firstCodeLine=1057; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 1076 a 1076: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1077 a 1083: funci?n `v3ReversalsUsuarioActivo_`; arranque l?gico en firstCodeLine=1078; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1084 a 1084: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1085 a 1091: funci?n `v3ReversalsAsegurarHoja_`; arranque l?gico en firstCodeLine=1086; ejecuta flujo con llamadas a: asegurarHoja.
+- L?nea 1092 a 1092: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1093 a 1099: funci?n `v3ReversalsGenerarId_`; arranque l?gico en firstCodeLine=1094; ejecuta flujo con llamadas a: generarId.
+- L?nea 1100 a 1100: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1101 a 1113: funci?n `v3ReversalsRegistrarAuditoria_`; arranque l?gico en firstCodeLine=1102; ejecuta flujo con llamadas a: registrarAuditoria, v3ReversalsUsuarioActivo_.
+- L?nea 1114 a 1114: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1115 a 1121: funci?n `v3ReversalsTexto_`; arranque l?gico en firstCodeLine=1116; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1122 a 1122: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1123 a 1135: funci?n `v3ReversalsNumero_`; arranque l?gico en firstCodeLine=1124; ejecuta flujo con llamadas a: convertirANumeroSeguro, v3ReversalsTexto_.
+- L?nea 1136 a 1136: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1137 a 1169: funci?n `v3ReversalsFecha_`; arranque l?gico en firstCodeLine=1138; ejecuta flujo con llamadas a: normalizarFecha, v3ReversalsTexto_.
+- L?nea 1170 a 1170: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1171 a 1178: funci?n `v3ReversalsHoy_`; arranque l?gico en firstCodeLine=1172; ejecuta flujo con llamadas a: hoySinHora.
+- L?nea 1179 a 1190: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1191 a 1194: funci?n `v3ReversalsInsertarFilaRecargo_`; arranque l?gico en firstCodeLine=1192; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1195 a 1208: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1209 a 1276: funci?n `v3ReversalsActualizarRecargoEnFila_`; arranque l?gico en firstCodeLine=1210; ejecuta flujo con llamadas a: v3ReversalsNumero_, v3ReversalsGetCellByHeader_, v3ReversalsRedondear2_, a, v3ReversalsRemoveRecargoDeObs_, v3ReversalsAppendObs_, saldado.
+  - fase inicial (1209-1230): v3ReversalsNumero_, v3ReversalsGetCellByHeader_.
+  - fase media (1231-1253): v3ReversalsRedondear2_, a.
+  - fase final (1254-1276): v3ReversalsRemoveRecargoDeObs_, v3ReversalsAppendObs_, saldado.
+- L?nea 1277 a 1284: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1285 a 1300: funci?n `v3ReversalsBuscarCargoRecargo_`; arranque l?gico en firstCodeLine=1286; ejecuta flujo con llamadas a: v3ReversalsTexto_, v3ReversalsEstadoCargoIgnorado_, v3ReversalsExtraerOrigenCargoId_.
+- L?nea 1301 a 1304: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1305 a 1309: funci?n `v3ReversalsExtraerOrigenCargoId_`; arranque l?gico en firstCodeLine=1306; ejecuta flujo con llamadas a: v3ReversalsTexto_.
+- L?nea 1310 a 1315: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1316 a 1318: funci?n `v3ReversalsRegularizarRecargosPostAplicacion`; arranque l?gico en firstCodeLine=1317; ejecuta flujo con llamadas a: v3ReversalsProcesarRegularizacionMasiva_.
+
+# 09_V3_Statements.gs.js
+
+- Prop?sito probable: generar, registrar sobre mora, periodo, fecha.
+- Se?ales usadas: funciones v3StatementsNormalizarPeriodo_, v3StatementsPeriodoSortKey_, v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_, v3StatementsResolverPeriodoAplicacion_....
+- Flujo observado por llamadas: valorSeguroTexto, v3StatementsNormalizarPeriodo_, v3StatementsPeriodoSortKey_, generarId, v3StatementsConstruirEstadoCuentaDetalle_, v3StatementsConstruirEstadoCuentaResumen_....
+
+- L?nea 1 a 61: pre?mbulo de constantes/configuraci?n; define o prepara: V3_STATEMENTS_VERSION, V3_STATEMENTS_EPSILON, V3_STATEMENTS_MORA_UMBRAL_DIAS, V3_STATEMENTS_DETALLE_HEADERS, V3_STATEMENTS_RESUMEN_HEADERS, V3_STATEMENTS_IGNORE_APP_STATES.
+- L?nea 62 a 77: funci?n `v3StatementsNormalizarPeriodo_`; arranque l?gico en firstCodeLine=63; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 78 a 78: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 79 a 94: funci?n `v3StatementsPeriodoSortKey_`; arranque l?gico en firstCodeLine=80; ejecuta flujo con llamadas a: v3StatementsNormalizarPeriodo_.
+- L?nea 95 a 95: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 96 a 100: funci?n `v3StatementsMovimientoPerteneceAPeriodo_`; arranque l?gico en firstCodeLine=97; ejecuta flujo con llamadas a: v3StatementsNormalizarPeriodo_.
+- L?nea 101 a 101: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 102 a 107: funci?n `v3StatementsMovimientoEsAnteriorAPeriodo_`; arranque l?gico en firstCodeLine=103; ejecuta flujo con llamadas a: v3StatementsPeriodoSortKey_.
+- L?nea 108 a 108: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 109 a 111: funci?n `v3StatementsResolverPeriodoAplicacion_`; arranque l?gico en firstCodeLine=110; ejecuta flujo con llamadas a: v3StatementsNormalizarPeriodo_.
+- L?nea 112 a 122: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 123 a 157: funci?n `v3StatementsConstruirEstadosCuenta`; arranque l?gico en firstCodeLine=124; ejecuta flujo con llamadas a: generarId, v3StatementsConstruirEstadoCuentaDetalle_, v3StatementsConstruirEstadoCuentaResumen_, registrarAuditoria.
+- L?nea 158 a 165: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 166 a 193: funci?n `v3StatementsConstruirEstadoCuentaDetalle`; arranque l?gico en firstCodeLine=167; ejecuta flujo con llamadas a: generarId, v3StatementsConstruirEstadoCuentaDetalle_, registrarAuditoria.
+- L?nea 194 a 201: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 202 a 229: funci?n `v3StatementsConstruirEstadoCuentaResumen`; arranque l?gico en firstCodeLine=203; ejecuta flujo con llamadas a: generarId, v3StatementsConstruirEstadoCuentaResumen_, registrarAuditoria.
+- L?nea 230 a 234: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 235 a 283: funci?n `v3StatementsConstruirEstadoCuentaDetalle_`; arranque l?gico en firstCodeLine=236; ejecuta flujo con llamadas a: v3StatementsConstruirContexto_, v3StatementsAsegurarHojaDetalle_, v3StatementsBuildHeaderIndex_, v3StatementsLeerHeaders_, v3StatementsEvaluarMora_, v3StatementsConstruirDetalleAlumno_, v3StatementsConstruirFilaDesdeObjeto_, v3StatementsUpsertScopeRows_, hoySinHora, v3StatementsAplicarFormatosDetalle_.
+- L?nea 284 a 284: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 285 a 350: funci?n `v3StatementsConstruirDetalleAlumno_`; arranque l?gico en firstCodeLine=286; ejecuta flujo con llamadas a: v3StatementsMovimientoPerteneceAPeriodo_, generarId, hoySinHora, v3StatementsRedondear2_, v3StatementsResolverEstadoMovimiento_, v3StatementsMovimientoEsAnteriorAPeriodo_.
+  - fase inicial (285-306): v3StatementsMovimientoPerteneceAPeriodo_, generarId.
+  - fase media (307-328): hoySinHora, v3StatementsRedondear2_.
+  - fase final (329-350): v3StatementsResolverEstadoMovimiento_, v3StatementsMovimientoEsAnteriorAPeriodo_.
+- L?nea 351 a 355: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 356 a 396: funci?n `v3StatementsConstruirEstadoCuentaResumen_`; arranque l?gico en firstCodeLine=357; ejecuta flujo con llamadas a: v3StatementsConstruirContexto_, v3StatementsAsegurarHojaResumen_, v3StatementsBuildHeaderIndex_, v3StatementsLeerHeaders_, v3StatementsConstruirResumenAlumno_, v3StatementsConstruirFilaDesdeObjeto_, v3StatementsUpsertScopeRows_, hoySinHora, v3StatementsAplicarFormatosResumen_.
+- L?nea 397 a 397: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 398 a 465: funci?n `v3StatementsConstruirResumenAlumno_`; arranque l?gico en firstCodeLine=399; ejecuta flujo con llamadas a: v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_, v3StatementsEvaluarMora_, v3StatementsResolverEstadoCuenta_, hoySinHora, v3StatementsEmailSeguro_, v3StatementsRedondear2_.
+  - fase inicial (398-419): v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_.
+  - fase media (420-442): v3StatementsEvaluarMora_, v3StatementsResolverEstadoCuenta_.
+  - fase final (443-465): hoySinHora, v3StatementsEmailSeguro_, v3StatementsRedondear2_.
+- L?nea 466 a 466: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 467 a 486: funci?n `v3StatementsResolverEstadoCuenta_`; arranque l?gico en firstCodeLine=468; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+- L?nea 487 a 487: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 488 a 492: funci?n `v3StatementsEmailSeguro_`; arranque l?gico en firstCodeLine=489; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 493 a 493: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 494 a 561: funci?n `v3StatementsEvaluarMora_`; arranque l?gico en firstCodeLine=495; ejecuta flujo con llamadas a: hoySinHora, convertirANumeroSeguro, valorSeguroTexto, v3StatementsPeriodoMensual_, v3StatementsImpagoCon60Dias_, v3StatementsResolverPeriodoMoroso_, impagos.
+  - fase inicial (494-515): hoySinHora, convertirANumeroSeguro.
+  - fase media (516-538): valorSeguroTexto, v3StatementsPeriodoMensual_.
+  - fase final (539-561): v3StatementsImpagoCon60Dias_, v3StatementsResolverPeriodoMoroso_, impagos.
+- L?nea 562 a 562: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 563 a 566: funci?n `v3StatementsPeriodoMensual_`; arranque l?gico en firstCodeLine=564; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 567 a 567: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 568 a 575: funci?n `v3StatementsImpagoCon60Dias_`; arranque l?gico en firstCodeLine=569; ejecuta flujo con llamadas a: normalizarFecha.
+- L?nea 576 a 576: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 577 a 587: funci?n `v3StatementsResolverPeriodoMoroso_`; arranque l?gico en firstCodeLine=578; ejecuta flujo con llamadas a: valorSeguroTexto, normalizarFecha.
+- L?nea 588 a 592: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 593 a 794: funci?n `v3StatementsConstruirContexto_`; arranque l?gico en firstCodeLine=594; ejecuta flujo con llamadas a: v3StatementsNormalizarPeriodo_, valorSeguroTexto, asegurarHoja, v3StatementsBuildHeaderIndex_, v3StatementsLeerHeaders_, v3StatementsGetCellByHeader_, v3StatementsEnsureStudent_, convertirANumeroSeguro, v3StatementsRedondear2_, normalizarFecha, hoySinHora, v3StatementsDebeExcluirAplicacion_, v3StatementsResolverPeriodoAplicacion_.
+  - fase inicial (593-659): v3StatementsNormalizarPeriodo_, valorSeguroTexto, asegurarHoja, v3StatementsBuildHeaderIndex_.
+  - fase media (660-726): v3StatementsLeerHeaders_, v3StatementsGetCellByHeader_, v3StatementsEnsureStudent_, convertirANumeroSeguro.
+  - fase final (727-794): v3StatementsRedondear2_, normalizarFecha, hoySinHora, v3StatementsDebeExcluirAplicacion_, v3StatementsResolverPeriodoAplicacion_.
+- L?nea 795 a 795: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 796 a 819: funci?n `v3StatementsEnsureStudent_`; arranque l?gico en firstCodeLine=797; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 820 a 820: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 821 a 831: funci?n `v3StatementsDebeExcluirAplicacion_`; arranque l?gico en firstCodeLine=822; ejecuta flujo con llamadas a: valorSeguroTexto, v3StatementsGetCellByHeader_.
+- L?nea 832 a 836: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 837 a 919: funci?n `v3StatementsUpsertScopeRows_`; arranque l?gico en firstCodeLine=838; ejecuta flujo con llamadas a: valorSeguroTexto, v3StatementsRowsDifferent_.
+  - fase inicial (837-863): sin llamadas clave asignables.
+  - fase media (864-891): valorSeguroTexto.
+  - fase final (892-919): v3StatementsRowsDifferent_.
+- L?nea 920 a 924: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 925 a 929: funci?n `v3StatementsAsegurarHojaDetalle_`; arranque l?gico en firstCodeLine=926; ejecuta flujo con llamadas a: asegurarHoja, v3StatementsAsegurarHeaders_.
+- L?nea 930 a 930: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 931 a 935: funci?n `v3StatementsAsegurarHojaResumen_`; arranque l?gico en firstCodeLine=932; ejecuta flujo con llamadas a: asegurarHoja, v3StatementsAsegurarHeaders_.
+- L?nea 936 a 936: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 937 a 961: funci?n `v3StatementsAsegurarHeaders_`; arranque l?gico en firstCodeLine=938; ejecuta flujo con llamadas a: v3StatementsLeerHeaders_, v3StatementsBuildHeaderIndex_, valorSeguroTexto.
+- L?nea 962 a 962: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 963 a 978: funci?n `v3StatementsAplicarFormatosDetalle_`; arranque l?gico en firstCodeLine=964; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 979 a 979: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 980 a 995: funci?n `v3StatementsAplicarFormatosResumen_`; arranque l?gico en firstCodeLine=981; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 996 a 1000: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1001 a 1007: funci?n `v3StatementsLeerHeaders_`; arranque l?gico en firstCodeLine=1002; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1008 a 1008: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1009 a 1016: funci?n `v3StatementsBuildHeaderIndex_`; arranque l?gico en firstCodeLine=1010; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1017 a 1017: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1018 a 1022: funci?n `v3StatementsGetCellByHeader_`; arranque l?gico en firstCodeLine=1019; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1023 a 1023: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1024 a 1034: funci?n `v3StatementsConstruirFilaDesdeObjeto_`; arranque l?gico en firstCodeLine=1025; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1035 a 1035: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1036 a 1044: funci?n `v3StatementsRowsDifferent_`; arranque l?gico en firstCodeLine=1037; ejecuta flujo con llamadas a: v3StatementsComparable_.
+- L?nea 1045 a 1045: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1046 a 1063: funci?n `v3StatementsComparable_`; arranque l?gico en firstCodeLine=1047; ejecuta flujo con llamadas a: normalizarFecha, v3StatementsRedondear2_, valorSeguroTexto, convertirANumeroSeguro.
+- L?nea 1064 a 1073: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1074 a 1095: funci?n `v3StatementsResolverEstadoMovimiento_`; arranque l?gico en firstCodeLine=1075; ejecuta flujo con llamadas a: valorSeguroTexto, vencido.
+- L?nea 1096 a 1096: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1097 a 1117: funci?n `v3StatementsCompararMovimientos_`; arranque l?gico en firstCodeLine=1100; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 1118 a 1118: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1119 a 1121: funci?n `v3StatementsRedondear2_`; arranque l?gico en firstCodeLine=1120; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+
+# 10_V3_PortalExport.gs.js
+
+- Prop?sito probable: generar, registrar sobre periodo, fecha.
+- Se?ales usadas: funciones v3PortalExportInicializarConfigBase, v3PortalExportGenerar, v3PortalExportGenerarPortalPadresExport, v3StatementsConstruirPortalPadresExport, v3PortalExportGenerarExportContabilidad....
+- Flujo observado por llamadas: generarId, v3PortalExportInicializarConfigBase_, registrarAuditoria, v3PortalExportGenerarPortalPadresExport_, v3PortalExportGenerarExportContabilidad_, v3PortalExportGenerarPortalPadresExport....
+
+- L?nea 1 a 71: pre?mbulo de constantes/configuraci?n; define o prepara: V3_PORTALEXPORT_VERSION, V3_PORTALEXPORT_EPSILON, V3_PORTALEXPORT_PORTAL_HEADERS, V3_PORTALEXPORT_CONTA_HEADERS, V3_PORTALEXPORT_CONFIG_KEYS, V3_PORTALEXPORT_CONFIG_DEFAULTS.
+- L?nea 72 a 99: funci?n `v3PortalExportInicializarConfigBase`; arranque l?gico en firstCodeLine=73; ejecuta flujo con llamadas a: generarId, v3PortalExportInicializarConfigBase_, registrarAuditoria.
+- L?nea 100 a 109: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 110 a 144: funci?n `v3PortalExportGenerar`; arranque l?gico en firstCodeLine=111; ejecuta flujo con llamadas a: generarId, v3PortalExportGenerarPortalPadresExport_, v3PortalExportGenerarExportContabilidad_, registrarAuditoria.
+- L?nea 145 a 152: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 153 a 180: funci?n `v3PortalExportGenerarPortalPadresExport`; arranque l?gico en firstCodeLine=154; ejecuta flujo con llamadas a: generarId, v3PortalExportGenerarPortalPadresExport_, registrarAuditoria.
+- L?nea 181 a 188: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 189 a 191: funci?n `v3StatementsConstruirPortalPadresExport`; arranque l?gico en firstCodeLine=190; ejecuta flujo con llamadas a: v3PortalExportGenerarPortalPadresExport.
+- L?nea 192 a 199: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 200 a 227: funci?n `v3PortalExportGenerarExportContabilidad`; arranque l?gico en firstCodeLine=201; ejecuta flujo con llamadas a: generarId, v3PortalExportGenerarExportContabilidad_, registrarAuditoria.
+- L?nea 228 a 232: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 233 a 304: funci?n `v3PortalExportGenerarPortalPadresExport_`; arranque l?gico en firstCodeLine=234; ejecuta flujo con llamadas a: v3PortalExportInicializarConfigBase_, v3PortalExportAsegurarOrigenEstados_, v3PortalExportConstruirScopeKey_, asegurarHoja, v3PortalExportAsegurarHojaPortal_, v3PortalExportBuildHeaderIndex_, v3PortalExportLeerHeaders_, v3PortalExportLeerResumenScope_, v3PortalExportConstruirPendientesPorAlumno_, leerConfig, v3PortalExportLimpiarValidacionesCuerpo_, v3PortalExportHash_, v3PortalExportConstruirFilaDesdeObjeto_, hoySinHora, v3PortalExportUpsertScopeRows_, v3PortalExportAplicarFormatosPortal_, valorSeguroTexto.
+  - fase inicial (233-256): v3PortalExportInicializarConfigBase_, v3PortalExportAsegurarOrigenEstados_, v3PortalExportConstruirScopeKey_, asegurarHoja, v3PortalExportAsegurarHojaPortal_.
+  - fase media (257-280): v3PortalExportBuildHeaderIndex_, v3PortalExportLeerHeaders_, v3PortalExportLeerResumenScope_, v3PortalExportConstruirPendientesPorAlumno_, leerConfig, v3PortalExportLimpiarValidacionesCuerpo_.
+  - fase final (281-304): v3PortalExportHash_, v3PortalExportConstruirFilaDesdeObjeto_, hoySinHora, v3PortalExportUpsertScopeRows_, v3PortalExportAplicarFormatosPortal_, valorSeguroTexto.
+- L?nea 305 a 309: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 310 a 390: funci?n `v3PortalExportGenerarExportContabilidad_`; arranque l?gico en firstCodeLine=311; ejecuta flujo con llamadas a: v3PortalExportInicializarConfigBase_, v3PortalExportAsegurarOrigenEstados_, v3PortalExportConstruirScopeKey_, asegurarHoja, v3PortalExportAsegurarHojaContabilidad_, v3PortalExportBuildHeaderIndex_, v3PortalExportLeerHeaders_, v3PortalExportLeerDetalleScope_, v3PortalExportLimpiarValidacionesCuerpo_, valorSeguroTexto, v3PortalExportResolverMontoContable_, v3PortalExportResolverCuentaContable_, leerConfig, v3PortalExportConstruirFilaDesdeObjeto_, hoySinHora, v3PortalExportUpsertScopeRows_, v3PortalExportAplicarFormatosContabilidad_.
+  - fase inicial (310-336): v3PortalExportInicializarConfigBase_, v3PortalExportAsegurarOrigenEstados_, v3PortalExportConstruirScopeKey_, asegurarHoja, v3PortalExportAsegurarHojaContabilidad_.
+  - fase media (337-363): v3PortalExportBuildHeaderIndex_, v3PortalExportLeerHeaders_, v3PortalExportLeerDetalleScope_, v3PortalExportLimpiarValidacionesCuerpo_, valorSeguroTexto, v3PortalExportResolverMontoContable_.
+  - fase final (364-390): v3PortalExportResolverCuentaContable_, leerConfig, v3PortalExportConstruirFilaDesdeObjeto_, hoySinHora, v3PortalExportUpsertScopeRows_, v3PortalExportAplicarFormatosContabilidad_.
+- L?nea 391 a 395: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 396 a 411: funci?n `v3PortalExportAsegurarOrigenEstados_`; arranque l?gico en firstCodeLine=397; ejecuta flujo con llamadas a: asegurarHoja, v3StatementsConstruirEstadosCuenta.
+- L?nea 412 a 416: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 417 a 452: funci?n `v3PortalExportLeerResumenScope_`; arranque l?gico en firstCodeLine=418; ejecuta flujo con llamadas a: valorSeguroTexto, v3PortalExportGetCellByHeader_, convertirANumeroSeguro.
+- L?nea 453 a 453: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 454 a 488: funci?n `v3PortalExportLeerDetalleScope_`; arranque l?gico en firstCodeLine=455; ejecuta flujo con llamadas a: valorSeguroTexto, v3PortalExportGetCellByHeader_, convertirANumeroSeguro.
+- L?nea 489 a 493: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 494 a 533: funci?n `v3PortalExportConstruirPendientesPorAlumno_`; arranque l?gico en firstCodeLine=495; ejecuta flujo con llamadas a: asegurarHoja, v3PortalExportBuildHeaderIndex_, v3PortalExportLeerHeaders_, valorSeguroTexto, v3PortalExportGetCellByHeader_, convertirANumeroSeguro, v3PortalExportPeriodoSortKey_.
+- L?nea 534 a 534: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 535 a 550: funci?n `v3PortalExportPeriodoSortKey_`; arranque l?gico en firstCodeLine=536; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 551 a 555: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 556 a 577: funci?n `v3PortalExportResolverMontoContable_`; arranque l?gico en firstCodeLine=557; ejecuta flujo con llamadas a: valorSeguroTexto, convertirANumeroSeguro.
+- L?nea 578 a 578: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 579 a 613: funci?n `v3PortalExportResolverCuentaContable_`; arranque l?gico en firstCodeLine=580; ejecuta flujo con llamadas a: valorSeguroTexto, v3PortalExportNormalizarClaveConcepto_, leerConfig.
+- L?nea 614 a 614: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 615 a 622: funci?n `v3PortalExportNormalizarClaveConcepto_`; arranque l?gico en firstCodeLine=616; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 623 a 627: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 628 a 707: funci?n `v3PortalExportUpsertScopeRows_`; arranque l?gico en firstCodeLine=629; ejecuta flujo con llamadas a: valorSeguroTexto, v3PortalExportRowsDifferent_.
+  - fase inicial (628-653): sin llamadas clave asignables.
+  - fase media (654-680): valorSeguroTexto.
+  - fase final (681-707): v3PortalExportRowsDifferent_.
+- L?nea 708 a 712: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 713 a 740: funci?n `v3PortalExportInicializarConfigBase_`; arranque l?gico en firstCodeLine=714; ejecuta flujo con llamadas a: leerConfig, valorSeguroTexto, escribirConfig.
+- L?nea 741 a 745: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 746 a 750: funci?n `v3PortalExportAsegurarHojaPortal_`; arranque l?gico en firstCodeLine=747; ejecuta flujo con llamadas a: asegurarHoja, v3PortalExportAsegurarHeaders_.
+- L?nea 751 a 751: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 752 a 756: funci?n `v3PortalExportAsegurarHojaContabilidad_`; arranque l?gico en firstCodeLine=753; ejecuta flujo con llamadas a: asegurarHoja, v3PortalExportAsegurarHeaders_.
+- L?nea 757 a 757: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 758 a 782: funci?n `v3PortalExportAsegurarHeaders_`; arranque l?gico en firstCodeLine=759; ejecuta flujo con llamadas a: v3PortalExportLeerHeaders_, v3PortalExportBuildHeaderIndex_, valorSeguroTexto.
+- L?nea 783 a 783: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 784 a 798: funci?n `v3PortalExportAplicarFormatosPortal_`; arranque l?gico en firstCodeLine=785; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 799 a 799: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 800 a 814: funci?n `v3PortalExportAplicarFormatosContabilidad_`; arranque l?gico en firstCodeLine=801; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 815 a 815: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 816 a 820: funci?n `v3PortalExportLimpiarValidacionesCuerpo_`; arranque l?gico en firstCodeLine=817; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 821 a 825: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 826 a 828: funci?n `v3PortalExportConstruirScopeKey_`; arranque l?gico en firstCodeLine=827; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 829 a 829: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 830 a 836: funci?n `v3PortalExportLeerHeaders_`; arranque l?gico en firstCodeLine=831; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 837 a 837: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 838 a 845: funci?n `v3PortalExportBuildHeaderIndex_`; arranque l?gico en firstCodeLine=839; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 846 a 846: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 847 a 851: funci?n `v3PortalExportGetCellByHeader_`; arranque l?gico en firstCodeLine=848; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 852 a 852: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 853 a 863: funci?n `v3PortalExportConstruirFilaDesdeObjeto_`; arranque l?gico en firstCodeLine=854; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 864 a 864: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 865 a 873: funci?n `v3PortalExportRowsDifferent_`; arranque l?gico en firstCodeLine=866; ejecuta flujo con llamadas a: v3PortalExportComparable_.
+- L?nea 874 a 874: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 875 a 892: funci?n `v3PortalExportComparable_`; arranque l?gico en firstCodeLine=876; ejecuta flujo con llamadas a: normalizarFecha, v3PortalExportRedondear2_, valorSeguroTexto, convertirANumeroSeguro.
+- L?nea 893 a 893: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 894 a 908: funci?n `v3PortalExportHash_`; arranque l?gico en firstCodeLine=895; ejecuta flujo con llamadas a: normalizarFecha, valorSeguroTexto.
+- L?nea 909 a 909: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 910 a 912: funci?n `v3PortalExportRedondear2_`; arranque l?gico en firstCodeLine=911; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+
+# 11A_V3_Task1_ReglasCobroReset.gs.js
+
+- Prop?sito probable: registrar sobre datos transaccionales.
+- Se?ales usadas: funciones v3Task1PreviewReglasCobroReset, v3Task1EjecutarReglasCobroReset, v3Task1ReglasCobroReset_, v3Task1EnsureStagingSheet_, v3Task1HeaderMap_....
+- Flujo observado por llamadas: v3Task1ReglasCobroReset_, v3Task1HeaderMap_, v3Task1Norm_, v3Task1HasValue_, v3Task1Ts_, v3Task1EnsureStagingSheet_....
+
+- L?nea 1 a 52: pre?mbulo de constantes/configuraci?n; define o prepara: V3_TASK1_RULESRESET_VERSION, V3_TASK1_RULESRESET.
+- L?nea 53 a 55: funci?n `v3Task1PreviewReglasCobroReset`; arranque l?gico en firstCodeLine=54; ejecuta flujo con llamadas a: v3Task1ReglasCobroReset_.
+- L?nea 56 a 56: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 57 a 59: funci?n `v3Task1EjecutarReglasCobroReset`; arranque l?gico en firstCodeLine=58; ejecuta flujo con llamadas a: v3Task1ReglasCobroReset_.
+- L?nea 60 a 60: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 61 a 221: funci?n `v3Task1ReglasCobroReset_`; arranque l?gico en firstCodeLine=62; ejecuta flujo con llamadas a: v3Task1HeaderMap_, v3Task1Norm_, v3Task1HasValue_, v3Task1Ts_, v3Task1EnsureStagingSheet_, registrarAuditoria.
+  - fase inicial (61-113): v3Task1HeaderMap_, v3Task1Norm_.
+  - fase media (114-167): v3Task1HasValue_, v3Task1Ts_.
+  - fase final (168-221): v3Task1EnsureStagingSheet_, registrarAuditoria.
+- L?nea 222 a 226: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 227 a 248: funci?n `v3Task1EnsureStagingSheet_`; arranque l?gico en firstCodeLine=228; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 249 a 249: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 250 a 256: funci?n `v3Task1HeaderMap_`; arranque l?gico en firstCodeLine=251; ejecuta flujo con llamadas a: v3Task1Norm_.
+- L?nea 257 a 257: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 258 a 265: funci?n `v3Task1Norm_`; arranque l?gico en firstCodeLine=259; ejecuta flujo con llamadas a: v3Task1Str_.
+- L?nea 266 a 266: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 267 a 269: funci?n `v3Task1Str_`; arranque l?gico en firstCodeLine=268; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 270 a 270: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 271 a 273: funci?n `v3Task1HasValue_`; arranque l?gico en firstCodeLine=272; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 274 a 274: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 275 a 277: funci?n `v3Task1Ts_`; arranque l?gico en firstCodeLine=276; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 11_V3_RulesSeed.gs.js
+
+- Prop?sito probable: cargar sobre datos transaccionales.
+- Se?ales usadas: funciones v3RulesSeedPreview2026, v3RulesSeedCargar2026, v3RulesSeedRecargar2026, v3RulesSeedBuildRows_, v3RulesSeedExplicitarObservaciones_....
+- Flujo observado por llamadas: v3RulesSeedBuildRows_, v3RulesSeedContarConceptos_, v3RulesSeedEnsureHeaders_, v3RulesSeedClearBodyOnly_, v3RulesSeedWriteRows_, v3RulesSeedApplyFormats_....
+
+- L?nea 1 a 30: pre?mbulo de constantes/configuraci?n; define o prepara: V3_RULESSEED_VERSION, V3_RULESSEED.
+- L?nea 31 a 42: funci?n `v3RulesSeedPreview2026`; arranque l?gico en firstCodeLine=32; ejecuta flujo con llamadas a: v3RulesSeedBuildRows_, v3RulesSeedContarConceptos_.
+- L?nea 43 a 43: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 44 a 66: funci?n `v3RulesSeedCargar2026`; arranque l?gico en firstCodeLine=45; ejecuta flujo con llamadas a: v3RulesSeedBuildRows_, v3RulesSeedEnsureHeaders_, v3RulesSeedClearBodyOnly_, v3RulesSeedWriteRows_, v3RulesSeedApplyFormats_, v3RulesSeedApplyValidations_, v3RulesSeedContarConceptos_.
+- L?nea 67 a 67: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 68 a 70: funci?n `v3RulesSeedRecargar2026`; arranque l?gico en firstCodeLine=69; ejecuta flujo con llamadas a: v3RulesSeedCargar2026.
+- L?nea 71 a 75: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 76 a 166: funci?n `v3RulesSeedBuildRows_`; arranque l?gico en firstCodeLine=77; ejecuta flujo con llamadas a: v3RulesSeedRuleRow_, sistema, variable, MOROSO, v3RulesSeedExplicitarObservaciones_.
+  - fase inicial (76-105): v3RulesSeedRuleRow_.
+  - fase media (106-135): sistema, variable.
+  - fase final (136-166): MOROSO, v3RulesSeedExplicitarObservaciones_.
+- L?nea 167 a 167: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 168 a 186: funci?n `v3RulesSeedExplicitarObservaciones_`; arranque l?gico en firstCodeLine=169; ejecuta flujo con llamadas a: MOROSO.
+- L?nea 187 a 187: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 188 a 205: funci?n `v3RulesSeedRuleRow_`; arranque l?gico en firstCodeLine=189; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 206 a 206: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 207 a 214: funci?n `v3RulesSeedContarConceptos_`; arranque l?gico en firstCodeLine=208; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 215 a 219: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 220 a 223: funci?n `v3RulesSeedEnsureHeaders_`; arranque l?gico en firstCodeLine=221; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 224 a 224: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 225 a 232: funci?n `v3RulesSeedClearBodyOnly_`; arranque l?gico en firstCodeLine=226; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 233 a 233: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 234 a 237: funci?n `v3RulesSeedWriteRows_`; arranque l?gico en firstCodeLine=235; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 238 a 238: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 239 a 272: funci?n `v3RulesSeedApplyFormats_`; arranque l?gico en firstCodeLine=240; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 273 a 273: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 274 a 311: funci?n `v3RulesSeedApplyValidations_`; arranque l?gico en firstCodeLine=275; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 12_V3_ResetMensual.gs.js
+
+- Prop?sito probable: generar, validar, procesar, registrar sobre mora, cargo, periodo, fecha.
+- Se?ales usadas: funciones v3ResetMensualGetSheet_, v3ResetMensualAuditar_, v3ResetMensualLog_, v3ResetMensualClearSheetBody_, v3ResetMensualPreviewClearSheets_....
+- Flujo observado por llamadas: obtenerHojaPorNombre, asegurarHoja, registrarAuditoria, v3ResetMensualGetSheet_, fn, v3AutomationEliminarTriggersDual....
+
+- L?nea 1 a 75: pre?mbulo de constantes/configuraci?n; define o prepara: V3_RESET_MENSUAL_VERSION, V3_RESET_MENSUAL.
+- L?nea 76 a 89: funci?n `v3ResetMensualGetSheet_`; arranque l?gico en firstCodeLine=77; ejecuta flujo con llamadas a: obtenerHojaPorNombre, asegurarHoja.
+- L?nea 90 a 90: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 91 a 95: funci?n `v3ResetMensualAuditar_`; arranque l?gico en firstCodeLine=92; ejecuta flujo con llamadas a: registrarAuditoria.
+- L?nea 96 a 96: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 97 a 100: funci?n `v3ResetMensualLog_`; arranque l?gico en firstCodeLine=98; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 101 a 101: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 102 a 123: funci?n `v3ResetMensualClearSheetBody_`; arranque l?gico en firstCodeLine=103; ejecuta flujo con llamadas a: v3ResetMensualGetSheet_.
+- L?nea 124 a 124: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 125 a 135: funci?n `v3ResetMensualPreviewClearSheets_`; arranque l?gico en firstCodeLine=126; ejecuta flujo con llamadas a: v3ResetMensualGetSheet_.
+- L?nea 136 a 136: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 137 a 142: funci?n `v3ResetMensualRunStep_`; arranque l?gico en firstCodeLine=138; ejecuta flujo con llamadas a: fn.
+- L?nea 143 a 143: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 144 a 162: funci?n `v3ResetMensualFreezeAutomation_`; arranque l?gico en firstCodeLine=145; ejecuta flujo con llamadas a: v3AutomationEliminarTriggersDual.
+- L?nea 163 a 163: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 164 a 185: funci?n `v3ResetMensualBackupSheets_`; arranque l?gico en firstCodeLine=165; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 186 a 186: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 187 a 191: funci?n `v3ResetMensualLimpiarDerivadas_`; arranque l?gico en firstCodeLine=188; ejecuta flujo con llamadas a: v3ResetMensualClearSheetBody_.
+- L?nea 192 a 192: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 193 a 197: funci?n `v3ResetMensualReconstruirPeriodos_`; arranque l?gico en firstCodeLine=194; ejecuta flujo con llamadas a: v3ResetMensualPreviewYGenerarPeriodo_.
+- L?nea 198 a 198: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 199 a 296: funci?n `v3ResetMensualCompletarCargosEscolares_`; arranque l?gico en firstCodeLine=200; ejecuta flujo con llamadas a: v3ResetMensualGetSheet_, v3ChargesAsegurarHeaders_.
+  - fase inicial (199-230): sin llamadas clave asignables.
+  - fase media (231-263): v3ResetMensualGetSheet_.
+  - fase final (264-296): v3ChargesAsegurarHeaders_.
+- L?nea 297 a 297: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 298 a 306: funci?n `v3ResetMensualRebuildDetalle_`; arranque l?gico en firstCodeLine=299; ejecuta flujo con llamadas a: v3StatementsConstruirEstadoCuentaDetalle, v3StatementsConstruirEstadosCuenta.
+- L?nea 307 a 307: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 308 a 316: funci?n `v3ResetMensualRebuildResumen_`; arranque l?gico en firstCodeLine=309; ejecuta flujo con llamadas a: v3StatementsConstruirEstadoCuentaResumen, v3StatementsConstruirEstadosCuenta.
+- L?nea 317 a 317: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 318 a 323: funci?n `v3ResetMensualRebuildConciliacion_`; arranque l?gico en firstCodeLine=319; ejecuta flujo con llamadas a: v3ConciliacionGenerar.
+- L?nea 324 a 324: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 325 a 333: funci?n `v3ResetMensualRebuildExportContabilidad_`; arranque l?gico en firstCodeLine=326; ejecuta flujo con llamadas a: v3PortalExportGenerarExportContabilidad, v3PortalExportGenerar.
+- L?nea 334 a 334: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 335 a 346: funci?n `v3ResetMensualRefrescarPortalPadres_`; arranque l?gico en firstCodeLine=336; ejecuta flujo con llamadas a: v3PortalExportGenerarPortalPadresExport, v3PortalExportGenerar, v3StatementsConstruirPortalPadresExport.
+- L?nea 347 a 347: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 348 a 373: funci?n `v3ResetMensualValidarPeriodosReconstruidos_`; arranque l?gico en firstCodeLine=349; ejecuta flujo con llamadas a: v3StageReadSheetObjects_, valorSeguroTexto.
+- L?nea 374 a 374: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 375 a 400: funci?n `v3ResetMensualValidarCoherenciaFinal_`; arranque l?gico en firstCodeLine=376; ejecuta flujo con llamadas a: v3StageAuditConsolidacionFinal_, normalizarFecha, hoySinHora, valorSeguroTexto, v3StagePruebaFuncional_.
+- L?nea 401 a 401: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 402 a 413: funci?n `v3ResetMensualSetRepairRequired_`; arranque l?gico en firstCodeLine=403; ejecuta flujo con llamadas a: v3StageMarkRequiresCleanRebuild_.
+- L?nea 414 a 414: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 415 a 424: funci?n `v3ResetMensualClearRepairRequired_`; arranque l?gico en firstCodeLine=416; ejecuta flujo con llamadas a: v3StageClearRepairRequired_.
+- L?nea 425 a 425: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 426 a 515: funci?n `runModoReconstruccionLimpiaCasoActual`; arranque l?gico en firstCodeLine=427; ejecuta flujo con llamadas a: generarId, v3ResetMensualFreezeAutomation_, run98_CongelarYRespaldarDerivadas, v3ResetMensualLimpiarDerivadas_, ORDENADO, gracia, v3ResetMensualPreviewYGenerarPeriodo_, v3ResetMensualAplicarMora_, v3ResetMensualCompletarCargosEscolares_, v3ResetMensualAplicarPagosPendientes_, v3ResetMensualRegularizarRecargos_, v3ResetMensualRebuildDetalle_, v3ResetMensualRebuildResumen_, v3ResetMensualRebuildConciliacion_, v3ResetMensualRebuildExportContabilidad_, v3ResetMensualRefrescarPortalPadres_, v3ResetMensualValidarPeriodosReconstruidos_, v3ResetMensualValidarCoherenciaFinal_, v3ResetMensualSetRepairRequired_, v3AutomationConfigurarTriggersDual, v3ResetMensualClearRepairRequired_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+  - fase inicial (426-455): generarId, v3ResetMensualFreezeAutomation_, run98_CongelarYRespaldarDerivadas, v3ResetMensualLimpiarDerivadas_, ORDENADO, gracia, v3ResetMensualPreviewYGenerarPeriodo_.
+  - fase media (456-485): v3ResetMensualAplicarMora_, v3ResetMensualCompletarCargosEscolares_, v3ResetMensualAplicarPagosPendientes_, v3ResetMensualRegularizarRecargos_, v3ResetMensualRebuildDetalle_, v3ResetMensualRebuildResumen_, v3ResetMensualRebuildConciliacion_, v3ResetMensualRebuildExportContabilidad_.
+  - fase final (486-515): v3ResetMensualRefrescarPortalPadres_, v3ResetMensualValidarPeriodosReconstruidos_, v3ResetMensualValidarCoherenciaFinal_, v3ResetMensualSetRepairRequired_, v3AutomationConfigurarTriggersDual, v3ResetMensualClearRepairRequired_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 516 a 516: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 517 a 528: funci?n `v3ResetMensualPreviewPeriodo_`; arranque l?gico en firstCodeLine=518; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 529 a 529: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 530 a 541: funci?n `v3ResetMensualGeneratePeriodo_`; arranque l?gico en firstCodeLine=531; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 542 a 542: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 543 a 558: funci?n `v3ResetMensualPreviewYGenerarPeriodo_`; arranque l?gico en firstCodeLine=544; ejecuta flujo con llamadas a: v3ResetMensualPreviewPeriodo_, v3ResetMensualGeneratePeriodo_.
+- L?nea 559 a 559: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 560 a 568: funci?n `v3ResetMensualPreviewMora_`; arranque l?gico en firstCodeLine=561; ejecuta flujo con llamadas a: v3ReversalsPrevisualizarMora.
+- L?nea 569 a 569: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 570 a 578: funci?n `v3ResetMensualAplicarMora_`; arranque l?gico en firstCodeLine=571; ejecuta flujo con llamadas a: v3ReversalsAplicarMora.
+- L?nea 579 a 579: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 580 a 588: funci?n `v3ResetMensualPreviewImportPagos_`; arranque l?gico en firstCodeLine=581; ejecuta flujo con llamadas a: v3PaymentsPrevisualizarImportacion.
+- L?nea 589 a 589: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 590 a 598: funci?n `v3ResetMensualImportPagos_`; arranque l?gico en firstCodeLine=591; ejecuta flujo con llamadas a: v3PaymentsImportarPagosReportadosDesdeFormulario.
+- L?nea 599 a 599: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 600 a 605: funci?n `v3ResetMensualAplicarPagosPendientes_`; arranque l?gico en firstCodeLine=601; ejecuta flujo con llamadas a: v3ApplicationsAplicarPagosPendientes.
+- L?nea 606 a 606: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 607 a 612: funci?n `v3ResetMensualRegularizarRecargos_`; arranque l?gico en firstCodeLine=608; ejecuta flujo con llamadas a: v3ReversalsRegularizarRecargosPostAplicacion.
+- L?nea 613 a 613: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 614 a 619: funci?n `v3ResetMensualRebuildEstados_`; arranque l?gico en firstCodeLine=615; ejecuta flujo con llamadas a: v3StatementsConstruirEstadosCuenta.
+- L?nea 620 a 620: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 621 a 629: funci?n `v3ResetMensualRebuildPortal_`; arranque l?gico en firstCodeLine=622; ejecuta flujo con llamadas a: v3StatementsConstruirPortalPadresExport.
+- L?nea 630 a 630: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 631 a 666: funci?n `v3ResetMensualPrepararBase_`; arranque l?gico en firstCodeLine=632; ejecuta flujo con llamadas a: v3SchemaAsegurarEstructura, v3SchemaAsegurarValidaciones, v3ConfigSetupInicializarBase, v3SyncAlumnosDesdeFuente, v3ResetMensualGetSheet_, v3ChargesAsegurarHeaders_.
+- L?nea 667 a 674: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 675 a 697: funci?n `runPreviewResetBaseFebMar2026`; arranque l?gico en firstCodeLine=676; ejecuta flujo con llamadas a: v3ResetMensualPreviewClearSheets_, v3ResetMensualPreviewPeriodo_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 698 a 701: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 702 a 728: funci?n `runResetBaseFebMar2026`; arranque l?gico en firstCodeLine=703; ejecuta flujo con llamadas a: v3ResetMensualClearSheetBody_, v3ResetMensualPreviewYGenerarPeriodo_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 729 a 733: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 734 a 741: funci?n `runPreviewFeb2026Limpio`; arranque l?gico en firstCodeLine=735; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 742 a 742: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 743 a 750: funci?n `runGenerarFeb2026Limpio`; arranque l?gico en firstCodeLine=744; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 751 a 751: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 752 a 759: funci?n `runPreviewMar2026Limpio`; arranque l?gico en firstCodeLine=753; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 760 a 760: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 761 a 768: funci?n `runGenerarMar2026Limpio`; arranque l?gico en firstCodeLine=762; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 769 a 769: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 770 a 777: funci?n `runPreviewAbr2026Limpio`; arranque l?gico en firstCodeLine=771; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 778 a 778: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 779 a 786: funci?n `runGenerarAbr2026Limpio`; arranque l?gico en firstCodeLine=780; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 787 a 794: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 795 a 799: funci?n `runPreviewMoraAl20260402`; arranque l?gico en firstCodeLine=796; ejecuta flujo con llamadas a: v3ResetMensualPreviewMora_.
+- L?nea 800 a 803: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 804 a 808: funci?n `runAplicarMoraAl20260402`; arranque l?gico en firstCodeLine=805; ejecuta flujo con llamadas a: v3ResetMensualAplicarMora_.
+- L?nea 809 a 812: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 813 a 817: funci?n `runPreviewMoraHistorica`; arranque l?gico en firstCodeLine=814; ejecuta flujo con llamadas a: v3ResetMensualPreviewMora_.
+- L?nea 818 a 821: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 822 a 826: funci?n `runAplicarMoraHistorica`; arranque l?gico en firstCodeLine=823; ejecuta flujo con llamadas a: v3ResetMensualAplicarMora_.
+- L?nea 827 a 831: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 832 a 836: funci?n `runRebuildEstadosBase`; arranque l?gico en firstCodeLine=833; ejecuta flujo con llamadas a: v3ResetMensualRebuildEstados_.
+- L?nea 837 a 837: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 838 a 842: funci?n `runRebuildPortalPadresBase`; arranque l?gico en firstCodeLine=839; ejecuta flujo con llamadas a: v3ResetMensualRebuildPortal_.
+- L?nea 843 a 847: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 848 a 870: funci?n `runPreviewResetBaseHistoricaFebMarAbr`; arranque l?gico en firstCodeLine=849; ejecuta flujo con llamadas a: v3ResetMensualPreviewClearSheets_, v3ResetMensualPreviewPeriodo_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 871 a 871: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 872 a 899: funci?n `runResetBaseHistoricaFebMarAbr`; arranque l?gico en firstCodeLine=873; ejecuta flujo con llamadas a: v3ResetMensualPrepararBase_, v3ResetMensualClearSheetBody_, v3ResetMensualPreviewYGenerarPeriodo_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 900 a 904: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 905 a 923: funci?n `runPreviewProcesamientoHistorico`; arranque l?gico en firstCodeLine=906; ejecuta flujo con llamadas a: v3ResetMensualPreviewMora_, v3ResetMensualPreviewImportPagos_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 924 a 924: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 925 a 946: funci?n `runProcesarHistoricoCompleto`; arranque l?gico en firstCodeLine=926; ejecuta flujo con llamadas a: v3ResetMensualAplicarMora_, v3ResetMensualImportPagos_, v3ResetMensualAplicarPagosPendientes_, v3ResetMensualRebuildEstados_, v3ResetMensualRebuildPortal_, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 947 a 951: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 952 a 971: funci?n `runBootstrapHistoricoCompleto`; arranque l?gico en firstCodeLine=953; ejecuta flujo con llamadas a: v3ResetMensualPrepararBase_, runResetBaseHistoricaFebMarAbr, runProcesarHistoricoCompleto, v3ResetMensualAuditar_, v3ResetMensualLog_.
+- L?nea 972 a 991: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 992 a 1062: funci?n `runCicloMensualNuevo`; arranque l?gico en firstCodeLine=993; ejecuta flujo con llamadas a: v3ResetMensualNormalizarPeriodo_, generarId, v3ResetMensualVerificarPeriodoYaProcesado_, v3ResetMensualAuditar_, v3ResetMensualLog_, v3ResetMensualPreviewYGenerarPeriodo_, v3ResetMensualAplicarMora_, v3ResetMensualAplicarPagosPendientes_, v3ResetMensualRegularizarRecargos_, v3ResetMensualRebuildDetalle_, v3ResetMensualRebuildResumen_, v3ResetMensualRebuildConciliacion_, v3ResetMensualRefrescarPortalPadres_.
+  - fase inicial (992-1014): v3ResetMensualNormalizarPeriodo_, generarId, v3ResetMensualVerificarPeriodoYaProcesado_, v3ResetMensualAuditar_.
+  - fase media (1015-1038): v3ResetMensualLog_, v3ResetMensualPreviewYGenerarPeriodo_, v3ResetMensualAplicarMora_, v3ResetMensualAplicarPagosPendientes_.
+  - fase final (1039-1062): v3ResetMensualRegularizarRecargos_, v3ResetMensualRebuildDetalle_, v3ResetMensualRebuildResumen_, v3ResetMensualRebuildConciliacion_, v3ResetMensualRefrescarPortalPadres_.
+- L?nea 1063 a 1067: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1068 a 1117: funci?n `v3ResetMensualVerificarPeriodoYaProcesado_`; arranque l?gico en firstCodeLine=1069; ejecuta flujo con llamadas a: v3ResetMensualGetSheet_.
+- L?nea 1118 a 1118: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1119 a 1122: funci?n `v3ResetMensualNormalizarPeriodo_`; arranque l?gico en firstCodeLine=1120; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 12_V3_RulesFix.gs.js
+
+- Prop?sito probable: orquestar l?gica de negocio sobre datos transaccionales.
+- Se?ales usadas: funciones v3RulesFixValidaciones.
+- Flujo observado: sin llamadas expl?citas en bloques.
+
+- L?nea 1 a 2: pre?mbulo de constantes/configuraci?n; define o prepara: V3_RULESFIX_VERSION.
+
+# 13_V3_ComprobantesCargados.gs.js
+
+- Prop?sito probable: orquestar l?gica de negocio sobre datos transaccionales.
+- Se?ales usadas: funciones runConstruirComprobantesCargados, v3CompHumanoConstruir_, v3CompLeerAlumnos_, v3CompLeerPagos_, v3CompHeaderIndex_....
+- Flujo observado por llamadas: v3CompHumanoConstruir_, v3CompLeerAlumnos_, v3CompLeerPagos_, v3CompDateSortValue_, v3CompHeaderIndex_, v3CompFindColumn_....
+
+- L?nea 1 a 20: pre?mbulo de constantes/configuraci?n; define o prepara: V3_COMP_HUMANO_VERSION, V3_COMP_HUMANO.
+- L?nea 21 a 25: funci?n `runConstruirComprobantesCargados`; arranque l?gico en firstCodeLine=22; ejecuta flujo con llamadas a: v3CompHumanoConstruir_.
+- L?nea 26 a 26: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 27 a 157: funci?n `v3CompHumanoConstruir_`; arranque l?gico en firstCodeLine=28; ejecuta flujo con llamadas a: v3CompLeerAlumnos_, v3CompLeerPagos_, v3CompDateSortValue_.
+  - fase inicial (27-69): v3CompLeerAlumnos_.
+  - fase media (70-113): v3CompLeerPagos_.
+  - fase final (114-157): v3CompDateSortValue_.
+- L?nea 158 a 162: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 163 a 201: funci?n `v3CompLeerAlumnos_`; arranque l?gico en firstCodeLine=164; ejecuta flujo con llamadas a: v3CompHeaderIndex_, v3CompFindColumn_, v3CompFilaVacia_, v3CompText_, v3CompNorm_.
+- L?nea 202 a 206: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 207 a 242: funci?n `v3CompLeerPagos_`; arranque l?gico en firstCodeLine=208; ejecuta flujo con llamadas a: v3CompHeaderIndex_, v3CompFindColumn_, v3CompFilaVacia_, v3CompText_.
+- L?nea 243 a 247: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 248 a 254: funci?n `v3CompHeaderIndex_`; arranque l?gico en firstCodeLine=249; ejecuta flujo con llamadas a: v3CompNorm_.
+- L?nea 255 a 255: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 256 a 262: funci?n `v3CompFindColumn_`; arranque l?gico en firstCodeLine=257; ejecuta flujo con llamadas a: v3CompNorm_.
+- L?nea 263 a 263: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 264 a 266: funci?n `v3CompText_`; arranque l?gico en firstCodeLine=265; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 267 a 267: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 268 a 275: funci?n `v3CompNorm_`; arranque l?gico en firstCodeLine=269; ejecuta flujo con llamadas a: v3CompText_.
+- L?nea 276 a 276: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 277 a 281: funci?n `v3CompFilaVacia_`; arranque l?gico en firstCodeLine=278; ejecuta flujo con llamadas a: v3CompText_.
+- L?nea 282 a 282: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 283 a 290: funci?n `v3CompDateSortValue_`; arranque l?gico en firstCodeLine=284; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 14_V3_FormularioPagosInterno.gs.js
+
+- Prop?sito probable: guardar sobre datos transaccionales.
+- Se?ales usadas: funciones runCrearFormularioPagosInterno, v3FormPagosCrear_, v3FormPagosBuscarExistente_, v3FormPagosConstruirPreguntas_, v3FormPagosGuardarConfig_....
+- Flujo observado por llamadas: v3FormPagosCrear_, v3PaymentsInicializarConfigBase, v3FormPagosBuscarExistente_, v3FormPagosConstruirPreguntas_, v3FormPagosDetectarHojaRespuestas_, v3FormPagosGuardarConfig_....
+
+- L?nea 1 a 50: pre?mbulo de constantes/configuraci?n; define o prepara: V3_FORM_PAGOS_VERSION, V3_FORM_PAGOS.
+- L?nea 51 a 55: funci?n `runCrearFormularioPagosInterno`; arranque l?gico en firstCodeLine=52; ejecuta flujo con llamadas a: v3FormPagosCrear_.
+- L?nea 56 a 56: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 57 a 109: funci?n `v3FormPagosCrear_`; arranque l?gico en firstCodeLine=58; ejecuta flujo con llamadas a: v3PaymentsInicializarConfigBase, v3FormPagosBuscarExistente_, v3FormPagosConstruirPreguntas_, v3FormPagosDetectarHojaRespuestas_, v3FormPagosGuardarConfig_, v3FormPagosAsegurarTrigger_.
+- L?nea 110 a 110: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 111 a 133: funci?n `v3FormPagosBuscarExistente_`; arranque l?gico en firstCodeLine=112; ejecuta flujo con llamadas a: leerConfig.
+- L?nea 134 a 134: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 135 a 208: funci?n `v3FormPagosConstruirPreguntas_`; arranque l?gico en firstCodeLine=136; ejecuta flujo con llamadas a: sin llamadas detectadas.
+  - fase inicial (135-158): sin llamadas clave asignables.
+  - fase media (159-183): sin llamadas clave asignables.
+  - fase final (184-208): sin llamadas clave asignables.
+- L?nea 209 a 209: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 210 a 236: funci?n `v3FormPagosGuardarConfig_`; arranque l?gico en firstCodeLine=211; ejecuta flujo con llamadas a: escribirConfig.
+- L?nea 237 a 237: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 238 a 270: funci?n `v3FormPagosAsegurarTrigger_`; arranque l?gico en firstCodeLine=239; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 271 a 271: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 272 a 291: funci?n `v3FormPagosDetectarHojaRespuestas_`; arranque l?gico en firstCodeLine=273; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 15_V3_FormularioPagosV2.gs.js
+
+- Prop?sito probable: generar, procesar, registrar sobre fecha.
+- Se?ales usadas: funciones runCrearFormularioPagosV2, runProcesarUltimaRespuestaFormV2, v3PaymentsOnFormSubmitV2, v3FormV2Crear_, v3FormV2BuscarExistente_....
+- Flujo observado por llamadas: v3FormV2Crear_, v3FormV2LeerConfig_, v3PaymentsImportarDesdeFormulario_, v3FormV2ImportarFila_, v3FormV2BuscarExistente_, v3FormV2ConstruirPreguntas_....
+
+- L?nea 1 a 85: pre?mbulo de constantes/configuraci?n; define o prepara: V3_FORM_V2_VERSION, V3_FORM_V2_MANUAL_MODE, V3_FORM_V2.
+- L?nea 86 a 90: funci?n `runCrearFormularioPagosV2`; arranque l?gico en firstCodeLine=87; ejecuta flujo con llamadas a: v3FormV2Crear_.
+- L?nea 91 a 91: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 92 a 105: funci?n `runProcesarUltimaRespuestaFormV2`; arranque l?gico en firstCodeLine=93; ejecuta flujo con llamadas a: v3FormV2LeerConfig_, v3PaymentsImportarDesdeFormulario_, v3FormV2ImportarFila_.
+- L?nea 106 a 106: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 107 a 143: funci?n `v3PaymentsOnFormSubmitV2`; arranque l?gico en firstCodeLine=108; ejecuta flujo con llamadas a: v3FormV2LeerConfig_, v3PaymentsImportarDesdeFormulario_, v3FormV2ImportarFila_.
+- L?nea 144 a 148: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 149 a 199: funci?n `v3FormV2Crear_`; arranque l?gico en firstCodeLine=150; ejecuta flujo con llamadas a: v3FormV2BuscarExistente_, v3FormV2ConstruirPreguntas_, v3FormV2DetectarHojaRespuestas_, v3FormV2EscribirConfig_, v3FormV2ReemplazarTriggers_.
+- L?nea 200 a 200: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 201 a 218: funci?n `v3FormV2BuscarExistente_`; arranque l?gico en firstCodeLine=202; ejecuta flujo con llamadas a: v3FormV2LeerConfig_.
+- L?nea 219 a 219: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 220 a 272: funci?n `v3FormV2ConstruirPreguntas_`; arranque l?gico en firstCodeLine=221; ejecuta flujo con llamadas a: v3FormV2LeerConceptosDesdeParametros_, v3FormV2AgregarLinea_.
+- L?nea 273 a 273: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 274 a 289: funci?n `v3FormV2AgregarLinea_`; arranque l?gico en firstCodeLine=275; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 290 a 290: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 291 a 309: funci?n `v3FormV2ReemplazarTriggers_`; arranque l?gico en firstCodeLine=292; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 310 a 310: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 311 a 328: funci?n `v3FormV2DetectarHojaRespuestas_`; arranque l?gico en firstCodeLine=312; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 329 a 333: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 334 a 518: funci?n `v3FormV2ImportarFila_`; arranque l?gico en firstCodeLine=335; ejecuta flujo con llamadas a: v3FormV2AsegurarHojaPagos_, v3FormV2LeerHeaders_, v3FormV2HeaderMap_, v3FormV2NormalizarFecha_, v3FormV2GetCell_, v3FormV2Text_, v3FormV2Numero_, v3FormV2BuscarAlumnoPorId_, v3FormV2Hoy_, v3FormV2LeerExistingPagos_, v3FormV2ConstruirHashPago_, v3FormV2Red2_, v3FormV2GenerarId_, v3FormV2Usuario_, v3FormV2ConstruirFilaDestino_, v3FormV2AplicarFormatosPagos_, runConstruirComprobantesCargados, registrarAuditoria.
+  - fase inicial (334-394): v3FormV2AsegurarHojaPagos_, v3FormV2LeerHeaders_, v3FormV2HeaderMap_, v3FormV2NormalizarFecha_, v3FormV2GetCell_, v3FormV2Text_.
+  - fase media (395-456): v3FormV2Numero_, v3FormV2BuscarAlumnoPorId_, v3FormV2Hoy_, v3FormV2LeerExistingPagos_, v3FormV2ConstruirHashPago_, v3FormV2Red2_.
+  - fase final (457-518): v3FormV2GenerarId_, v3FormV2Usuario_, v3FormV2ConstruirFilaDestino_, v3FormV2AplicarFormatosPagos_, runConstruirComprobantesCargados, registrarAuditoria.
+- L?nea 519 a 523: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 524 a 563: funci?n `v3FormV2BuscarAlumnoPorId_`; arranque l?gico en firstCodeLine=525; ejecuta flujo con llamadas a: v3FormV2HeaderMap_, v3FormV2FindColumn_, v3FormV2Text_.
+- L?nea 564 a 568: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 569 a 597: funci?n `v3FormV2AsegurarHojaPagos_`; arranque l?gico en firstCodeLine=570; ejecuta flujo con llamadas a: asegurarHoja, v3FormV2HeaderMap_, v3FormV2Norm_.
+- L?nea 598 a 598: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 599 a 621: funci?n `v3FormV2LeerExistingPagos_`; arranque l?gico en firstCodeLine=600; ejecuta flujo con llamadas a: v3FormV2Text_.
+- L?nea 622 a 622: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 623 a 631: funci?n `v3FormV2ConstruirFilaDestino_`; arranque l?gico en firstCodeLine=624; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 632 a 632: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 633 a 647: funci?n `v3FormV2AplicarFormatosPagos_`; arranque l?gico en firstCodeLine=634; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 648 a 652: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 653 a 672: funci?n `v3FormV2LeerConceptosDesdeParametros_`; arranque l?gico en firstCodeLine=654; ejecuta flujo con llamadas a: v3FormV2Text_.
+- L?nea 673 a 673: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 674 a 677: funci?n `v3FormV2LeerConfig_`; arranque l?gico en firstCodeLine=675; ejecuta flujo con llamadas a: leerConfig.
+- L?nea 678 a 678: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 679 a 684: funci?n `v3FormV2EscribirConfig_`; arranque l?gico en firstCodeLine=680; ejecuta flujo con llamadas a: escribirConfig.
+- L?nea 685 a 685: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 686 a 690: funci?n `v3FormV2LeerHeaders_`; arranque l?gico en firstCodeLine=687; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 691 a 691: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 692 a 699: funci?n `v3FormV2HeaderMap_`; arranque l?gico en firstCodeLine=693; ejecuta flujo con llamadas a: v3FormV2Norm_.
+- L?nea 700 a 700: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 701 a 707: funci?n `v3FormV2FindColumn_`; arranque l?gico en firstCodeLine=702; ejecuta flujo con llamadas a: v3FormV2Norm_.
+- L?nea 708 a 708: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 709 a 713: funci?n `v3FormV2GetCell_`; arranque l?gico en firstCodeLine=710; ejecuta flujo con llamadas a: v3FormV2Norm_.
+- L?nea 714 a 714: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 715 a 718: funci?n `v3FormV2Text_`; arranque l?gico en firstCodeLine=716; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 719 a 719: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 720 a 727: funci?n `v3FormV2Norm_`; arranque l?gico en firstCodeLine=721; ejecuta flujo con llamadas a: v3FormV2Text_.
+- L?nea 728 a 728: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 729 a 736: funci?n `v3FormV2Numero_`; arranque l?gico en firstCodeLine=730; ejecuta flujo con llamadas a: convertirANumeroSeguro.
+- L?nea 737 a 737: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 738 a 743: funci?n `v3FormV2NormalizarFecha_`; arranque l?gico en firstCodeLine=739; ejecuta flujo con llamadas a: normalizarFecha.
+- L?nea 744 a 744: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 745 a 749: funci?n `v3FormV2Hoy_`; arranque l?gico en firstCodeLine=746; ejecuta flujo con llamadas a: hoySinHora.
+- L?nea 750 a 750: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 751 a 753: funci?n `v3FormV2Red2_`; arranque l?gico en firstCodeLine=752; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 754 a 754: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 755 a 761: funci?n `v3FormV2Usuario_`; arranque l?gico en firstCodeLine=756; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 762 a 762: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 763 a 768: funci?n `v3FormV2GenerarId_`; arranque l?gico en firstCodeLine=764; ejecuta flujo con llamadas a: generarId.
+- L?nea 769 a 769: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 770 a 791: funci?n `v3FormV2ConstruirHashPago_`; arranque l?gico en firstCodeLine=771; ejecuta flujo con llamadas a: v3FormV2Text_, v3FormV2Numero_.
+
+# 16_V3_Automation.gs.js
+
+- Prop?sito probable: registrar sobre cargo, periodo, fecha.
+- Se?ales usadas: funciones v3AutomationPeriodoActual_, v3AutomationFechaCorteDefault_, v3AutomationAuditar_, v3AutomationDeleteTriggersByHandler_, v3AutomationConfigurarTriggerDiarioPagos....
+- Flujo observado por llamadas: v3AutomationPeriodoActual_, registrarAuditoria, v3AutomationDeleteTriggersByHandler_, v3AutomationEliminarTriggersDual, v3AutomationConfigurarTriggerDiarioPagos, v3AutomationConfigurarTriggerPeriodoVigente....
+
+- L?nea 1 a 25: pre?mbulo de constantes/configuraci?n; define o prepara: V3_AUTOMATION_VERSION, V3_AUTOMATION_EPSILON, V3_AUTOMATION_CONFIG.
+- L?nea 26 a 29: funci?n `v3AutomationPeriodoActual_`; arranque l?gico en firstCodeLine=27; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 30 a 30: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 31 a 33: funci?n `v3AutomationFechaCorteDefault_`; arranque l?gico en firstCodeLine=32; ejecuta flujo con llamadas a: v3AutomationPeriodoActual_.
+- L?nea 34 a 34: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 35 a 39: funci?n `v3AutomationAuditar_`; arranque l?gico en firstCodeLine=36; ejecuta flujo con llamadas a: registrarAuditoria.
+- L?nea 40 a 40: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 41 a 53: funci?n `v3AutomationDeleteTriggersByHandler_`; arranque l?gico en firstCodeLine=42; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 54 a 54: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 55 a 71: funci?n `v3AutomationConfigurarTriggerDiarioPagos`; arranque l?gico en firstCodeLine=56; ejecuta flujo con llamadas a: v3AutomationDeleteTriggersByHandler_.
+- L?nea 72 a 72: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 73 a 89: funci?n `v3AutomationConfigurarTriggerPeriodoVigente`; arranque l?gico en firstCodeLine=74; ejecuta flujo con llamadas a: v3AutomationDeleteTriggersByHandler_.
+- L?nea 90 a 90: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 91 a 117: funci?n `v3AutomationConfigurarTriggersDual`; arranque l?gico en firstCodeLine=92; ejecuta flujo con llamadas a: v3AutomationEliminarTriggersDual, v3AutomationConfigurarTriggerDiarioPagos, v3AutomationConfigurarTriggerPeriodoVigente, v3AutomationConfigurarTriggerEtapa_, v3AutomationAuditar_.
+- L?nea 118 a 118: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 119 a 143: funci?n `v3AutomationEliminarTriggersDual`; arranque l?gico en firstCodeLine=120; ejecuta flujo con llamadas a: v3AutomationDeleteTriggersByHandler_.
+- L?nea 144 a 144: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 145 a 159: funci?n `v3AutomationConfigurarTriggerEtapa_`; arranque l?gico en firstCodeLine=146; ejecuta flujo con llamadas a: v3AutomationDeleteTriggersByHandler_.
+- L?nea 160 a 160: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 161 a 211: funci?n `v3AutomationDetectarEstadoPeriodo_`; arranque l?gico en firstCodeLine=162; ejecuta flujo con llamadas a: v3AutomationPeriodoActual_, v3AutomationFechaCorteDefault_, asegurarHoja, v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 212 a 212: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 213 a 217: funci?n `v3AutomationEjecutarFlujoFinanciero_`; arranque l?gico en firstCodeLine=214; ejecuta flujo con llamadas a: v3StageRunPipelineManual_, v3StageRunPipelineManual.
+- L?nea 218 a 219: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 220 a 225: funci?n `v3AutomationRunMasterManual`; arranque l?gico en firstCodeLine=221; ejecuta flujo con llamadas a: v3AutomationEjecutarFlujoFinanciero_.
+- L?nea 226 a 227: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 228 a 230: funci?n `v3AutomationTriggerDiarioPagos`; arranque l?gico en firstCodeLine=229; ejecuta flujo con llamadas a: v3AutomationTriggerEtapaImportacion.
+- L?nea 231 a 231: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 232 a 234: funci?n `v3AutomationTriggerPeriodoVigente`; arranque l?gico en firstCodeLine=233; ejecuta flujo con llamadas a: v3AutomationTriggerEtapaCargos.
+- L?nea 235 a 235: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 236 a 240: funci?n `v3AutomationTriggerEtapaImportacion`; arranque l?gico en firstCodeLine=237; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 241 a 241: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 242 a 246: funci?n `v3AutomationTriggerEtapaCargos`; arranque l?gico en firstCodeLine=243; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 247 a 247: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 248 a 252: funci?n `v3AutomationTriggerEtapaRecargos`; arranque l?gico en firstCodeLine=249; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 253 a 253: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 254 a 258: funci?n `v3AutomationTriggerEtapaAplicacion`; arranque l?gico en firstCodeLine=255; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 259 a 259: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 260 a 264: funci?n `v3AutomationTriggerEtapaConsolidacion`; arranque l?gico en firstCodeLine=261; ejecuta flujo con llamadas a: v3StageRunStage_.
+
+# 17_V3_PortalAPI.gs.js
+
+- Prop?sito probable: generar sobre datos transaccionales.
+- Se?ales usadas: funciones doGet, v3PortalApiRunBackoffice_, v3PortalApiCatalogAllowlistMap_, v3PortalApiParseArgs_, v3PortalApiGetBackofficeCatalog_....
+- Flujo observado por llamadas: v3PortalApiGetSystemStatus_, v3PortalApiAdminInfo_, v3PortalApiLoginAlumno_, v3PortalApiValidateToken_, v3PortalApiRunBackoffice_, v3PortalApiGetBackofficeCatalog_....
+
+- L?nea 1 a 54: pre?mbulo de constantes/configuraci?n; define o prepara: V3_PORTAL_API_VERSION, V3_PORTAL_CONTRASENAS, V3_PORTAL_API_CONFIG, V3_PORTAL_ADMIN_POST_OPS, V3_PORTAL_ADMIN_GET_OPS.
+- L?nea 55 a 160: funci?n `doGet`; arranque l?gico en firstCodeLine=56; ejecuta flujo con llamadas a: v3PortalApiGetSystemStatus_, v3PortalApiAdminInfo_, v3PortalApiLoginAlumno_, v3PortalApiValidateToken_, v3PortalApiRunBackoffice_, v3PortalApiGetBackofficeCatalog_, v3PortalApiGetAlumnoData_, v3PortalApiGetAlumnoListFromPortal_.
+  - fase inicial (55-89): v3PortalApiGetSystemStatus_, v3PortalApiAdminInfo_.
+  - fase media (90-124): v3PortalApiLoginAlumno_, v3PortalApiValidateToken_, v3PortalApiRunBackoffice_.
+  - fase final (125-160): v3PortalApiGetBackofficeCatalog_, v3PortalApiGetAlumnoData_, v3PortalApiGetAlumnoListFromPortal_.
+- L?nea 161 a 161: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 162 a 198: funci?n `v3PortalApiRunBackoffice_`; arranque l?gico en firstCodeLine=163; ejecuta flujo con llamadas a: v3PortalApiGetBackofficeCatalog_, v3PortalApiCatalogAllowlistMap_, v3PortalApiParseArgs_.
+- L?nea 199 a 199: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 200 a 208: funci?n `v3PortalApiCatalogAllowlistMap_`; arranque l?gico en firstCodeLine=201; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 209 a 209: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 210 a 222: funci?n `v3PortalApiParseArgs_`; arranque l?gico en firstCodeLine=211; ejecuta flujo con llamadas a: lido.
+- L?nea 223 a 223: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 224 a 285: funci?n `v3PortalApiGetBackofficeCatalog_`; arranque l?gico en firstCodeLine=225; ejecuta flujo con llamadas a: v3PortalApiGetBackofficeCatalogDefault_.
+  - fase inicial (224-243): sin llamadas clave asignables.
+  - fase media (244-264): sin llamadas clave asignables.
+  - fase final (265-285): v3PortalApiGetBackofficeCatalogDefault_.
+- L?nea 286 a 286: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 287 a 350: funci?n `v3PortalApiGetBackofficeCatalogDefault_`; arranque l?gico en firstCodeLine=288; ejecuta flujo con llamadas a: sin llamadas detectadas.
+  - fase inicial (287-307): sin llamadas clave asignables.
+  - fase media (308-328): sin llamadas clave asignables.
+  - fase final (329-350): sin llamadas clave asignables.
+- L?nea 351 a 351: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 352 a 379: funci?n `doPost`; arranque l?gico en firstCodeLine=353; ejecuta flujo con llamadas a: v3PortalApiReadPostJson_, v3PortalApiHandleAdminPost_.
+- L?nea 380 a 380: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 381 a 396: funci?n `v3PortalApiReadPostJson_`; arranque l?gico en firstCodeLine=382; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 397 a 397: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 398 a 440: funci?n `v3PortalApiHandleAdminPost_`; arranque l?gico en firstCodeLine=399; ejecuta flujo con llamadas a: v3PortalApiAdminValidateRequest_, v3PortalApiAdminProbeGuardrail_, run98_CongelarYRespaldarDerivadas, v3PortalApiSetupAdminSecurity, v3PortalApiAdminAudit_.
+- L?nea 441 a 441: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 442 a 474: funci?n `v3PortalApiAdminReadSecurity_`; arranque l?gico en firstCodeLine=443; ejecuta flujo con llamadas a: leerConfig.
+- L?nea 475 a 475: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 476 a 480: funci?n `v3PortalApiDeprecateAdminConfigKeys_`; arranque l?gico en firstCodeLine=477; ejecuta flujo con llamadas a: escribirConfig.
+- L?nea 481 a 481: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 482 a 548: funci?n `v3PortalApiAdminValidateRequest_`; arranque l?gico en firstCodeLine=483; ejecuta flujo con llamadas a: v3PortalApiAdminReadSecurity_, milisegundos, repetido, v3PortalApiAdminBuildPayload_, v3PortalApiHmacSha256Hex_, v3PortalApiSafeEquals_, v3PortalApiAdminPruneNonces_.
+  - fase inicial (482-503): v3PortalApiAdminReadSecurity_, milisegundos.
+  - fase media (504-525): repetido, v3PortalApiAdminBuildPayload_.
+  - fase final (526-548): v3PortalApiHmacSha256Hex_, v3PortalApiSafeEquals_, v3PortalApiAdminPruneNonces_.
+- L?nea 549 a 549: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 550 a 558: funci?n `v3PortalApiAdminBuildPayload_`; arranque l?gico en firstCodeLine=551; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 559 a 559: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 560 a 583: funci?n `v3PortalApiAdminPruneNonces_`; arranque l?gico en firstCodeLine=561; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 584 a 584: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 585 a 593: funci?n `v3PortalApiAdminAllowlistHash_`; arranque l?gico en firstCodeLine=586; ejecuta flujo con llamadas a: v3PortalApiSha256Hex_.
+- L?nea 594 a 594: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 595 a 614: funci?n `v3PortalApiAdminProbeGuardrail_`; arranque l?gico en firstCodeLine=596; ejecuta flujo con llamadas a: v3LegacyRunnerGuardrail_.
+- L?nea 615 a 615: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 616 a 659: funci?n `v3PortalApiAdminInfo_`; arranque l?gico en firstCodeLine=617; ejecuta flujo con llamadas a: v3PortalApiAdminAllowlistHash_, v3PortalApiAdminReadSecurity_.
+- L?nea 660 a 660: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 661 a 676: funci?n `v3PortalApiAdminAudit_`; arranque l?gico en firstCodeLine=662; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 677 a 677: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 678 a 684: funci?n `v3PortalApiHmacSha256Hex_`; arranque l?gico en firstCodeLine=679; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 685 a 685: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 686 a 692: funci?n `v3PortalApiSha256Hex_`; arranque l?gico en firstCodeLine=687; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 693 a 693: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 694 a 703: funci?n `v3PortalApiSafeEquals_`; arranque l?gico en firstCodeLine=695; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 704 a 704: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 705 a 710: funci?n `v3PortalApiValidateToken_`; arranque l?gico en firstCodeLine=706; ejecuta flujo con llamadas a: leerConfig.
+- L?nea 711 a 711: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 712 a 760: funci?n `v3PortalApiGetAlumnoData_`; arranque l?gico en firstCodeLine=713; ejecuta flujo con llamadas a: v3PortalApiParseBoolean_.
+- L?nea 761 a 761: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 762 a 766: funci?n `v3PortalApiParseBoolean_`; arranque l?gico en firstCodeLine=763; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 767 a 767: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 768 a 778: funci?n `v3PortalApiGetSystemStatus_`; arranque l?gico en firstCodeLine=769; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 779 a 779: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 780 a 804: funci?n `v3PortalApiGetAlumnoListFromPortal_`; arranque l?gico en firstCodeLine=781; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 805 a 809: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 810 a 843: funci?n `v3PortalApiLoginAlumno_`; arranque l?gico en firstCodeLine=811; ejecuta flujo con llamadas a: v3PortalApiGetAlumnoData_, v3PortalApiGetResumenFinanciero_, v3PortalApiGetDetalleMovimientos_.
+- L?nea 844 a 847: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 848 a 890: funci?n `v3PortalApiGetResumenFinanciero_`; arranque l?gico en firstCodeLine=849; ejecuta flujo con llamadas a: alumno, col.
+- L?nea 891 a 894: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 895 a 928: funci?n `v3PortalApiGetDetalleMovimientos_`; arranque l?gico en firstCodeLine=896; ejecuta flujo con llamadas a: col.
+- L?nea 929 a 933: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 934 a 982: funci?n `v3PortalApiGenerarContrasenas`; arranque l?gico en firstCodeLine=935; ejecuta flujo con llamadas a: v3PortalApiGenerarPassAleatoria_.
+- L?nea 983 a 983: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 984 a 990: funci?n `v3PortalApiGenerarPassAleatoria_`; arranque l?gico en firstCodeLine=986; ejecuta flujo con llamadas a: seg.
+- L?nea 991 a 991: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 992 a 997: funci?n `v3PortalApiSetupToken`; arranque l?gico en firstCodeLine=993; ejecuta flujo con llamadas a: escribirConfig.
+- L?nea 998 a 998: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 999 a 1026: funci?n `v3PortalApiSetupAdminSecurity`; arranque l?gico en firstCodeLine=1000; ejecuta flujo con llamadas a: v3PortalApiDeprecateAdminConfigKeys_, v3PortalApiSha256Hex_.
+- L?nea 1027 a 1027: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1028 a 1039: funci?n `v3PortalApiGetPublicUrl`; arranque l?gico en firstCodeLine=1029; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 18_V3_Conciliacion.gs.js
+
+- Prop?sito probable: generar sobre datos transaccionales.
+- Se?ales usadas: funciones v3ConciliacionGenerar, v3ConciliacionAsegurarHeadersYFormato_, v3ConciliacionReemplazarBody_, v3ConciliacionLeerPagos_, v3ConciliacionLeerAplicacionesPorPago_....
+- Flujo observado por llamadas: asegurarHoja, v3ConciliacionAsegurarHeadersYFormato_, v3ConciliacionLeerPagos_, v3ConciliacionLeerAplicacionesPorPago_, v3ConciliacionLeerExportPorPago_, v3ConciliacionRound2_....
+
+- L?nea 1 a 30: pre?mbulo de constantes/configuraci?n; define o prepara: V3_CONCILIACION_VERSION, V3_CONCILIACION_EPSILON, V3_CONCILIACION_HEADERS.
+- L?nea 31 a 94: funci?n `v3ConciliacionGenerar`; arranque l?gico en firstCodeLine=32; ejecuta flujo con llamadas a: asegurarHoja, v3ConciliacionAsegurarHeadersYFormato_, v3ConciliacionLeerPagos_, v3ConciliacionLeerAplicacionesPorPago_, v3ConciliacionLeerExportPorPago_, v3ConciliacionRound2_, v3ConciliacionResolverEstado_, v3ConciliacionJoinEstados_, hoySinHora, v3ConciliacionReemplazarBody_.
+  - fase inicial (31-51): asegurarHoja, v3ConciliacionAsegurarHeadersYFormato_, v3ConciliacionLeerPagos_.
+  - fase media (52-72): v3ConciliacionLeerAplicacionesPorPago_, v3ConciliacionLeerExportPorPago_, v3ConciliacionRound2_.
+  - fase final (73-94): v3ConciliacionResolverEstado_, v3ConciliacionJoinEstados_, hoySinHora, v3ConciliacionReemplazarBody_.
+- L?nea 95 a 95: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 96 a 123: funci?n `v3ConciliacionAsegurarHeadersYFormato_`; arranque l?gico en firstCodeLine=97; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 124 a 124: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 125 a 151: funci?n `v3ConciliacionReemplazarBody_`; arranque l?gico en firstCodeLine=126; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 152 a 152: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 153 a 188: funci?n `v3ConciliacionLeerPagos_`; arranque l?gico en firstCodeLine=154; ejecuta flujo con llamadas a: asegurarHoja, v3ConciliacionBuildHeaderIndex_, v3ConciliacionGet_, v3ConciliacionNumber_.
+- L?nea 189 a 189: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 190 a 221: funci?n `v3ConciliacionLeerAplicacionesPorPago_`; arranque l?gico en firstCodeLine=191; ejecuta flujo con llamadas a: asegurarHoja, v3ConciliacionBuildHeaderIndex_, v3ConciliacionGet_, v3ConciliacionNumber_.
+- L?nea 222 a 222: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 223 a 242: funci?n `v3ConciliacionLeerExportPorPago_`; arranque l?gico en firstCodeLine=224; ejecuta flujo con llamadas a: asegurarHoja, v3ConciliacionBuildHeaderIndex_, v3ConciliacionGet_.
+- L?nea 243 a 243: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 244 a 250: funci?n `v3ConciliacionResolverEstado_`; arranque l?gico en firstCodeLine=245; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 251 a 251: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 252 a 257: funci?n `v3ConciliacionJoinEstados_`; arranque l?gico en firstCodeLine=253; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 258 a 258: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 259 a 265: funci?n `v3ConciliacionBuildHeaderIndex_`; arranque l?gico en firstCodeLine=260; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 266 a 266: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 267 a 272: funci?n `v3ConciliacionGet_`; arranque l?gico en firstCodeLine=268; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 273 a 273: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 274 a 278: funci?n `v3ConciliacionNumber_`; arranque l?gico en firstCodeLine=275; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 279 a 279: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 280 a 282: funci?n `v3ConciliacionRound2_`; arranque l?gico en firstCodeLine=281; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 19_V3_Fixes.gs.js
+
+- Prop?sito probable: generar, validar sobre cargo, periodo.
+- Se?ales usadas: funciones v3FixesLimpiarValidacionesEstados, v3FixesLimpiarValidacionesFinancieras, v3FixesRebuildEstadosCuenta, v3FixesEstadosYRebuild, v3FixesLimpiarEstadosSinRevalidar....
+- Flujo observado por llamadas: v3SchemaAsegurarValidaciones, v3StatementsConstruirEstadosCuenta, v3FixesLimpiarValidacionesEstados, v3FixesRebuildEstadosCuenta, v3FixesLimpiarEstadosSinRevalidar, asegurarHoja....
+
+- L?nea 1 a 14: pre?mbulo de constantes/configuraci?n; define o prepara: V3_FIXES_VERSION, V3_FIXES_SHEETS.
+- L?nea 15 a 61: funci?n `v3FixesLimpiarValidacionesEstados`; arranque l?gico en firstCodeLine=16; ejecuta flujo con llamadas a: v3SchemaAsegurarValidaciones.
+- L?nea 62 a 66: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 67 a 120: funci?n `v3FixesLimpiarValidacionesFinancieras`; arranque l?gico en firstCodeLine=68; ejecuta flujo con llamadas a: v3SchemaAsegurarValidaciones.
+- L?nea 121 a 124: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 125 a 130: funci?n `v3FixesRebuildEstadosCuenta`; arranque l?gico en firstCodeLine=126; ejecuta flujo con llamadas a: v3StatementsConstruirEstadosCuenta.
+- L?nea 131 a 134: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 135 a 147: funci?n `v3FixesEstadosYRebuild`; arranque l?gico en firstCodeLine=136; ejecuta flujo con llamadas a: v3FixesLimpiarValidacionesEstados, v3FixesRebuildEstadosCuenta.
+- L?nea 148 a 148: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 149 a 176: funci?n `v3FixesLimpiarEstadosSinRevalidar`; arranque l?gico en firstCodeLine=150; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 177 a 177: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 178 a 181: funci?n `v3FixesRebuildEstadosSinValidaciones`; arranque l?gico en firstCodeLine=179; ejecuta flujo con llamadas a: v3FixesLimpiarEstadosSinRevalidar, v3StatementsConstruirEstadosCuenta.
+- L?nea 182 a 182: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 183 a 217: funci?n `v3FixesCongelarTriggersYRespaldarDerivadas_`; arranque l?gico en firstCodeLine=184; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 218 a 218: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 219 a 262: funci?n `v3FixesDeduplicarHojaPorLlave_`; arranque l?gico en firstCodeLine=220; ejecuta flujo con llamadas a: asegurarHoja, buildFallbackKeyFn.
+- L?nea 263 a 263: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 264 a 276: funci?n `v3FixesLimpiarBodyHoja_`; arranque l?gico en firstCodeLine=265; ejecuta flujo con llamadas a: asegurarHoja.
+- L?nea 277 a 277: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 278 a 336: funci?n `v3FixesReconstruirDerivadasIdempotente`; arranque l?gico en firstCodeLine=279; ejecuta flujo con llamadas a: valorSeguroTexto, leerConfig, v3FixesCongelarTriggersYRespaldarDerivadas_, v3FixesDeduplicarHojaPorLlave_, v3FixesLimpiarBodyHoja_, v3StatementsConstruirEstadosCuenta, v3PortalExportGenerar, v3ConciliacionGenerar, v3FixesContarDuplicadosCargoPeriodo_.
+- L?nea 337 a 337: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 338 a 372: funci?n `v3FixesContarDuplicadosCargoPeriodo_`; arranque l?gico en firstCodeLine=339; ejecuta flujo con llamadas a: asegurarHoja.
+
+# 20_V3_QA_Smoke.gs.js
+
+- Prop?sito probable: actualizar sobre mora, cargo, fecha, saldo.
+- Se?ales usadas: funciones v3QaSmokeBasico, v3QaSmokeFinanciero2026, v3QaSmokeCompleto2026, v3QaSmokeDinamicoSaldoParcialRecargo, v3QaReadHeaders_....
+- Flujo observado por llamadas: v3QaReadHeaders_, v3QaCheckHeaders_, v3ChargesPreviewFeb2026, v3ReversalsSelfTestFechasMora, v3ReversalsPrevisualizarMora, v3QaSmokeBasico....
+
+- L?nea 1 a 27: pre?mbulo de constantes/configuraci?n; define o prepara: V3_QA_VERSION, V3_QA.
+- L?nea 28 a 96: funci?n `v3QaSmokeBasico`; arranque l?gico en firstCodeLine=29; ejecuta flujo con llamadas a: v3QaReadHeaders_, v3QaCheckHeaders_.
+  - fase inicial (28-50): sin llamadas clave asignables.
+  - fase media (51-73): v3QaReadHeaders_.
+  - fase final (74-96): v3QaCheckHeaders_.
+- L?nea 97 a 97: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 98 a 139: funci?n `v3QaSmokeFinanciero2026`; arranque l?gico en firstCodeLine=99; ejecuta flujo con llamadas a: v3ChargesPreviewFeb2026, v3ReversalsSelfTestFechasMora, v3ReversalsPrevisualizarMora.
+- L?nea 140 a 140: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 141 a 150: funci?n `v3QaSmokeCompleto2026`; arranque l?gico en firstCodeLine=142; ejecuta flujo con llamadas a: v3QaSmokeBasico, v3QaSmokeFinanciero2026.
+- L?nea 151 a 160: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 161 a 273: funci?n `v3QaSmokeDinamicoSaldoParcialRecargo`; arranque l?gico en firstCodeLine=162; ejecuta flujo con llamadas a: v3ReversalsActualizarRecargoEnFila_.
+  - fase inicial (161-197): sin llamadas clave asignables.
+  - fase media (198-235): sin llamadas clave asignables.
+  - fase final (236-273): v3ReversalsActualizarRecargoEnFila_.
+- L?nea 274 a 278: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 279 a 285: funci?n `v3QaReadHeaders_`; arranque l?gico en firstCodeLine=280; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 286 a 286: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 287 a 327: funci?n `v3QaCheckHeaders_`; arranque l?gico en firstCodeLine=288; ejecuta flujo con llamadas a: v3QaReadHeaders_.
+
+# 21_V3_StageFlow.gs.js
+
+- Prop?sito probable: generar, obtener sobre mora, cargo, periodo, fecha.
+- Se?ales usadas: funciones v3StageEnsureControlSheets_, v3StageRunPipelineManual_, v3StageRunStage_, v3StagePruebaFuncional_, v3StageExecute_....
+- Flujo observado por llamadas: v3StageEnsureSheetHeaders_, asegurarHoja, valorSeguroTexto, v3StageResolvePeriodo_, v3StageFormatDate_, v3StageResolveFechaCorte_....
+
+- L?nea 1 a 80: pre?mbulo de constantes/configuraci?n; define o prepara: V3_STAGEFLOW_VERSION, V3_STAGEFLOW_SHEET_JOB_LEDGER, V3_STAGEFLOW_SHEET_INCIDENTS, V3_STAGEFLOW_ACTIVE_RUN_PROPERTY, V3_STAGEFLOW_REPAIR_REQUIRED_PROPERTY, V3_STAGEFLOW_EPSILON, V3_STAGEFLOW_BLOCKING, V3_STAGEFLOW_WARNING, V3_STAGEFLOW_OK, V3_STAGEFLOW_REPAIR_REQUIRED, V3_STAGEFLOW_JOB_HEADERS, V3_STAGEFLOW_INCIDENT_HEADERS, V3_STAGEFLOW_STAGES.
+- L?nea 81 a 89: funci?n `v3StageEnsureControlSheets_`; arranque l?gico en firstCodeLine=82; ejecuta flujo con llamadas a: v3StageEnsureSheetHeaders_, asegurarHoja.
+- L?nea 90 a 90: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 91 a 123: funci?n `v3StageRunPipelineManual_`; arranque l?gico en firstCodeLine=92; ejecuta flujo con llamadas a: valorSeguroTexto, v3StageResolvePeriodo_, v3StageFormatDate_, v3StageResolveFechaCorte_, v3StageRunStage_.
+- L?nea 124 a 124: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 125 a 287: funci?n `v3StageRunStage_`; arranque l?gico en firstCodeLine=126; ejecuta flujo con llamadas a: v3StageGetStageConfig_, valorSeguroTexto, v3StageResolvePeriodo_, v3StageResolveFechaCorte_, generarId, v3StageEnsureControlSheets_, v3StageOpenActiveRun_, v3StageGetRepairRequired_, v3StageAppendLedgerRow_, v3StageAppendIncident_, v3StageValidateDependencies_, v3StageSnapshotSheets_, v3StageExecute_, v3StageDiffSnapshots_, v3StageCountRowsAcrossSheets_, v3StageDurationSeconds_, v3StageSummarizeOutput_, v3StageAudit_, v3StageMarkRequiresCleanRebuild_, v3StageCloseActiveRun_.
+  - fase inicial (125-178): v3StageGetStageConfig_, valorSeguroTexto, v3StageResolvePeriodo_, v3StageResolveFechaCorte_, generarId, v3StageEnsureControlSheets_.
+  - fase media (179-232): v3StageOpenActiveRun_, v3StageGetRepairRequired_, v3StageAppendLedgerRow_, v3StageAppendIncident_, v3StageValidateDependencies_, v3StageSnapshotSheets_, v3StageExecute_.
+  - fase final (233-287): v3StageDiffSnapshots_, v3StageCountRowsAcrossSheets_, v3StageDurationSeconds_, v3StageSummarizeOutput_, v3StageAudit_, v3StageMarkRequiresCleanRebuild_, v3StageCloseActiveRun_.
+- L?nea 288 a 288: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 289 a 337: funci?n `v3StagePruebaFuncional_`; arranque l?gico en firstCodeLine=290; ejecuta flujo con llamadas a: normalizarFecha, hoySinHora, v3StageReadSheetObjects_, convertirANumeroSeguro, valorSeguroTexto, v3StageAuditRecargosVencimientos_, v3StageAuditConsolidacionFinal_.
+- L?nea 338 a 338: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 339 a 354: funci?n `v3StageExecute_`; arranque l?gico en firstCodeLine=340; ejecuta flujo con llamadas a: v3StageExecuteImportacionPagos_, v3StageExecuteGeneracionCargos_, v3StageExecuteRecargosVencimientos_, v3StageExecuteAplicacionPagos_, v3StageExecuteConsolidacionFinal_.
+- L?nea 355 a 355: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 356 a 371: funci?n `v3StageAudit_`; arranque l?gico en firstCodeLine=357; ejecuta flujo con llamadas a: v3StageAuditImportacionPagos_, v3StageAuditGeneracionCargos_, v3StageAuditRecargosVencimientos_, v3StageAuditAplicacionPagos_, v3StageAuditConsolidacionFinal_.
+- L?nea 372 a 372: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 373 a 390: funci?n `v3StageExecuteImportacionPagos_`; arranque l?gico en firstCodeLine=374; ejecuta flujo con llamadas a: v3PaymentsImportarPagosReportadosDesdeFormulario, runConstruirComprobantesCargados, v3ApplicationsCorregirAplicacionesErradas.
+- L?nea 391 a 391: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 392 a 413: funci?n `v3StageExecuteGeneracionCargos_`; arranque l?gico en firstCodeLine=393; ejecuta flujo con llamadas a: v3StageFormatDate_, v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo.
+- L?nea 414 a 414: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 415 a 419: funci?n `v3StageExecuteRecargosVencimientos_`; arranque l?gico en firstCodeLine=416; ejecuta flujo con llamadas a: v3ReversalsAplicarMora, v3StageFormatDate_.
+- L?nea 420 a 420: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 421 a 425: funci?n `v3StageExecuteAplicacionPagos_`; arranque l?gico en firstCodeLine=422; ejecuta flujo con llamadas a: v3ApplicationsAplicarPagosPendientes.
+- L?nea 426 a 426: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 427 a 443: funci?n `v3StageExecuteConsolidacionFinal_`; arranque l?gico en firstCodeLine=428; ejecuta flujo con llamadas a: v3StatementsConstruirEstadosCuenta, v3PortalExportGenerar, v3ConciliacionGenerar.
+- L?nea 444 a 444: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 445 a 464: funci?n `v3StageAuditImportacionPagos_`; arranque l?gico en firstCodeLine=446; ejecuta flujo con llamadas a: v3StageFindDuplicatesInSheet_, v3StageCreateIncident_, v3StageFindDuplicateCompositeInSheet_.
+- L?nea 465 a 465: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 466 a 500: funci?n `v3StageAuditGeneracionCargos_`; arranque l?gico en firstCodeLine=467; ejecuta flujo con llamadas a: v3StageFindDuplicatesInSheet_, valorSeguroTexto, v3StageCreateIncident_, v3StageReadSheetObjects_, v3StageExtractMonth_.
+- L?nea 501 a 501: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 502 a 556: funci?n `v3StageAuditRecargosVencimientos_`; arranque l?gico en firstCodeLine=503; ejecuta flujo con llamadas a: hoySinHora, v3ReversalsConstruirContexto_, v3StageCreateIncident_, v3StageIsIgnoredCargoState_, v3ReversalsResolverReglaParaCargo_, v3ReversalsObtenerFechaInicioMora_, v3StageFormatDate_.
+- L?nea 557 a 557: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 558 a 608: funci?n `v3StageAuditAplicacionPagos_`; arranque l?gico en firstCodeLine=559; ejecuta flujo con llamadas a: v3StageReadSheetObjects_, valorSeguroTexto, v3StageCreateIncident_.
+- L?nea 609 a 609: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 610 a 703: funci?n `v3StageAuditConsolidacionFinal_`; arranque l?gico en firstCodeLine=611; ejecuta flujo con llamadas a: v3StageReadSheetObjects_, valorSeguroTexto, convertirANumeroSeguro, v3StageCreateIncident_, v3PortalExportResolverMontoContable_.
+  - fase inicial (610-640): v3StageReadSheetObjects_.
+  - fase media (641-671): valorSeguroTexto, convertirANumeroSeguro.
+  - fase final (672-703): v3StageCreateIncident_, v3PortalExportResolverMontoContable_.
+- L?nea 704 a 704: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 705 a 709: funci?n `v3StageGetStageConfig_`; arranque l?gico en firstCodeLine=706; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 710 a 710: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 711 a 719: funci?n `v3StageResolvePeriodo_`; arranque l?gico en firstCodeLine=712; ejecuta flujo con llamadas a: v3StageNormalizePeriodo_, valorSeguroTexto, leerConfig.
+- L?nea 720 a 720: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 721 a 730: funci?n `v3StageNormalizePeriodo_`; arranque l?gico en firstCodeLine=722; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 731 a 731: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 732 a 734: funci?n `v3StageResolveFechaCorte_`; arranque l?gico en firstCodeLine=733; ejecuta flujo con llamadas a: normalizarFecha, hoySinHora.
+- L?nea 735 a 735: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 736 a 739: funci?n `v3StageFormatDate_`; arranque l?gico en firstCodeLine=737; ejecuta flujo con llamadas a: normalizarFecha, hoySinHora.
+- L?nea 740 a 740: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 741 a 761: funci?n `v3StageEnsureSheetHeaders_`; arranque l?gico en firstCodeLine=742; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 762 a 762: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 763 a 770: funci?n `v3StageSnapshotSheets_`; arranque l?gico en firstCodeLine=764; ejecuta flujo con llamadas a: obtenerHojaPorNombre.
+- L?nea 771 a 771: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 772 a 779: funci?n `v3StageDiffSnapshots_`; arranque l?gico en firstCodeLine=773; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 780 a 780: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 781 a 785: funci?n `v3StageCountRowsAcrossSheets_`; arranque l?gico en firstCodeLine=782; ejecuta flujo con llamadas a: v3StageCountRows_.
+- L?nea 786 a 786: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 787 a 790: funci?n `v3StageCountRows_`; arranque l?gico en firstCodeLine=788; ejecuta flujo con llamadas a: obtenerHojaPorNombre.
+- L?nea 791 a 791: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 792 a 794: funci?n `v3StageDurationSeconds_`; arranque l?gico en firstCodeLine=793; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 795 a 795: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 796 a 799: funci?n `v3StageSummarizeOutput_`; arranque l?gico en firstCodeLine=797; ejecuta flujo con llamadas a: _serializarDatosExtraSeguro_.
+- L?nea 800 a 800: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 801 a 813: funci?n `v3StageReadSheetObjects_`; arranque l?gico en firstCodeLine=802; ejecuta flujo con llamadas a: obtenerHojaPorNombre, valorSeguroTexto.
+- L?nea 814 a 814: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 815 a 829: funci?n `v3StageFindDuplicatesInSheet_`; arranque l?gico en firstCodeLine=816; ejecuta flujo con llamadas a: v3StageReadSheetObjects_, filterFn, valorSeguroTexto.
+- L?nea 830 a 830: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 831 a 846: funci?n `v3StageFindDuplicateCompositeInSheet_`; arranque l?gico en firstCodeLine=832; ejecuta flujo con llamadas a: v3StageReadSheetObjects_, valorSeguroTexto.
+- L?nea 847 a 847: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 848 a 861: funci?n `v3StageValidateDependencies_`; arranque l?gico en firstCodeLine=849; ejecuta flujo con llamadas a: v3StageGetStageConfig_, v3StageGetLastAuditStatus_.
+- L?nea 862 a 862: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 863 a 874: funci?n `v3StageGetLastAuditStatus_`; arranque l?gico en firstCodeLine=864; ejecuta flujo con llamadas a: obtenerHojaPorNombre, v3StageReadSheetObjects_, valorSeguroTexto.
+- L?nea 875 a 875: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 876 a 898: funci?n `v3StageOpenActiveRun_`; arranque l?gico en firstCodeLine=877; ejecuta flujo con llamadas a: normalizarFecha.
+- L?nea 899 a 899: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 900 a 914: funci?n `v3StageCloseActiveRun_`; arranque l?gico en firstCodeLine=901; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 915 a 915: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 916 a 932: funci?n `v3StageAppendLedgerRow_`; arranque l?gico en firstCodeLine=917; ejecuta flujo con llamadas a: asegurarHoja, v3StageEnsureSheetHeaders_, valorSeguroTexto.
+- L?nea 933 a 933: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 934 a 948: funci?n `v3StageAppendIncident_`; arranque l?gico en firstCodeLine=935; ejecuta flujo con llamadas a: asegurarHoja, v3StageEnsureSheetHeaders_, valorSeguroTexto.
+- L?nea 949 a 949: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 950 a 961: funci?n `v3StageCreateIncident_`; arranque l?gico en firstCodeLine=951; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 962 a 962: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 963 a 965: funci?n `v3StageIsBlockingIncident_`; arranque l?gico en firstCodeLine=964; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 966 a 966: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 967 a 970: funci?n `v3StageExtractMonth_`; arranque l?gico en firstCodeLine=968; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 971 a 971: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 972 a 975: funci?n `v3StageIsIgnoredCargoState_`; arranque l?gico en firstCodeLine=973; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 976 a 976: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 977 a 992: funci?n `v3StageMarkRequiresCleanRebuild_`; arranque l?gico en firstCodeLine=978; ejecuta flujo con llamadas a: valorSeguroTexto.
+- L?nea 993 a 993: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 994 a 1015: funci?n `v3StageClearRepairRequired_`; arranque l?gico en firstCodeLine=995; ejecuta flujo con llamadas a: v3StageAppendIncident_, valorSeguroTexto.
+- L?nea 1016 a 1016: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1017 a 1030: funci?n `v3StageGetRepairRequired_`; arranque l?gico en firstCodeLine=1018; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 90_V3_Runners.gs.js
+
+- Prop?sito probable: generar, cargar, obtener sobre mora, cargo, periodo, fecha.
+- Se?ales usadas: funciones run0_ActivacionMinima, run1_SchemaAsegurarEstructura, run2_SchemaAsegurarValidaciones, run3_ConfigInicializarBase, run4_SyncInicializarConfigBase....
+- Flujo observado por llamadas: v3ActivacionMinima, v3SchemaAsegurarEstructura, v3SchemaAsegurarValidaciones, v3ConfigSetupInicializarBase, v3SyncInicializarConfigBase, v3PaymentsInicializarConfigBase....
+
+- L?nea 1 a 28: pre?mbulo de constantes/configuraci?n; define o prepara: V3_RUNNERS_VERSION, V3_RUNNERS_DEFAULTS, V3_LEGACY_GUARDRAIL, V3_RUNNERS_DERIVADAS_CONTROLADAS.
+- L?nea 29 a 36: funci?n `run0_ActivacionMinima`; arranque l?gico en firstCodeLine=30; ejecuta flujo con llamadas a: v3ActivacionMinima.
+- L?nea 37 a 44: funci?n `run1_SchemaAsegurarEstructura`; arranque l?gico en firstCodeLine=38; ejecuta flujo con llamadas a: v3SchemaAsegurarEstructura.
+- L?nea 45 a 52: funci?n `run2_SchemaAsegurarValidaciones`; arranque l?gico en firstCodeLine=46; ejecuta flujo con llamadas a: v3SchemaAsegurarValidaciones.
+- L?nea 53 a 60: funci?n `run3_ConfigInicializarBase`; arranque l?gico en firstCodeLine=54; ejecuta flujo con llamadas a: v3ConfigSetupInicializarBase.
+- L?nea 61 a 68: funci?n `run4_SyncInicializarConfigBase`; arranque l?gico en firstCodeLine=62; ejecuta flujo con llamadas a: v3SyncInicializarConfigBase.
+- L?nea 69 a 76: funci?n `run5_PaymentsInicializarConfigBase`; arranque l?gico en firstCodeLine=70; ejecuta flujo con llamadas a: v3PaymentsInicializarConfigBase.
+- L?nea 77 a 84: funci?n `run6_RulesSeedPreview2026`; arranque l?gico en firstCodeLine=78; ejecuta flujo con llamadas a: v3RulesSeedPreview2026.
+- L?nea 85 a 92: funci?n `run7_RulesSeedCargar2026`; arranque l?gico en firstCodeLine=86; ejecuta flujo con llamadas a: v3RulesSeedCargar2026.
+- L?nea 93 a 100: funci?n `run8_RulesFixValidaciones`; arranque l?gico en firstCodeLine=94; ejecuta flujo con llamadas a: v3RulesFixValidaciones.
+- L?nea 101 a 107: funci?n `run9_GenerarContrasenasPortal`; arranque l?gico en firstCodeLine=104; ejecuta flujo con llamadas a: v3PortalApiGenerarContrasenas.
+- L?nea 108 a 115: funci?n `run10_VerificarSchema`; arranque l?gico en firstCodeLine=109; ejecuta flujo con llamadas a: v3SchemaVerificarEstructura.
+- L?nea 116 a 123: funci?n `run11_VerificarSync`; arranque l?gico en firstCodeLine=117; ejecuta flujo con llamadas a: v3SyncVerificarConfiguracionFuente.
+- L?nea 124 a 131: funci?n `run12_VerificarPayments`; arranque l?gico en firstCodeLine=125; ejecuta flujo con llamadas a: v3PaymentsVerificarConfiguracion.
+- L?nea 132 a 134: funci?n `run13_ChargesPreviewAnoLectivoActual`; arranque l?gico en firstCodeLine=133; ejecuta flujo con llamadas a: run45_ChargesPreviewReconstruccionHistoricaAnoActual.
+- L?nea 135 a 139: funci?n `run14_ChargesGenerateAnoLectivoActual`; arranque l?gico en firstCodeLine=136; ejecuta flujo con llamadas a: run46_ChargesReconstruccionHistoricaAnoActual.
+- L?nea 140 a 147: funci?n `run15_EliminarTriggersDual`; arranque l?gico en firstCodeLine=141; ejecuta flujo con llamadas a: v3AutomationEliminarTriggersDual.
+- L?nea 148 a 158: funci?n `run16_ClearRepairMode`; arranque l?gico en firstCodeLine=149; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 159 a 174: funci?n `run17_SetBackupEvidenceStale`; arranque l?gico en firstCodeLine=160; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 175 a 186: funci?n `run18_ClearBackupEvidence`; arranque l?gico en firstCodeLine=176; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 187 a 208: funci?n `run19_RepairModeSetter`; arranque l?gico en firstCodeLine=188; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 209 a 216: funci?n `run20_SyncPreview`; arranque l?gico en firstCodeLine=210; ejecuta flujo con llamadas a: v3SyncPrevisualizarAlumnosDesdeFuente.
+- L?nea 217 a 224: funci?n `run21_SyncReal`; arranque l?gico en firstCodeLine=218; ejecuta flujo con llamadas a: v3SyncAlumnosDesdeFuente.
+- L?nea 225 a 227: funci?n `run22_FlujoMesControlado`; arranque l?gico en firstCodeLine=226; ejecuta flujo con llamadas a: v3RunnersFlujoMesControladoUnico_.
+- L?nea 228 a 230: funci?n `run23_RebuildControladoDerivadasPeriodo`; arranque l?gico en firstCodeLine=229; ejecuta flujo con llamadas a: v3RunnersRebuildControladoDerivadas_.
+- L?nea 231 a 233: funci?n `run24_SecuenciaOperativaMesUnicoArgs`; arranque l?gico en firstCodeLine=232; ejecuta flujo con llamadas a: v3RunnersSecuenciaOperativaMesUnico_.
+- L?nea 234 a 236: funci?n `run25_SecuenciaMesPagosEstadosExport`; arranque l?gico en firstCodeLine=235; ejecuta flujo con llamadas a: v3RunnersSecuenciaMesPagosEstadosExport_.
+- L?nea 237 a 244: funci?n `run30_PaymentsPreview`; arranque l?gico en firstCodeLine=238; ejecuta flujo con llamadas a: v3PaymentsPrevisualizarImportacion.
+- L?nea 245 a 252: funci?n `run31_PaymentsImport`; arranque l?gico en firstCodeLine=246; ejecuta flujo con llamadas a: v3PaymentsImportarPagosReportadosDesdeFormulario.
+- L?nea 253 a 271: funci?n `run40_BootstrapCrearCargosEscolares`; arranque l?gico en firstCodeLine=254; ejecuta flujo con llamadas a: asegurarHoja, v3ChargesAsegurarHeaders_.
+- L?nea 272 a 282: funci?n `run41_ChargesPreviewPeriodoPrueba`; arranque l?gico en firstCodeLine=273; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 283 a 293: funci?n `run42_ChargesGeneratePeriodoPrueba`; arranque l?gico en firstCodeLine=284; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 294 a 304: funci?n `run43_ChargesPreviewPeriodoAlterno`; arranque l?gico en firstCodeLine=295; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 305 a 315: funci?n `run44_ChargesGeneratePeriodoAlterno`; arranque l?gico en firstCodeLine=306; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 316 a 326: funci?n `run45_ChargesPreviewReconstruccionHistoricaAnoActual`; arranque l?gico en firstCodeLine=317; ejecuta flujo con llamadas a: v3ChargesPrevisualizarReconstruccionHistorica, v3ChargesPrevisualizarAnoLectivo.
+- L?nea 327 a 337: funci?n `run46_ChargesReconstruccionHistoricaAnoActual`; arranque l?gico en firstCodeLine=328; ejecuta flujo con llamadas a: v3ChargesGenerarReconstruccionHistorica, v3ChargesGenerarAnoLectivo.
+- L?nea 338 a 348: funci?n `run47_ChargesPreviewFebrero`; arranque l?gico en firstCodeLine=339; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 349 a 359: funci?n `run48_ChargesGenerateFebrero`; arranque l?gico en firstCodeLine=350; ejecuta flujo con llamadas a: v3ChargesGenerarCargosPeriodo.
+- L?nea 360 a 370: funci?n `run49_ChargesPreviewMarzo`; arranque l?gico en firstCodeLine=361; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo.
+- L?nea 371 a 378: funci?n `run50_MoraPreviewPeriodoPrueba`; arranque l?gico en firstCodeLine=372; ejecuta flujo con llamadas a: v3ReversalsPrevisualizarMora.
+- L?nea 379 a 386: funci?n `run51_MoraAplicarPeriodoPrueba`; arranque l?gico en firstCodeLine=380; ejecuta flujo con llamadas a: v3ReversalsAplicarMora.
+- L?nea 387 a 394: funci?n `run60_AplicacionesApplyPendientes`; arranque l?gico en firstCodeLine=388; ejecuta flujo con llamadas a: v3ApplicationsAplicarPagosPendientes.
+- L?nea 395 a 401: funci?n `run61_AplicacionesPreviewPagoPorId`; arranque l?gico en firstCodeLine=396; ejecuta flujo con llamadas a: runPreviewPagoXYZ, v3ApplicationsPrevisualizarAplicacionPagoReportado.
+- L?nea 402 a 408: funci?n `run62_AplicacionesApplyPagoPorId`; arranque l?gico en firstCodeLine=403; ejecuta flujo con llamadas a: runAplicarPagoXYZ, v3ApplicationsAplicarPagoReportado.
+- L?nea 409 a 416: funci?n `run70_RebuildEstadosBase`; arranque l?gico en firstCodeLine=410; ejecuta flujo con llamadas a: v3StatementsConstruirEstadosCuenta.
+- L?nea 417 a 424: funci?n `run71_RebuildPortalPadresExport`; arranque l?gico en firstCodeLine=418; ejecuta flujo con llamadas a: v3StatementsConstruirPortalPadresExport.
+- L?nea 425 a 432: funci?n `run72_PortalApiStatus`; arranque l?gico en firstCodeLine=426; ejecuta flujo con llamadas a: v3PortalApiGetSystemStatus_.
+- L?nea 433 a 440: funci?n `run73_PortalApiPublicUrl`; arranque l?gico en firstCodeLine=434; ejecuta flujo con llamadas a: v3PortalApiGetPublicUrl.
+- L?nea 441 a 457: funci?n `run80_FlujoArranqueBase`; arranque l?gico en firstCodeLine=442; ejecuta flujo con llamadas a: run00_ActivacionMinima, run01_SchemaAsegurarEstructura, run02_SchemaAsegurarValidaciones, run03_ConfigInicializarBase, run07_RulesSeedCargar2026, run08_RulesFixValidaciones, run21_SyncReal.
+- L?nea 458 a 471: funci?n `run81_FlujoCargosPeriodoPrueba`; arranque l?gico en firstCodeLine=459; ejecuta flujo con llamadas a: run41_ChargesPreviewPeriodoPrueba, run42_ChargesGeneratePeriodoPrueba.
+- L?nea 472 a 484: funci?n `run82_FlujoPagosYEstados`; arranque l?gico en firstCodeLine=473; ejecuta flujo con llamadas a: run31_PaymentsImport, run60_AplicacionesApplyPendientes, run70_RebuildEstadosBase.
+- L?nea 485 a 503: funci?n `run83_FlujoMensualCompletoPeriodoPrueba`; arranque l?gico en firstCodeLine=486; ejecuta flujo con llamadas a: run41_ChargesPreviewPeriodoPrueba, run42_ChargesGeneratePeriodoPrueba, run50_MoraPreviewPeriodoPrueba, run51_MoraAplicarPeriodoPrueba, run31_PaymentsImport, run60_AplicacionesApplyPendientes, run70_RebuildEstadosBase.
+- L?nea 504 a 522: funci?n `run84_FlujoManualFebrero`; arranque l?gico en firstCodeLine=505; ejecuta flujo con llamadas a: run47_ChargesPreviewFebrero, run48_ChargesGenerateFebrero, run60B_AplicacionesPreviewCorreccionErradas, run60C_AplicacionesAplicarCorreccionErradas, run60A_AplicacionesPreviewPendientes, run60_AplicacionesApplyPendientes, run70_RebuildEstadosBase.
+- L?nea 523 a 541: funci?n `run85_FlujoManualMarzo`; arranque l?gico en firstCodeLine=524; ejecuta flujo con llamadas a: run49_ChargesPreviewMarzo, run49A_ChargesGenerateMarzo, run60B_AplicacionesPreviewCorreccionErradas, run60C_AplicacionesAplicarCorreccionErradas, run60A_AplicacionesPreviewPendientes, run60_AplicacionesApplyPendientes, run70_RebuildEstadosBase.
+- L?nea 542 a 558: funci?n `run90_FlujoOperativoDiario`; arranque l?gico en firstCodeLine=543; ejecuta flujo con llamadas a: run31B_PaymentsManualImport, run60B_AplicacionesPreviewCorreccionErradas, run60C_AplicacionesAplicarCorreccionErradas, run60A_AplicacionesPreviewPendientes, run60_AplicacionesApplyPendientes, run70_RebuildEstadosBase.
+- L?nea 559 a 589: funci?n `run91_ConfigurarTriggerFlujoOperativoDiario`; arranque l?gico en firstCodeLine=560; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 590 a 609: funci?n `run92_EliminarTriggerFlujoOperativoDiario`; arranque l?gico en firstCodeLine=591; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 610 a 617: funci?n `run93_FlujoMaestroPeriodoVigente`; arranque l?gico en firstCodeLine=611; ejecuta flujo con llamadas a: v3AutomationRunMasterManual.
+- L?nea 618 a 625: funci?n `run94_ConfigurarTriggersDual`; arranque l?gico en firstCodeLine=619; ejecuta flujo con llamadas a: v3AutomationConfigurarTriggersDual.
+- L?nea 626 a 642: funci?n `run95_RecuperarReglasYPortal`; arranque l?gico en firstCodeLine=627; ejecuta flujo con llamadas a: run07_RulesSeedCargar2026, run08_RulesFixValidaciones, run70_RebuildEstadosBase, run71_RebuildPortalPadresExport, run72_PortalApiStatus, run73_PortalApiPublicUrl.
+- L?nea 643 a 665: funci?n `run96_RebuildExportContableYConciliacion`; arranque l?gico en firstCodeLine=644; ejecuta flujo con llamadas a: v3PortalExportGenerarExportContabilidad, v3ConciliacionGenerar, v3StagePruebaFuncional_.
+- L?nea 666 a 721: funci?n `run98_CongelarYRespaldarDerivadas`; arranque l?gico en firstCodeLine=667; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 722 a 728: funci?n `run100_InicializarArquitecturaEscalonada`; arranque l?gico en firstCodeLine=723; ejecuta flujo con llamadas a: v3StageEnsureControlSheets_.
+- L?nea 729 a 739: funci?n `run101_EtapaImportacionPagos`; arranque l?gico en firstCodeLine=730; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 740 a 750: funci?n `run102_EtapaGeneracionCargos`; arranque l?gico en firstCodeLine=741; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 751 a 761: funci?n `run103_EtapaRecargosVencimientos`; arranque l?gico en firstCodeLine=752; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 762 a 772: funci?n `run104_EtapaAplicacionPagos`; arranque l?gico en firstCodeLine=763; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 773 a 783: funci?n `run105_EtapaConsolidacionFinal`; arranque l?gico en firstCodeLine=774; ejecuta flujo con llamadas a: v3StageRunStage_.
+- L?nea 784 a 810: funci?n `run106_PruebaFuncionalArquitectura`; arranque l?gico en firstCodeLine=785; ejecuta flujo con llamadas a: v3StagePruebaFuncional_, v3RunnersResumenControlEjecucion_, v3RunnersEstadoRepairRequired_, v3RunnersSaldoDesdeDetalle_, v3RunnersSaldoDesdeHoja_, v3RunnersRecargosMarzo_, v3RunnersDuplicadosAbril_, v3RunnersCheckConciliacionMontoAplicado_.
+- L?nea 811 a 817: funci?n `run107_ModoReconstruccionLimpiaCasoActual`; arranque l?gico en firstCodeLine=812; ejecuta flujo con llamadas a: runModoReconstruccionLimpiaCasoActual.
+- L?nea 818 a 851: funci?n `run108_EvidenciaCasoActual`; arranque l?gico en firstCodeLine=819; ejecuta flujo con llamadas a: v3RunnersResumenControlEjecucion_, v3RunnersEstadoRepairRequired_, v3RunnersSaldoDesdeDetalle_, v3RunnersSaldoDesdeHoja_, v3RunnersRecargosMarzo_, v3RunnersDuplicadosAbril_, v3RunnersCheckConciliacionMontoAplicado_.
+- L?nea 852 a 862: funci?n `run109_CicloMensualNuevo`; arranque l?gico en firstCodeLine=853; ejecuta flujo con llamadas a: runCicloMensualNuevo.
+- L?nea 863 a 965: funci?n `run110_DiagnosticoRecargo`; arranque l?gico en firstCodeLine=864; ejecuta flujo con llamadas a: periodoKey, v3ReversalsPrevisualizarMora.
+  - fase inicial (863-896): sin llamadas clave asignables.
+  - fase media (897-930): periodoKey.
+  - fase final (931-965): v3ReversalsPrevisualizarMora.
+- L?nea 966 a 968: funci?n `run111_FlujoMesFebreroCompleto`; arranque l?gico en firstCodeLine=967; ejecuta flujo con llamadas a: v3RunnersFlujoMesCompleto_.
+- L?nea 969 a 971: funci?n `run112_FlujoMesMarzoCompleto`; arranque l?gico en firstCodeLine=970; ejecuta flujo con llamadas a: v3RunnersFlujoMesCompleto_.
+- L?nea 972 a 974: funci?n `run113_FlujoMesAbrilCompleto`; arranque l?gico en firstCodeLine=973; ejecuta flujo con llamadas a: v3RunnersFlujoMesCompleto_.
+- L?nea 975 a 1073: funci?n `run114_AuditoriaDescuentoVsRecargo`; arranque l?gico en firstCodeLine=976; ejecuta flujo con llamadas a: periodoKey, obtenerHojaPorNombre, v3RunnersHeaderMap_, v3RunnersFindCol_.
+  - fase inicial (975-1007): periodoKey.
+  - fase media (1008-1040): obtenerHojaPorNombre.
+  - fase final (1041-1073): v3RunnersHeaderMap_, v3RunnersFindCol_.
+- L?nea 1074 a 1076: funci?n `run115_PreviewReparacionRecargoSinDescuento`; arranque l?gico en firstCodeLine=1075; ejecuta flujo con llamadas a: v3RunnersRepararRecargoSinDescuento_.
+- L?nea 1077 a 1079: funci?n `run116_AplicarReparacionRecargoSinDescuento`; arranque l?gico en firstCodeLine=1078; ejecuta flujo con llamadas a: v3RunnersRepararRecargoSinDescuento_.
+- L?nea 1080 a 1086: funci?n `run117_FlujoMesControladoUnico`; arranque l?gico en firstCodeLine=1081; ejecuta flujo con llamadas a: v3RunnersFlujoMesControladoUnico_.
+- L?nea 1087 a 1089: funci?n `run118_RebuildControladoDerivadas`; arranque l?gico en firstCodeLine=1088; ejecuta flujo con llamadas a: v3RunnersResetFlujoCompletoSoloFebrero_.
+- L?nea 1090 a 1092: funci?n `run118A_RebuildFebrero`; arranque l?gico en firstCodeLine=1091; ejecuta flujo con llamadas a: v3RunnersResetFlujoCompletoSoloFebrero_.
+- L?nea 1093 a 1095: funci?n `run118Z_RebuildTodosLosPeriodos`; arranque l?gico en firstCodeLine=1094; ejecuta flujo con llamadas a: v3RunnersRebuildControladoDerivadas_.
+- L?nea 1096 a 1113: funci?n `run119_AuditoriaControlCalculos`; arranque l?gico en firstCodeLine=1097; ejecuta flujo con llamadas a: run114_AuditoriaDescuentoVsRecargo, run108_EvidenciaCasoActual.
+- L?nea 1114 a 1120: funci?n `run120_SecuenciaOperativaMesUnico`; arranque l?gico en firstCodeLine=1115; ejecuta flujo con llamadas a: v3RunnersSecuenciaOperativaMesUnico_.
+- L?nea 1121 a 1127: funci?n `run121_SecuenciaFebreroPagosEstadosExport`; arranque l?gico en firstCodeLine=1122; ejecuta flujo con llamadas a: v3RunnersSecuenciaMesPagosEstadosExport_.
+- L?nea 1128 a 1134: funci?n `run122_SecuenciaMarzoPagosEstadosExport`; arranque l?gico en firstCodeLine=1129; ejecuta flujo con llamadas a: v3RunnersSecuenciaMesPagosEstadosExport_.
+- L?nea 1135 a 1141: funci?n `run123_SecuenciaAbrilPagosEstadosExport`; arranque l?gico en firstCodeLine=1136; ejecuta flujo con llamadas a: v3RunnersSecuenciaMesPagosEstadosExport_.
+- L?nea 1142 a 1148: funci?n `run124_SecuenciaMesPagosEstadosExportDefault`; arranque l?gico en firstCodeLine=1143; ejecuta flujo con llamadas a: v3RunnersSecuenciaMesPagosEstadosExport_.
+- L?nea 1149 a 1149: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1150 a 1160: funci?n `v3RunnersPeriodoSeguro_`; arranque l?gico en firstCodeLine=1151; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1161 a 1161: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1162 a 1176: funci?n `v3RunnersHojasFlujoCompleto_`; arranque l?gico en firstCodeLine=1163; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1177 a 1177: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1178 a 1203: funci?n `v3RunnersLimpiarHojasFlujoCompleto_`; arranque l?gico en firstCodeLine=1179; ejecuta flujo con llamadas a: obtenerHojaPorNombre.
+- L?nea 1204 a 1204: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1205 a 1211: funci?n `v3RunnersTextoNormalizado_`; arranque l?gico en firstCodeLine=1206; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1212 a 1212: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1213 a 1218: funci?n `v3RunnersNormalizarPeriodo_`; arranque l?gico en firstCodeLine=1214; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 1219 a 1219: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1220 a 1226: funci?n `v3RunnersHeaderMap_`; arranque l?gico en firstCodeLine=1221; ejecuta flujo con llamadas a: v3RunnersTextoNormalizado_.
+- L?nea 1227 a 1227: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1228 a 1336: funci?n `v3RunnersForzarRecargosVencidosPeriodo_`; arranque l?gico en firstCodeLine=1229; ejecuta flujo con llamadas a: obtenerHojaPorNombre, v3RunnersNormalizarPeriodo_, v3RunnersHeaderMap_, normalizarFecha, hoySinHora, v3RunnersTextoNormalizado_.
+  - fase inicial (1228-1263): obtenerHojaPorNombre, v3RunnersNormalizarPeriodo_.
+  - fase media (1264-1299): v3RunnersHeaderMap_, normalizarFecha.
+  - fase final (1300-1336): hoySinHora, v3RunnersTextoNormalizado_.
+- L?nea 1337 a 1337: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1338 a 1444: funci?n `v3RunnersResetFlujoCompletoSoloFebrero_`; arranque l?gico en firstCodeLine=1339; ejecuta flujo con llamadas a: v3ResetMensualPrepararBase_, v3RunnersLimpiarHojasFlujoCompleto_, v3RunnersHojasFlujoCompleto_, v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo, v3ResetMensualCompletarCargosEscolares_, v3ResetMensualAplicarPagosPendientes_, v3ReversalsAplicarMora, v3ResetMensualAplicarMora_, v3RunnersForzarRecargosVencidosPeriodo_, v3ResetMensualRegularizarRecargos_, v3StatementsConstruirEstadoCuentaDetalle, v3StatementsConstruirEstadoCuentaResumen, v3ConciliacionGenerar, v3PortalExportGenerarPortalPadresExport, v3StatementsConstruirPortalPadresExport, v3PortalExportGenerarExportContabilidad.
+  - fase inicial (1338-1372): v3ResetMensualPrepararBase_, v3RunnersLimpiarHojasFlujoCompleto_, v3RunnersHojasFlujoCompleto_, v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo.
+  - fase media (1373-1408): v3ResetMensualCompletarCargosEscolares_, v3ResetMensualAplicarPagosPendientes_, v3ReversalsAplicarMora, v3ResetMensualAplicarMora_, v3RunnersForzarRecargosVencidosPeriodo_, v3ResetMensualRegularizarRecargos_.
+  - fase final (1409-1444): v3StatementsConstruirEstadoCuentaDetalle, v3StatementsConstruirEstadoCuentaResumen, v3ConciliacionGenerar, v3PortalExportGenerarPortalPadresExport, v3StatementsConstruirPortalPadresExport, v3PortalExportGenerarExportContabilidad.
+- L?nea 1445 a 1445: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1446 a 1473: funci?n `v3RunnersLimpiarDerivadasControladas_`; arranque l?gico en firstCodeLine=1447; ejecuta flujo con llamadas a: obtenerHojaPorNombre.
+- L?nea 1474 a 1474: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1475 a 1512: funci?n `v3RunnersReconstruirDerivadas_`; arranque l?gico en firstCodeLine=1476; ejecuta flujo con llamadas a: v3RunnersPeriodoSeguro_, v3StatementsConstruirEstadoCuentaDetalle, v3StatementsConstruirEstadoCuentaResumen, v3ConciliacionGenerar, v3PortalExportGenerarPortalPadresExport, v3StatementsConstruirPortalPadresExport, v3PortalExportGenerarExportContabilidad.
+- L?nea 1513 a 1513: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1514 a 1566: funci?n `v3RunnersRebuildControladoDerivadas_`; arranque l?gico en firstCodeLine=1515; ejecuta flujo con llamadas a: v3RunnersPeriodoSeguro_, v3RunnersLimpiarDerivadasControladas_, v3StatementsConstruirEstadoCuentaDetalle, v3StatementsConstruirEstadoCuentaResumen, v3ConciliacionGenerar, v3PortalExportGenerarPortalPadresExport, v3StatementsConstruirPortalPadresExport, v3PortalExportGenerarExportContabilidad.
+- L?nea 1567 a 1567: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1568 a 1621: funci?n `v3RunnersSecuenciaMesPagosEstadosExport_`; arranque l?gico en firstCodeLine=1569; ejecuta flujo con llamadas a: v3RunnersPeriodoSeguro_, v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo, v3ReversalsAplicarMora, v3ApplicationsAplicarPagosPendientes, v3RunnersReconstruirDerivadas_, v3RunnersRebuildControladoDerivadas_.
+- L?nea 1622 a 1622: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1623 a 1631: funci?n `v3RunnersSecuenciaOperativaMesUnico_`; arranque l?gico en firstCodeLine=1624; ejecuta flujo con llamadas a: v3RunnersSecuenciaMesPagosEstadosExport_.
+- L?nea 1632 a 1632: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1633 a 1641: funci?n `v3RunnersFlujoMesControladoUnico_`; arranque l?gico en firstCodeLine=1634; ejecuta flujo con llamadas a: v3RunnersSecuenciaMesPagosEstadosExport_.
+- L?nea 1642 a 1642: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 1643 a 1653: funci?n `run199_SetRepairModeSI`; arranque l?gico en firstCodeLine=1644; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 91_V3_Orchestrators.gs.js
+
+- Prop?sito probable: orquestar l?gica de negocio sobre datos transaccionales.
+- Se?ales usadas: funciones myFunction.
+- Flujo observado: sin llamadas expl?citas en bloques.
+
+
+# 98_Admin_Mantenimiento.gs.js
+
+- Prop?sito probable: orquestar l?gica de negocio sobre datos transaccionales.
+- Se?ales usadas: funciones v3AdminBackupYPurgarPagosReportados_FormResponseSheet, v3AdminRebuildComprobantesCargadosOrdenado.
+- Flujo observado por llamadas: col.
+
+- L?nea 1 a 8: pre?mbulo de constantes/configuraci?n; define o prepara: constantes/configuraci?n no detalladas.
+- L?nea 9 a 54: funci?n `v3AdminBackupYPurgarPagosReportados_FormResponseSheet`; arranque l?gico en firstCodeLine=10; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 55 a 61: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 62 a 174: funci?n `v3AdminRebuildComprobantesCargadosOrdenado`; arranque l?gico en firstCodeLine=63; ejecuta flujo con llamadas a: col.
+  - fase inicial (62-98): sin llamadas clave asignables.
+  - fase media (99-136): sin llamadas clave asignables.
+  - fase final (137-174): col.
+
+# 98_V3_GuardianRepair.gs.js
+
+- Prop?sito probable: orquestar l?gica de negocio sobre cargo.
+- Se?ales usadas: funciones v3GuardianInspectHeaders, v3GuardianRepairAll, v3GuardianRepairCargos, v3GuardianRepairConciliacion, v3GuardianListLegacySheets....
+- Flujo observado por llamadas: v3GuardianGetHeaders_, v3GuardianRepairCargos, v3GuardianRepairConciliacion, v3GuardianBuildAlumnosMap_, v3GuardianNeedHeader_, v3GuardianStr_....
+
+- L?nea 1 a 14: pre?mbulo de constantes/configuraci?n; define o prepara: V3_GUARDIAN_VERSION, V3_GUARDIAN.
+- L?nea 15 a 38: funci?n `v3GuardianInspectHeaders`; arranque l?gico en firstCodeLine=16; ejecuta flujo con llamadas a: v3GuardianGetHeaders_.
+- L?nea 39 a 43: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 44 a 61: funci?n `v3GuardianRepairAll`; arranque l?gico en firstCodeLine=45; ejecuta flujo con llamadas a: v3GuardianRepairCargos, v3GuardianRepairConciliacion.
+- L?nea 62 a 62: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 63 a 105: funci?n `v3GuardianRepairCargos`; arranque l?gico en firstCodeLine=64; ejecuta flujo con llamadas a: v3GuardianBuildAlumnosMap_, v3GuardianGetHeaders_, v3GuardianNeedHeader_, v3GuardianStr_.
+- L?nea 106 a 106: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 107 a 153: funci?n `v3GuardianRepairConciliacion`; arranque l?gico en firstCodeLine=108; ejecuta flujo con llamadas a: v3GuardianBuildAlumnosMap_, v3GuardianGetHeaders_, v3GuardianNeedHeader_, v3GuardianStr_, v3GuardianNum_, v3GuardianRound2_.
+- L?nea 154 a 158: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 159 a 175: funci?n `v3GuardianListLegacySheets`; arranque l?gico en firstCodeLine=160; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 176 a 180: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 181 a 213: funci?n `v3GuardianBuildAlumnosMap_`; arranque l?gico en firstCodeLine=182; ejecuta flujo con llamadas a: v3GuardianGetHeaders_, v3GuardianNeedHeader_, v3GuardianFindHeaderAny_, v3GuardianStr_.
+- L?nea 214 a 214: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 215 a 219: funci?n `v3GuardianGetHeaders_`; arranque l?gico en firstCodeLine=216; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 220 a 220: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 221 a 225: funci?n `v3GuardianNeedHeader_`; arranque l?gico en firstCodeLine=222; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 226 a 226: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 227 a 233: funci?n `v3GuardianFindHeaderAny_`; arranque l?gico en firstCodeLine=228; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 234 a 234: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 235 a 237: funci?n `v3GuardianStr_`; arranque l?gico en firstCodeLine=236; ejecuta flujo con llamadas a: sin llamadas detectadas.
+- L?nea 238 a 238: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 239 a 244: funci?n `v3GuardianNum_`; arranque l?gico en firstCodeLine=240; ejecuta flujo con llamadas a: v3GuardianStr_.
+- L?nea 245 a 245: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 246 a 248: funci?n `v3GuardianRound2_`; arranque l?gico en firstCodeLine=247; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+# 99_V3_OrquestadorContable.gs.js
+
+- Prop?sito probable: generar, registrar sobre mora, cargo, periodo.
+- Se?ales usadas: funciones v3OrquestadorContable, v3OrquestadorDiagnostico, v3OrquestadorDetectarPagosPendientes_.
+- Flujo observado por llamadas: v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo, v3OrquestadorDetectarPagosPendientes_, v3ApplicationsAplicarPagosPendientes, v3ReversalsAplicarMora, v3StatementsConstruirEstadoCuentaDetalle....
+
+- L?nea 1 a 3: pre?mbulo de constantes/configuraci?n; define o prepara: constantes/configuraci?n no detalladas.
+- L?nea 4 a 99: funci?n `v3OrquestadorContable`; arranque l?gico en firstCodeLine=5; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo, v3OrquestadorDetectarPagosPendientes_, v3ApplicationsAplicarPagosPendientes, v3ReversalsAplicarMora, v3StatementsConstruirEstadoCuentaDetalle, v3StatementsConstruirEstadoCuentaResumen, v3PortalExportGenerarPortalPadresExport, registrarAuditoria.
+  - fase inicial (4-35): v3ChargesPrevisualizarCargosPeriodo, v3ChargesGenerarCargosPeriodo, v3OrquestadorDetectarPagosPendientes_.
+  - fase media (36-67): v3ApplicationsAplicarPagosPendientes, v3ReversalsAplicarMora, v3StatementsConstruirEstadoCuentaDetalle.
+  - fase final (68-99): v3StatementsConstruirEstadoCuentaResumen, v3PortalExportGenerarPortalPadresExport, registrarAuditoria.
+- L?nea 100 a 103: interludio/secci?n auxiliar entre bloques funcionales.
+- L?nea 104 a 136: funci?n `v3OrquestadorDiagnostico`; arranque l?gico en firstCodeLine=105; ejecuta flujo con llamadas a: v3ChargesPrevisualizarCargosPeriodo, v3OrquestadorDetectarPagosPendientes_, v3ReversalsPrevisualizarMora.
+- L?nea 137 a 141: funci?n `v3OrquestadorDetectarPagosPendientes_`; arranque l?gico en firstCodeLine=140; ejecuta flujo con llamadas a: sin llamadas detectadas.
+
+## Mapa de Choques Potenciales
+
+- Hardcodes potenciales de periodo/fecha detectados en constantes top-level:
+  - `00_V3_ActivacionMinima.gs.js` l?nea 1: `V3_MIN_VERSION`
+  - `01_V3_Core.gs.js` l?nea 11: `V3_VERSION`
+  - `01_V3_Core.gs.js` l?nea 16: `ALUMNOS`
+  - `01_V3_Core.gs.js` l?nea 17: `CARGOS_ESCOLARES`
+  - `01_V3_Core.gs.js` l?nea 18: `PAGOS_REPORTADOS`
+  - `01_V3_Core.gs.js` l?nea 19: `CONCILIACION`
+  - `01_V3_Core.gs.js` l?nea 20: `PARAMETROS`
+  - `01_V3_Core.gs.js` l?nea 21: `CONFIG`
+  - `01_V3_Core.gs.js` l?nea 22: `REGLAS_COBRO`
+  - `01_V3_Core.gs.js` l?nea 23: `APLICACION_PAGOS`
+  - `01_V3_Core.gs.js` l?nea 24: `AUDITORIA_FINANCIERA`
+  - `01_V3_Core.gs.js` l?nea 25: `ESTADO_CUENTA_DETALLE`
+  - `01_V3_Core.gs.js` l?nea 26: `ESTADO_CUENTA_RESUMEN`
+  - `01_V3_Core.gs.js` l?nea 27: `PORTAL_PADRES_EXPORT`
+  - `01_V3_Core.gs.js` l?nea 28: `EXPORT_CONTABILIDAD`
+  - `01_V3_Core.gs.js` l?nea 30: `COLA_ENVIO_FACTURAS`
+  - `01_V3_Core.gs.js` l?nea 35: `EMAIL_FACTURACION_ALIAS`
+  - `01_V3_Core.gs.js` l?nea 36: `EMAIL_FACTURACION_REPLYTO`
+  - `01_V3_Core.gs.js` l?nea 37: `FACTURAS_FOLDER_NUEVAS_ID`
+  - `01_V3_Core.gs.js` l?nea 38: `FACTURAS_FOLDER_ENVIADAS_ID`
+  - `01_V3_Core.gs.js` l?nea 39: `FACTURAS_FOLDER_ERROR_ID`
+  - `01_V3_Core.gs.js` l?nea 40: `FACTURAS_FOLDER_ARCHIVO_ID`
+  - `01_V3_Core.gs.js` l?nea 41: `PLANTILLA_RECIBO_ID`
+  - `01_V3_Core.gs.js` l?nea 42: `MODO_ENVIO_FACTURAS`
+  - `01_V3_Core.gs.js` l?nea 43: `MODO_SISTEMA`
+- Orden de ejecuci?n entre scripts (sugerido por referencias callerFile -> resolvedInFile):
+  - `09_V3_Statements.gs.js` -> `01_V3_Core.gs.js` (3210 referencia(s))
+  - `10_V3_PortalExport.gs.js` -> `01_V3_Core.gs.js` (3090 referencia(s))
+  - `05_V3_Payments.gs.js` -> `01_V3_Core.gs.js` (3090 referencia(s))
+  - `06_V3_Applications.gs.js` -> `01_V3_Core.gs.js` (2880 referencia(s))
+  - `21_V3_StageFlow.gs.js` -> `01_V3_Core.gs.js` (2760 referencia(s))
+  - `04_V3_Sync.gs.js` -> `01_V3_Core.gs.js` (2220 referencia(s))
+  - `03_V3_ConfigSetup.gs.js` -> `01_V3_Core.gs.js` (1050 referencia(s))
+  - `90_V3_Runners.gs.js` -> `07_V3_Charges.gs.js` (780 referencia(s))
+  - `14_V3_FormularioPagosInterno.gs.js` -> `01_V3_Core.gs.js` (690 referencia(s))
+  - `02_V3_Schema.gs.js` -> `01_V3_Core.gs.js` (450 referencia(s))
+  - `90_V3_Runners.gs.js` -> `10_V3_PortalExport.gs.js` (360 referencia(s))
+  - `12_V3_ResetMensual.gs.js` -> `07_V3_Charges.gs.js` (360 referencia(s))
+  - `15_V3_FormularioPagosV2.gs.js` -> `01_V3_Core.gs.js` (300 referencia(s))
+  - `12_V3_ResetMensual.gs.js` -> `01_V3_Core.gs.js` (300 referencia(s))
+  - `90_V3_Runners.gs.js` -> `21_V3_StageFlow.gs.js` (240 referencia(s))
+  - `90_V3_Runners.gs.js` -> `09_V3_Statements.gs.js` (240 referencia(s))
+  - `90_V3_Runners.gs.js` -> `04_V3_Sync.gs.js` (240 referencia(s))
+  - `90_V3_Runners.gs.js` -> `01_V3_Core.gs.js` (240 referencia(s))
+  - `90_V3_Runners.gs.js` -> `12_V3_ResetMensual.gs.js` (210 referencia(s))
+  - `90_V3_Runners.gs.js` -> `08_V3_Reversals.gs.js` (210 referencia(s))
+- Dependencias cruzadas fuertes (>=3 referencias entre pares de archivos):
+  - `09_V3_Statements.gs.js` -> `01_V3_Core.gs.js`: 3210
+  - `10_V3_PortalExport.gs.js` -> `01_V3_Core.gs.js`: 3090
+  - `05_V3_Payments.gs.js` -> `01_V3_Core.gs.js`: 3090
+  - `06_V3_Applications.gs.js` -> `01_V3_Core.gs.js`: 2880
+  - `21_V3_StageFlow.gs.js` -> `01_V3_Core.gs.js`: 2760
+  - `04_V3_Sync.gs.js` -> `01_V3_Core.gs.js`: 2220
+  - `03_V3_ConfigSetup.gs.js` -> `01_V3_Core.gs.js`: 1050
+  - `90_V3_Runners.gs.js` -> `07_V3_Charges.gs.js`: 780
+  - `14_V3_FormularioPagosInterno.gs.js` -> `01_V3_Core.gs.js`: 690
+  - `02_V3_Schema.gs.js` -> `01_V3_Core.gs.js`: 450
+  - `90_V3_Runners.gs.js` -> `10_V3_PortalExport.gs.js`: 360
+  - `12_V3_ResetMensual.gs.js` -> `07_V3_Charges.gs.js`: 360
+  - `15_V3_FormularioPagosV2.gs.js` -> `01_V3_Core.gs.js`: 300
+  - `12_V3_ResetMensual.gs.js` -> `01_V3_Core.gs.js`: 300
+  - `90_V3_Runners.gs.js` -> `21_V3_StageFlow.gs.js`: 240
+  - `90_V3_Runners.gs.js` -> `09_V3_Statements.gs.js`: 240
+  - `90_V3_Runners.gs.js` -> `04_V3_Sync.gs.js`: 240
+  - `90_V3_Runners.gs.js` -> `01_V3_Core.gs.js`: 240
+  - `90_V3_Runners.gs.js` -> `12_V3_ResetMensual.gs.js`: 210
+  - `90_V3_Runners.gs.js` -> `08_V3_Reversals.gs.js`: 210
+- Llamadas no resueltas (138): MOROSO, ORDENADO, _serializarDatosExtraSeguro_, a, alumno, asegurarHoja, base, buildFallbackKeyFn, col, convertirANumeroSeguro, dias, escribirConfig, especiales, exigirNoProduccionOOverride, filterFn, fn, generarId, get, gracia, hoySinHora, impagos, leerConfig, lido, lineas, milisegundos, nimos, normalizarFecha, obtenerHojaPorNombre, obtenerSpreadsheetActivoSeguro, periodoKey, pushIf, registrarAuditoria, repetido, run00_ActivacionMinima, run01_SchemaAsegurarEstructura, run02_SchemaAsegurarValidaciones, run03_ConfigInicializarBase, run07_RulesSeedCargar2026, run08_RulesFixValidaciones, run31B_PaymentsManualImport...
+- Nombres potencialmente ambiguos: no detectados en crossRef.

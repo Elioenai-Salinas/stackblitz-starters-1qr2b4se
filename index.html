@@ -1,26 +1,76 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Informe Técnico CARGOS_MORA</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Informe Técnico Integral CARGOS_MORA</h1>
+      <p>Lectura profesional de arquitectura, flujo y conflictos por script</p>
+    </div>
+    <div class="badge" id="totalScripts">Scripts: --</div>
+  </header>
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="panel">
+        <h2>Navegación</h2>
+        <input id="searchInput" type="text" placeholder="Buscar script..." />
+        <div id="scriptList" class="script-list"></div>
+      </div>
+      <div class="panel stats" id="statsPanel"></div>
+    </aside>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+    <section class="content">
+      <nav class="tabs">
+        <button class="tab active" data-tab="direccion">Vista Dirección</button>
+        <button class="tab" data-tab="soluciones">Soluciones y Plan</button>
+        <button class="tab" data-tab="resumen">Resumen Técnico</button>
+        <button class="tab" data-tab="flujo">Flujo Graficado</button>
+        <button class="tab" data-tab="conflictos">Conflictos</button>
+        <button class="tab" data-tab="detalle">Detalle por Script</button>
+      </nav>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+      <article id="tab-direccion" class="tab-content active">
+        <div id="execKpis" class="card"></div>
+        <div id="execRisks" class="card"></div>
+        <div id="execNarrative" class="card"></div>
+      </article>
+
+      <article id="tab-soluciones" class="tab-content">
+        <div id="solutionsPlan" class="card"></div>
+      </article>
+
+      <article id="tab-resumen" class="tab-content">
+        <div id="globalSummary" class="card"></div>
+        <div id="callsSummary" class="card"></div>
+      </article>
+
+      <article id="tab-flujo" class="tab-content">
+        <div class="card">
+          <h3>Mapa Macro del Flujo</h3>
+          <div id="mermaidFlow" class="mermaid"></div>
+        </div>
+        <div id="flowNotes" class="card"></div>
+      </article>
+
+      <article id="tab-conflictos" class="tab-content">
+        <div id="conflictsPanel" class="card"></div>
+      </article>
+
+      <article id="tab-detalle" class="tab-content">
+        <div id="scriptDetail" class="card">
+          <h3>Selecciona un script en la barra lateral</h3>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
 </html>

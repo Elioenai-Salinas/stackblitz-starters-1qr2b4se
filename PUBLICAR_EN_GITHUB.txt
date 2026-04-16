@@ -1,0 +1,129 @@
+# 🚀 Guía: Publicar en GitHub Pages (5 minutos)
+
+## PASO 1: Crear cuenta en GitHub (si no tienes)
+
+1. Entra a https://github.com
+2. Click en "Sign up"
+3. Rellena email, contraseña, nombre de usuario
+4. Verifica tu email
+5. ¡Listo!
+
+---
+
+## PASO 2: Crear nuevo repositorio
+
+1. Ve a https://github.com/new
+2. Rellena así:
+   ```
+   Repository name: cargos-mora-informe
+   Description: Informe Ejecutivo Interactivo CARGOS_MORA
+   Public: ✅ (marcar)
+   Add a README: Dejar sin marcar (ya tenemos uno)
+   ```
+3. Click "Create repository"
+
+---
+
+## PASO 3: Subir los archivos
+
+Abre **PowerShell** y ejecuta ESTOS COMANDOS UNO POR UNO:
+
+```powershell
+# Navega a la carpeta de la app
+cd "C:\Users\Elio\OneDrive\Escritorio\Proyectos VS code\proyecto practica\CARGOS_MORA\INFORME_WEB"
+
+# Inicializar git
+git init
+
+# Agregar todos los archivos
+git add .
+
+# Hacer commit inicial
+git commit -m "CARGOS_MORA Informe Web - Versión 1.0"
+
+# Agregar el repositorio remoto (REEMPLAZA "tu-usuario" con tu usuario de GitHub)
+git remote add origin https://github.com/tu-usuario/cargos-mora-informe.git
+
+# Cambiar rama a 'main' si es necesario
+git branch -M main
+
+# Subir al repositorio
+git push -u origin main
+```
+
+**⚠️ IMPORTANTE:** Reemplaza `tu-usuario` con tu nombre de usuario en GitHub
+
+---
+
+## PASO 4: Habilitar GitHub Pages
+
+1. Ve a tu repo: https://github.com/tu-usuario/cargos-mora-informe
+2. Click en **"Settings"** (arriba a la derecha)
+3. En el menú izquierdo: **"Pages"**
+4. En "Source":
+   - Branch: `main`
+   - Carpeta: `/root`
+   - Click "Save"
+
+Espera 1-2 minutos.
+
+---
+
+## PASO 5: ¡Abre tu web app!
+
+Ve a:
+```
+https://tu-usuario.github.io/cargos-mora-informe
+```
+
+**¡Listo!** Comparte este link con cualquiera.
+
+---
+
+## 🔄 Si necesitas actualizar los datos
+
+Cuando regeneres `report_data.json`, solo necesitas:
+
+```powershell
+cd "C:\Users\Elio\OneDrive\Escritorio\Proyectos VS code\proyecto practica\CARGOS_MORA\INFORME_WEB"
+
+git add report_data.json
+
+git commit -m "Actualizar datos de análisis"
+
+git push
+```
+
+Espera 1 minuto y la web se actualiza automáticamente.
+
+---
+
+## ❓ Troubleshooting
+
+### "Permission denied (publickey)"
+→ Necesitas configurar SSH. Alternativa más fácil: usa HTTPS en lugar de SSH:
+```
+git remote set-url origin https://github.com/tu-usuario/cargos-mora-informe.git
+```
+
+### "El sitio no carga"
+→ Espera 2-3 minutos después de hacer push. GitHub necesita tiempo para generar la web.
+
+### "No se ve bien en móvil"
+→ La app es responsiva. Si no se ve bien, abre browser en modo desarrollador (F12) y revisa console por errores.
+
+### "Quiero dominio propio"
+→ En Settings → Pages, puedes agregar tu dominio personalizado.
+
+---
+
+## 💡 Tips
+
+- La web carga mucho más rápido desde GitHub Pages que desde localhost
+- Puedes editar README.md directamente en GitHub para cambiar la descripción
+- Los cambios se ven en ~30 segundos a 1 minuto
+- Para agregar colaboradores: Settings → Collaborators → Add people
+
+---
+
+**¿Necesitas ayuda?** Pregunta al equipo técnico.

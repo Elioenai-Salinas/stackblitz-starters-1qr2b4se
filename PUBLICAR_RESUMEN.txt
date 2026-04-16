@@ -1,0 +1,73 @@
+╔════════════════════════════════════════════════════════════════╗
+║      🚀 CARGOS_MORA INFORME WEB - LISTO PARA PUBLICAR          ║
+╚════════════════════════════════════════════════════════════════╝
+
+📋 ARCHIVOS QUE SE SUBIRÁN A GITHUB:
+
+├── 📄 index.html              → Estructura HTML (interfaz)
+├── 🎨 styles.css              → Estilos visuales
+├── ⚙️  app.js                 → Lógica interactiva (450 líneas)
+├── 📊 report_data.json        → Análisis de 30 scripts (486 KB)
+├── 📖 README.md               → Documentación para directores
+├── 📝 PUBLICAR_EN_GITHUB.txt  → Instrucciones paso a paso
+├── 🔧 PUBLICAR_A_GITHUB.ps1   → Script automático (RECOMENDADO)
+└── 🚫 .gitignore              → Archivos a ignorar
+
+═════════════════════════════════════════════════════════════════
+
+✅ LO QUE NECESITAS HACER (OPCIÓN 1 - MÁS FÁCIL):
+
+1. Abre PowerShell (Windows + R → "powershell")
+
+2. Navega a esta carpeta:
+   cd "C:\Users\Elio\OneDrive\Escritorio\Proyectos VS code\proyecto practica\CARGOS_MORA\INFORME_WEB"
+
+3. Ejecuta el script automático:
+   .\PUBLICAR_A_GITHUB.ps1
+
+4. Te pide tu usuario de GitHub
+   (si no tienes cuenta: https://github.com/signup)
+
+5. ¡Listo! Apareceré tu URL en la pantalla
+
+═════════════════════════════════════════════════════════════════
+
+🔗 RESULTADO FINAL:
+
+https://tu-usuario.github.io/cargos-mora-informe
+
+→ Puedes compartir esto con CUALQUIERA
+→ No necesitan código, usuario, contraseña
+→ Funciona en móvil, tablet, desktop
+→ Completamente seguro
+
+═════════════════════════════════════════════════════════════════
+
+⚠️  SI EL SCRIPT NO FUNCIONA:
+
+Lee el archivo "PUBLICAR_EN_GITHUB.txt" para instrucciones
+manuales paso a paso.
+
+═════════════════════════════════════════════════════════════════
+
+💡 PRÓXIMOS PASOS (DESPUÉS DE PUBLICAR):
+
+1. Comparte la URL con Directores
+2. Cuando actualices datos (report_data.json):
+   
+   git add report_data.json
+   git commit -m "Actualizar datos"
+   git push
+
+3. Los cambios aparecen en 1 minuto
+
+═════════════════════════════════════════════════════════════════
+
+📞 AYUDA:
+
+Si algo no funciona:
+- Verifica que tienes cuenta en GitHub
+- Verifica que git está instalado: git --version
+- Lee PUBLICAR_EN_GITHUB.txt para soluciones
+
+═════════════════════════════════════════════════════════════════
