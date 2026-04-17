@@ -195,7 +195,7 @@
             <tbody>
               <tr><td>Cargos Escolares</td><td>FUNCIONA</td><td>Genera cargos base.</td></tr>
               <tr><td>Aplicación de Pagos</td><td>FUNCIONA PARCIAL</td><td>Aplica pagos con casos pendientes.</td></tr>
-              <tr><td>Statements / Estados</td><td>BLOQUEADO (cuello)</td><td>Colapsa movimientos de período a saldo.</td></tr>
+              <tr><td>Statements / Estados</td><td>EN CORRECCIÓN (cuello principal)</td><td>Ajuste técnico aplicado; cierre bloqueado por validación pendiente en entorno autorizado.</td></tr>
               <tr><td>Detalle</td><td>FUNCIONA PARCIAL</td><td>Dependiente de corrección en Statements.</td></tr>
               <tr><td>Portal</td><td>HEREDA ERROR</td><td>No recalcula; hereda salida de Resumen/Detalle.</td></tr>
               <tr><td>Conciliación</td><td>REQUIERE VALIDACIÓN</td><td>Dependiente de aplicaciones reales.</td></tr>
@@ -210,7 +210,7 @@
             <li>Reestructuración por capas A-F activada.</li>
             <li>Flujo operativo secuencial activado (manual febrero-marzo-abril antes de automático).</li>
             <li>Protocolo iterativo obligatorio con evidencia web por cada cambio.</li>
-            <li>Iteración 1 enfocada en 09_V3_Statements.gs.js (normalización y clasificación de período).</li>
+            <li>Primer bloque enfocado en 09_V3_Statements.gs.js (estado: NO CERRADO hasta validar febrero en hojas).</li>
           </ul>
         </div>
 
@@ -261,7 +261,7 @@
               <tr><td>07_V3_Charges.gs.js</td><td>Generación de cargos</td><td>FUNCIONA</td></tr>
               <tr><td>06_V3_Applications.gs.js</td><td>Aplicación de pagos</td><td>FUNCIONA PARCIAL</td></tr>
               <tr><td>08_V3_Reversals.gs.js</td><td>Recargos / vencimientos</td><td>REQUIERE VALIDACIÓN</td></tr>
-              <tr><td>09_V3_Statements.gs.js</td><td>Detalle y Resumen</td><td>ITERACIÓN 2 EN CURSO</td></tr>
+              <tr><td>09_V3_Statements.gs.js</td><td>Detalle y Resumen</td><td>PRIMER BLOQUE EN VALIDACIÓN (NO CERRADO)</td></tr>
               <tr><td>10_V3_PortalExport.gs.js</td><td>Portal + Export Contable</td><td>HEREDA RESULTADOS DE STATES</td></tr>
               <tr><td>18_V3_Conciliacion.gs.js</td><td>Conciliación</td><td>REQUIERE VALIDACIÓN</td></tr>
               <tr><td>90_V3_Runners.gs.js</td><td>Secuencias de ejecución</td><td>OPERATIVO</td></tr>
@@ -270,17 +270,18 @@
           </table>
         </div>
 
-        <h4>Iteración 2 - Evidencia de Statements</h4>
+        <h4>Verificación del primer bloque - Statements</h4>
         <div class="note-box">
           <ul class="tight">
-            <li><strong>Función tocada:</strong> v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_, v3StatementsConstruirContexto_, v3StatementsEvidenciaIteracionFebrero.</li>
-            <li><strong>Regla cambiada:</strong> si un movimiento no trae periodo explícito, ahora se infiere por fecha de movimiento antes de excluirlo o enviarlo a saldo anterior.</li>
+            <li><strong>Función tocada:</strong> v3StatementsResolverPeriodoMovimiento_, v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_, v3StatementsConstruirContexto_.</li>
+            <li><strong>Regla cambiada:</strong> si un movimiento no trae período explícito, se infiere por fecha de movimiento antes de excluirlo o enviarlo a saldo anterior.</li>
             <li><strong>Síntoma a corregir:</strong> movimientos reales de febrero degradados a SALDO_INICIAL y Total_Cargos/Total_Pagos en 0 por pérdida de clasificación.</li>
             <li><strong>Cambio en Resumen:</strong> se habilita cómputo de cargos/pagos del periodo al recuperar movimientos sin periodo explícito pero con fecha válida.</li>
             <li><strong>Cambio en Detalle:</strong> se prioriza movimiento real del periodo y se reduce degradación a SALDO_INICIAL por faltante de periodo explícito.</li>
             <li><strong>Cambio en Portal:</strong> sin ajuste directo; hereda mejora cuando Resumen del scope de febrero se reconstruye correctamente.</li>
             <li><strong>Cambio en Exportación:</strong> sin ajuste directo; puede poblarse cuando Detalle de febrero tenga movimientos exportables.</li>
-            <li><strong>Qué sigue roto:</strong> ejecución remota bloqueada por permisos en clasp run para validar evidencia en hoja real con los 4 casos obligatorios.</li>
+            <li><strong>Qué sigue roto:</strong> ejecución remota bloqueada por permisos en clasp run; no hay cierre funcional de febrero en hoja real.</li>
+            <li><strong>Estado de cierre:</strong> PRIMER BLOQUE NO CERRADO.</li>
           </ul>
         </div>
 
@@ -294,9 +295,17 @@
               <tr><td>Detalle</td><td>Mostrar movimientos reales del periodo</td><td>Degradación a SALDO_INICIAL en casos afectados</td><td>Se reduce degradación al inferir periodo por fecha</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
               <tr><td>Portal</td><td>Heredar resumen corregido</td><td>Heredaba estados degradados</td><td>Sin cambio directo; depende de rebuild de states validado</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
               <tr><td>Exportación contable</td><td>Poblarse cuando haya detalle exportable</td><td>Vacía por falta de detalle útil</td><td>Sin cambio directo; depende de detalle corregido en ejecución real</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
-              <tr><td>Prueba obligatoria de febrero (4 casos)</td><td>Validar sin pagos, con pagos, descuento familiar, excedente</td><td>No consolidada</td><td>Función v3StatementsEvidenciaIteracionFebrero agregada; ejecución remota bloqueada</td><td>BLOQUEADA POR PERMISOS</td></tr>
+              <tr><td>Prueba obligatoria de febrero (4 casos)</td><td>Validar sin pagos, con pagos, descuento familiar, excedente</td><td>No consolidada</td><td>Ejecución remota bloqueada por permisos de entorno</td><td>BLOQUEADA POR PERMISOS</td></tr>
             </tbody>
           </table>
+        </div>
+
+        <h4>Estado actual del cuello principal</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li><strong>¿Cambió el cuello principal?</strong> No. Sigue siendo Statements / Estados hasta cerrar validación funcional de febrero.</li>
+            <li><strong>¿Se puede marcar bloque terminado?</strong> No. Falta evidencia observada en Resumen, Detalle, Portal y Exportación en hojas reales.</li>
+          </ul>
         </div>
 
         <div class="warning-banner">

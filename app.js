@@ -864,15 +864,15 @@ function renderSolutions() {
   };
 
   const iteration1 = {
-    iteracion: 'Iteración 1 - Statements / Estados',
+    iteracion: 'Primer bloque - Statements / Estados (NO CERRADO)',
     archivo: 'proyecto practica/CARGOS_MORA/09_V3_Statements.gs.js',
-    funcion: 'v3StatementsNormalizarPeriodo_, v3StatementsResolverPeriodoAplicacion_, v3StatementsConstruirContexto_',
-    cambio: 'Se reforzó la normalización de período (yyyy-mm, mm-yyyy, fechas y nombres de mes) y se agregó fallback de período para pagos aplicados (Periodo_Aplicado -> periodo cargo -> Periodo_Reportado -> fecha de pago -> período filtro).',
+    funcion: 'v3StatementsResolverPeriodoMovimiento_, v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_, v3StatementsConstruirContexto_',
+    cambio: 'Se ajustó la resolución del período por movimiento para que, cuando no exista período explícito, use fecha de movimiento y no reclasifique indebidamente a saldo anterior.',
     noTocado: 'No se modificó lógica de recargos, mora, conciliación ni portal visual.',
     motivo: 'Corregir degradación de movimientos del período que terminaban fuera del filtro de febrero y colapsaban a saldo anterior/saldo inicial.',
     efectoEsperado: 'Resumen y Detalle deben conservar movimientos reales del período; Portal y Export deben heredar movimientos exportables cuando existan.',
     prueba: 'Período 2026-02, corrida manual de Statements + salidas derivadas.',
-    resultado: 'Cambio aplicado y desplegado por clasp push. Ejecución remota de prueba bloqueada por permisos de clasp run; validación funcional de datos queda pendiente en entorno autorizado.',
+    resultado: 'Cambio aplicado y desplegado por clasp push. Validación funcional no cerrada: run84/run70 bloqueados por permisos de ejecución en el entorno actual.',
     resumenImpacto: 'Esperado: Total_Cargos/Total_Pagos visibles para febrero. Observado: pendiente de confirmación en hoja.',
     detalleImpacto: 'Esperado: detalle con cargos/pagos/ajustes/reversos reales en febrero. Observado: pendiente de confirmación en hoja.',
     portalImpacto: 'Esperado: portal hereda estados corregidos. Observado: pendiente de confirmación por bloqueo de run.',
@@ -1118,7 +1118,7 @@ function renderSolutions() {
       </table>
     </div>
 
-    <h4>Cierre de Iteración 1 (obligatorio)</h4>
+    <h4>Verificación del primer bloque (no cerrado)</h4>
     <div class="table-wrap">
       <table class="diag-table">
         <thead><tr><th>Bloque</th><th>Evidencia</th></tr></thead>
@@ -1128,12 +1128,12 @@ function renderSolutions() {
           <tr><td>C) Resultado observado</td><td>${escapeHtml(iteration1.resultado)}<br><em>Prueba:</em> ${escapeHtml(iteration1.prueba)}</td></tr>
           <tr><td>D) Riesgos abiertos</td><td>${escapeHtml(iteration1.riesgos)}</td></tr>
           <tr><td>E) Siguiente paso</td><td>${escapeHtml(iteration1.siguiente)}</td></tr>
-          <tr><td>F) Informe web actualizado</td><td>SI - Iteración 1 registrada con trazabilidad técnica y estado de validación.</td></tr>
+          <tr><td>F) Informe web actualizado</td><td>SI - Bloque registrado como NO CERRADO hasta validar febrero en hojas reales.</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h4>Salida obligatoria Iteración 1 (detalle técnico)</h4>
+    <h4>Salida obligatoria del primer bloque (detalle técnico)</h4>
     <div class="note-box">
       <ul class="tight">
         <li><strong>Qué anomalía corrige:</strong> ${escapeHtml(iteration1.motivo)}</li>
@@ -1142,7 +1142,7 @@ function renderSolutions() {
         <li><strong>Detalle:</strong> ${escapeHtml(iteration1.detalleImpacto)}</li>
         <li><strong>Portal:</strong> ${escapeHtml(iteration1.portalImpacto)}</li>
         <li><strong>Exportación Contable:</strong> ${escapeHtml(iteration1.exportImpacto)}</li>
-        <li><strong>Qué sigue roto:</strong> validación observada de febrero no cerrada por bloqueo de ejecución remota.</li>
+        <li><strong>Qué sigue roto:</strong> cierre de febrero no validado en hojas por bloqueo de permisos de ejecución.</li>
         <li><strong>Módulo siguiente:</strong> ejecución asistida de pruebas febrero en Statements (sin tocar recargos/mora/conciliación).</li>
       </ul>
     </div>
