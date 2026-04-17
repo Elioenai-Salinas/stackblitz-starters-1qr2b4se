@@ -1,0 +1,41 @@
+[
+  {
+    "id": "iter2-auth-clasp",
+    "fecha": "2026-04-17",
+    "titulo": "Reautenticacion de clasp en cuenta escolar",
+    "estado": "completado",
+    "alcance": "global",
+    "resumen": "Se restablecio el acceso OAuth de clasp y desaparecio invalid_rapt en deployments.",
+    "evidencia": [
+      "clasp deployments lista 21 deployments sin error invalid_rapt.",
+      "Cuenta activa validada: cebuenpastorgoldenheaven@ministeriotsebaot.com."
+    ],
+    "siguientePaso": "Usar esta sesion estable para validar ejecucion real de funciones de febrero."
+  },
+  {
+    "id": "iter2-run-permission",
+    "fecha": "2026-04-17",
+    "titulo": "Bloqueo en ejecucion remota de funciones",
+    "estado": "bloqueado",
+    "alcance": "09_V3_Statements.gs.js",
+    "resumen": "clasp run sigue rechazando funciones por permisos de ejecucion del script.",
+    "evidencia": [
+      "run10_VerificarSchema retorna: Unable to run script function.",
+      "run47_ChargesPreviewFebrero retorna el mismo bloqueo de permisos."
+    ],
+    "siguientePaso": "Habilitar permiso de ejecucion en Apps Script o GCP y repetir pruebas de febrero."
+  },
+  {
+    "id": "iter2-febrero-validation",
+    "fecha": "2026-04-17",
+    "titulo": "Validacion funcional de febrero (4 casos)",
+    "estado": "pendiente",
+    "alcance": "09_V3_Statements.gs.js",
+    "resumen": "Las validaciones en hojas reales siguen pendientes por bloqueo de ejecucion.",
+    "evidencia": [
+      "No evaluado: alumno sin pagos.",
+      "No evaluado: con pagos aplicados, descuento familiar y excedente."
+    ],
+    "siguientePaso": "Ejecutar runner de febrero y validar Resumen, Detalle, Portal y Export contable."
+  }
+]

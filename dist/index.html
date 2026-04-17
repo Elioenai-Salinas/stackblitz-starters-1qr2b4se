@@ -36,8 +36,8 @@
       "description": "Documento técnico en HTML con secciones estáticas y dinámicas para revisión humana y lectura automatizada por IA, sin dependencia de interacción para el contenido crítico."
     }
   </script>
-  <script type="module" crossorigin src="/assets/index-AQteUQrb.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DCXRQdCu.css">
+  <script type="module" crossorigin src="/assets/index-vTP5_byA.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-c6Aq8v-H.css">
 </head>
 <body>
   <a class="skip-link" href="#external-review">Saltar al contenido estático completo</a>
@@ -48,6 +48,11 @@
         <h3>Reporte Estático por Script</h3>
         <p class="small">Cada script queda disponible con ancla estable y contenido visible en HTML para revisión externa sin depender del cambio manual de pestañas.</p>
         <div id="externalScriptsReview"></div>
+      </section>
+      <section id="external-results-review" class="card static-review" aria-label="Informes de resultados de ejecución">
+        <h3>Informes de Resultados de Ejecución</h3>
+        <p class="small">Bitácora visible en HTML con cada corrida, estado y evidencia para lectura de modelos externos sin interacción.</p>
+        <div id="externalResultsReview"></div>
       </section>
       <h1>Informe Técnico Integral CARGOS_MORA</h1>
       <p>Lectura profesional de arquitectura, flujo y conflictos por script</p>
@@ -155,6 +160,7 @@
         <button class="tab active" data-tab="direccion">Vista Dirección</button>
         <button class="tab" data-tab="soluciones">Soluciones y Plan</button>
         <button class="tab" data-tab="resumen">Resumen Técnico</button>
+        <button class="tab" data-tab="resultados">Informes de Resultados</button>
         <button class="tab" data-tab="flujo">Flujo Graficado</button>
         <button class="tab" data-tab="conflictos">Conflictos</button>
         <button class="tab" data-tab="detalle">Detalle por Script</button>
@@ -174,6 +180,10 @@
 
       <article id="tab-resumen" class="tab-content">
         <div id="contextResumen" class="card"></div>
+      </article>
+
+      <article id="tab-resultados" class="tab-content">
+        <div id="contextResultados" class="card"></div>
       </article>
 
       <article id="tab-flujo" class="tab-content">

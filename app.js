@@ -3,6 +3,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
   const state = {
     data: null,
     execMd: '',
+    executionReports: [],
     scripts: [],
     selected: null,
     activeTab: 'direccion',
@@ -31,6 +32,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     scriptList: document.getElementById('scriptList'),
     statsPanel: document.getElementById('statsPanel'),
     externalScriptsReview: document.getElementById('externalScriptsReview'),
+    externalResultsReview: document.getElementById('externalResultsReview'),
     selectedBreadcrumb: document.getElementById('selectedBreadcrumb'),
     selectedTitle: document.getElementById('selectedTitle'),
     selectedMeta: document.getElementById('selectedMeta'),
@@ -42,6 +44,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     contextDireccion: document.getElementById('contextDireccion'),
     contextSoluciones: document.getElementById('contextSoluciones'),
     contextResumen: document.getElementById('contextResumen'),
+    contextResultados: document.getElementById('contextResultados'),
     contextFlujo: document.getElementById('contextFlujo'),
     contextConflictos: document.getElementById('contextConflictos'),
     contextDetalle: document.getElementById('contextDetalle')
@@ -80,6 +83,48 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
       recommendation: 'no tocar todavia'
     }
   };
+
+  const DEFAULT_EXECUTION_REPORTS = [
+    {
+      id: 'iter2-auth-clasp',
+      fecha: '2026-04-17',
+      titulo: 'Reautenticación de clasp en cuenta escolar',
+      estado: 'completado',
+      alcance: 'global',
+      resumen: 'Se restableció el acceso OAuth de clasp y desapareció invalid_rapt en deployments.',
+      evidencia: [
+        'clasp deployments lista 21 deployments sin error invalid_rapt.',
+        'Cuenta activa validada: cebuenpastorgoldenheaven@ministeriotsebaot.com.'
+      ],
+      siguientePaso: 'Usar esta sesión estable para validar ejecución real de funciones de febrero.'
+    },
+    {
+      id: 'iter2-run-permission',
+      fecha: '2026-04-17',
+      titulo: 'Bloqueo en ejecución remota de funciones',
+      estado: 'bloqueado',
+      alcance: '09_V3_Statements.gs.js',
+      resumen: 'clasp run sigue rechazando funciones por permisos de ejecución del script.',
+      evidencia: [
+        'run10_VerificarSchema retorna: Unable to run script function.',
+        'run47_ChargesPreviewFebrero retorna el mismo bloqueo de permisos.'
+      ],
+      siguientePaso: 'Habilitar permiso de ejecución en Apps Script / GCP y repetir pruebas de febrero.'
+    },
+    {
+      id: 'iter2-febrero-validation',
+      fecha: '2026-04-17',
+      titulo: 'Validación funcional de febrero (4 casos)',
+      estado: 'pendiente',
+      alcance: '09_V3_Statements.gs.js',
+      resumen: 'Las validaciones en hojas reales siguen pendientes por bloqueo de ejecución.',
+      evidencia: [
+        'No evaluado: alumno sin pagos.',
+        'No evaluado: con pagos aplicados, descuento familiar y excedente.'
+      ],
+      siguientePaso: 'Ejecutar runner de febrero y validar Resumen, Detalle, Portal y Export contable.'
+    }
+  ];
 
   const COTEJO_RECORDS = {
     '00_V3_ActivacionMinima.gs.js': {
@@ -2608,14 +2653,16 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     wireFilters();
     wireNavigation();
 
-    const [jsonText, mdText] = await Promise.all([
+    const [jsonText, mdText, reportsText] = await Promise.all([
       fetch('report_data.json').then(r => r.arrayBuffer()).then(buf => new TextDecoder('utf-8').decode(buf)),
-      fetch('INFORME_EJECUTIVO_DETALLADO.md').then(r => r.arrayBuffer()).then(buf => new TextDecoder('utf-8').decode(buf)).catch(() => '')
+      fetch('INFORME_EJECUTIVO_DETALLADO.md').then(r => r.arrayBuffer()).then(buf => new TextDecoder('utf-8').decode(buf)).catch(() => ''),
+      fetch('result_reports.json').then(r => r.arrayBuffer()).then(buf => new TextDecoder('utf-8').decode(buf)).catch(() => '[]')
     ]);
 
     state.data = JSON.parse(jsonText);
     normalizeDataStrings(state.data);
     state.execMd = mdText || '';
+    state.executionReports = parseExecutionReports(reportsText);
     state.scripts = enrichScripts((state.data.scripts || []).slice(), state.data.generatedAt || '');
     state.selected = state.scripts[0] || null;
 
@@ -2774,6 +2821,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     renderContextHeader();
     renderTabsForSelected();
     renderExternalScriptReports();
+    renderExternalResultsReports();
     activateTab(state.activeTab);
   }
 
@@ -2822,6 +2870,92 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
       </article>
     `).join('');
     safeMermaidRun(Array.from(ui.externalScriptsReview.querySelectorAll('.mermaid')));
+  }
+
+  function parseExecutionReports(rawText) {
+    try {
+      const parsed = JSON.parse(rawText || '[]');
+      if (!Array.isArray(parsed)) return DEFAULT_EXECUTION_REPORTS.slice();
+      if (!parsed.length) return DEFAULT_EXECUTION_REPORTS.slice();
+      return parsed.map((entry, index) => ({
+        id: entry.id || `result-${index + 1}`,
+        fecha: cleanText(entry.fecha || 'Sin fecha'),
+        titulo: cleanText(entry.titulo || 'Resultado sin título'),
+        estado: cleanText(entry.estado || 'pendiente').toLowerCase(),
+        alcance: cleanText(entry.alcance || 'global'),
+        resumen: cleanText(entry.resumen || 'Sin resumen disponible.'),
+        evidencia: Array.isArray(entry.evidencia) ? entry.evidencia.map(item => cleanText(item)) : [],
+        siguientePaso: cleanText(entry.siguientePaso || 'Pendiente definir siguiente paso.')
+      }));
+    } catch (error) {
+      return DEFAULT_EXECUTION_REPORTS.slice();
+    }
+  }
+
+  function reportStateClass(status) {
+    if (status === 'completado') return 'verde';
+    if (status === 'bloqueado') return 'rojo';
+    return 'amarillo';
+  }
+
+  function getReportsForScript(script) {
+    if (!script) return state.executionReports;
+    return state.executionReports.filter(report => {
+      const scope = (report.alcance || '').toLowerCase();
+      return scope === 'global' || scope === script.file.toLowerCase();
+    });
+  }
+
+  function renderResultadosTab(script) {
+    const reports = getReportsForScript(script);
+    if (!reports.length) {
+      return '<h3>Informes de Resultados</h3><div class="muted-box">No hay informes registrados todavía para este script.</div>';
+    }
+
+    return `
+      <h3>Informes de Resultados por Ejecución</h3>
+      <p class="small">Bitácora para revisión externa y seguimiento de bloqueos/avances del script seleccionado.</p>
+      <div class="result-report-list">
+        ${reports.map(report => `
+          <article class="result-report-card status-card ${reportStateClass(report.estado)}">
+            <header class="result-report-head">
+              <h4>${escapeHtml(report.titulo)}</h4>
+              <span class="chip ${reportStateClass(report.estado)}">${escapeHtml(report.estado.toUpperCase())}</span>
+            </header>
+            <p><strong>Fecha:</strong> ${escapeHtml(report.fecha)} · <strong>Alcance:</strong> ${escapeHtml(report.alcance)}</p>
+            <p>${escapeHtml(report.resumen)}</p>
+            <h5>Evidencia</h5>
+            <ul class="tight">
+              ${(report.evidencia || []).map(item => `<li>${escapeHtml(item)}</li>`).join('') || '<li>Sin evidencia cargada.</li>'}
+            </ul>
+            <p class="result-next-step"><strong>Siguiente paso:</strong> ${escapeHtml(report.siguientePaso)}</p>
+          </article>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderExternalResultsReports() {
+    if (!ui.externalResultsReview) return;
+    if (!state.executionReports.length) {
+      ui.externalResultsReview.innerHTML = '<div class="muted-box">No hay informes de resultados cargados.</div>';
+      return;
+    }
+
+    ui.externalResultsReview.innerHTML = state.executionReports.map(report => `
+      <article class="result-report-card status-card ${reportStateClass(report.estado)}">
+        <header class="result-report-head">
+          <h4>${escapeHtml(report.titulo)}</h4>
+          <span class="chip ${reportStateClass(report.estado)}">${escapeHtml(report.estado.toUpperCase())}</span>
+        </header>
+        <p><strong>Fecha:</strong> ${escapeHtml(report.fecha)} · <strong>Alcance:</strong> ${escapeHtml(report.alcance)}</p>
+        <p>${escapeHtml(report.resumen)}</p>
+        <ul class="tight">
+          ${(report.evidencia || []).map(item => `<li>${escapeHtml(item)}</li>`).join('') || '<li>Sin evidencia cargada.</li>'}
+        </ul>
+        <p class="result-next-step"><strong>Siguiente paso:</strong> ${escapeHtml(report.siguientePaso)}</p>
+      </article>
+    `).join('');
   }
 
   function renderStats() {
@@ -2880,6 +3014,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     ui.contextDireccion.innerHTML = renderDireccionTab(script);
     ui.contextSoluciones.innerHTML = renderSolucionesTab(script);
     ui.contextResumen.innerHTML = renderResumenTab(script);
+    ui.contextResultados.innerHTML = renderResultadosTab(script);
     ui.contextFlujo.innerHTML = renderFlujoTab(script);
     ui.contextConflictos.innerHTML = renderConflictosTab(script);
     ui.contextDetalle.innerHTML = renderDetalleTab(script);
