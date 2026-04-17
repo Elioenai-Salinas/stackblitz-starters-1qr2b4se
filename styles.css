@@ -284,19 +284,24 @@ body {
 }
 
 #clearFilters {
-  margin-top: 10px;
-  margin-bottom: 28px;
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 44px;
+  position: relative;
+  z-index: 2;
 }
 
 .script-list {
-  margin-top: 0.5cm;
-  padding-top: 12px;
+  margin-top: 0;
+  padding-top: 18px;
   border-top: 1px dashed #b7c7cd;
   max-height: calc(100vh - 280px);
   overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .static-script-list {
