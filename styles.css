@@ -16,6 +16,33 @@ body {
   background: radial-gradient(circle at 10% 10%, #f0f9fb, #f7f8f2 40%);
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  left: 10px;
+  top: 10px;
+  width: auto;
+  height: auto;
+  z-index: 1000;
+  background: #003844;
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.noscript-box {
+  margin: 12px 14px 0;
+  border: 2px dashed #0b7285;
+  background: #f0fbfe;
+}
+
 .topbar {
   display: flex;
   justify-content: space-between;

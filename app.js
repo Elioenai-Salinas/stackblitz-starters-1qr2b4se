@@ -26,6 +26,28 @@ const ui = {
 
 init();
 
+function isElementVisible(node) {
+  if (!node) return false;
+  return !!(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+}
+
+function safeMermaidRun(nodes) {
+  if (!window.mermaid || !Array.isArray(nodes)) return;
+  const visibleNodes = nodes.filter(node => node && node.isConnected && isElementVisible(node));
+  if (!visibleNodes.length) return;
+
+  Promise.resolve(mermaid.run({ nodes: visibleNodes })).catch(() => {
+    // Evita romper la UI si Mermaid falla en el render de un nodo.
+  });
+}
+
+function runActiveTabMermaid() {
+  const activeTab = document.querySelector('.tab-content.active');
+  if (!activeTab) return;
+  const nodes = Array.from(activeTab.querySelectorAll('.mermaid'));
+  safeMermaidRun(nodes);
+}
+
 async function init() {
   wireTabs();
   wireSearch();
@@ -45,6 +67,7 @@ async function init() {
   state.selected = state.scripts[0] || null;
 
   renderAll();
+  runActiveTabMermaid();
 }
 
 function normalizeDataStrings(obj) {
@@ -543,7 +566,7 @@ pie title Distribucion de Riesgo
 
   ui.execNarrative.innerHTML = execHtml;
   const riskNode = document.getElementById('riskPie');
-  if (riskNode) mermaid.run({ nodes: [riskNode] });
+  safeMermaidRun([riskNode]);
 }
 
 function renderSolutions() {
@@ -1247,7 +1270,7 @@ function renderFlow() {
     style I fill:#ececec,stroke:#616161,stroke-width:3px`;
 
   ui.mermaidFlow.textContent = mainFlow;
-  mermaid.run({ nodes: [ui.mermaidFlow] });
+  safeMermaidRun([ui.mermaidFlow]);
 
   ui.flowNotes.innerHTML = `
     <div class="flow-container">
@@ -1426,7 +1449,7 @@ function renderDetail() {
   ui.scriptDetail.innerHTML = detailHtml;
 
   const scriptNode = document.getElementById('scriptMermaid');
-  if (scriptNode) mermaid.run({ nodes: [scriptNode] });
+  safeMermaidRun([scriptNode]);
 }
 
 function explainBlock(block, script) {
@@ -1524,6 +1547,7 @@ function wireTabs() {
 function activateTab(tab) {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${tab}`));
+  runActiveTabMermaid();
 }
 
 function wireSearch() {
