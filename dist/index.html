@@ -36,8 +36,8 @@
       "description": "Documento técnico en HTML con secciones estáticas y dinámicas para revisión humana y lectura automatizada por IA, sin dependencia de interacción para el contenido crítico."
     }
   </script>
-  <script type="module" crossorigin src="/assets/index-DYjXS-8M.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DSwK2H2z.css">
+  <script type="module" crossorigin src="/assets/index-ytDrC2z_.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DS43YDuw.css">
 </head>
 <body>
   <a class="skip-link" href="#external-review">Saltar al contenido estático completo</a>
@@ -62,20 +62,32 @@
         <h2>Navegación</h2>
         <input id="searchInput" type="text" placeholder="Buscar script..." />
         <div class="filters-grid">
-          <select id="statusFilter" aria-label="Filtrar por estado">
-            <option value="all">Todos los estados</option>
-          </select>
-          <select id="severityFilter" aria-label="Filtrar por severidad">
-            <option value="all">Toda severidad</option>
-          </select>
-          <select id="priorityFilter" aria-label="Filtrar por prioridad">
-            <option value="all">Toda prioridad</option>
-          </select>
-          <select id="typeFilter" aria-label="Filtrar por tipo de módulo">
-            <option value="all">Todo tipo</option>
-          </select>
+          <div class="filter-wrap filter-wrap--estados">
+            <span class="filter-wrap__label">⬤ Estados</span>
+            <select id="statusFilter" aria-label="Filtrar por estado">
+              <option value="all">Todos los estados</option>
+            </select>
+          </div>
+          <div class="filter-wrap filter-wrap--severidad">
+            <span class="filter-wrap__label">⬤ Severidad</span>
+            <select id="severityFilter" aria-label="Filtrar por severidad">
+              <option value="all">Toda severidad</option>
+            </select>
+          </div>
+          <div class="filter-wrap filter-wrap--prioridad">
+            <span class="filter-wrap__label">⬤ Prioridad</span>
+            <select id="priorityFilter" aria-label="Filtrar por prioridad">
+              <option value="all">Toda prioridad</option>
+            </select>
+          </div>
+          <div class="filter-wrap filter-wrap--tipo">
+            <span class="filter-wrap__label">⬤ Tipo</span>
+            <select id="typeFilter" aria-label="Filtrar por tipo de módulo">
+              <option value="all">Todo tipo</option>
+            </select>
+          </div>
         </div>
-        <button id="clearFilters" class="ghost-button" type="button">Limpiar filtros</button>
+        <button id="clearFilters" class="ghost-button" type="button">🗑 Limpiar filtros</button>
         <div id="scriptList" class="script-list">
           <div class="small"><strong>Listado visible (fallback sin JS):</strong></div>
           <ul class="tight static-script-list">
