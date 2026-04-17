@@ -840,6 +840,24 @@ function renderSolutions() {
     siguiente: 'Aplicar en la próxima intervención de scripts y registrar evidencia completa.'
   };
 
+  const iteration1 = {
+    iteracion: 'Iteración 1 - Statements / Estados',
+    archivo: 'proyecto practica/CARGOS_MORA/09_V3_Statements.gs.js',
+    funcion: 'v3StatementsNormalizarPeriodo_, v3StatementsResolverPeriodoAplicacion_, v3StatementsConstruirContexto_',
+    cambio: 'Se reforzó la normalización de período (yyyy-mm, mm-yyyy, fechas y nombres de mes) y se agregó fallback de período para pagos aplicados (Periodo_Aplicado -> periodo cargo -> Periodo_Reportado -> fecha de pago -> período filtro).',
+    noTocado: 'No se modificó lógica de recargos, mora, conciliación ni portal visual.',
+    motivo: 'Corregir degradación de movimientos del período que terminaban fuera del filtro de febrero y colapsaban a saldo anterior/saldo inicial.',
+    efectoEsperado: 'Resumen y Detalle deben conservar movimientos reales del período; Portal y Export deben heredar movimientos exportables cuando existan.',
+    prueba: 'Período 2026-02, corrida manual de Statements + salidas derivadas.',
+    resultado: 'Cambio aplicado y desplegado por clasp push. Ejecución remota de prueba bloqueada por permisos de clasp run; validación funcional de datos queda pendiente en entorno autorizado.',
+    resumenImpacto: 'Esperado: Total_Cargos/Total_Pagos visibles para febrero. Observado: pendiente de confirmación en hoja.',
+    detalleImpacto: 'Esperado: detalle con cargos/pagos/ajustes/reversos reales en febrero. Observado: pendiente de confirmación en hoja.',
+    portalImpacto: 'Esperado: portal hereda estados corregidos. Observado: pendiente de confirmación por bloqueo de run.',
+    exportImpacto: 'Esperado: Export Contable empiece a poblarse cuando detalle tenga movimientos. Observado: pendiente de confirmación por bloqueo de run.',
+    riesgos: 'Permisos de ejecución remota impiden cerrar evidencia observada automática; requiere corrida manual asistida con usuario autorizado.',
+    siguiente: 'Ejecutar corrida manual febrero en entorno autorizado y registrar evidencia de 4 casos mínimos (sin pago, pagado, descuento familiar, saldo negativo/excedente).'
+  };
+
   const trackedMetrics = [
     'fecha y hora',
     'filas leídas',
@@ -1075,6 +1093,35 @@ function renderSolutions() {
           <tr><td>Siguiente acción</td><td>${escapeHtml(firstProtocolActivation.siguiente)}</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <h4>Cierre de Iteración 1 (obligatorio)</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Bloque</th><th>Evidencia</th></tr></thead>
+        <tbody>
+          <tr><td>A) Cambio realizado</td><td><strong>${escapeHtml(iteration1.archivo)}</strong><br>${escapeHtml(iteration1.funcion)}<br>${escapeHtml(iteration1.cambio)}<br><em>No tocado:</em> ${escapeHtml(iteration1.noTocado)}</td></tr>
+          <tr><td>B) Módulos impactados</td><td>Statements/Estados (directo), Resumen/Detalle (directo), Portal/Exportación (herencia).</td></tr>
+          <tr><td>C) Resultado observado</td><td>${escapeHtml(iteration1.resultado)}<br><em>Prueba:</em> ${escapeHtml(iteration1.prueba)}</td></tr>
+          <tr><td>D) Riesgos abiertos</td><td>${escapeHtml(iteration1.riesgos)}</td></tr>
+          <tr><td>E) Siguiente paso</td><td>${escapeHtml(iteration1.siguiente)}</td></tr>
+          <tr><td>F) Informe web actualizado</td><td>SI - Iteración 1 registrada con trazabilidad técnica y estado de validación.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Salida obligatoria Iteración 1 (detalle técnico)</h4>
+    <div class="note-box">
+      <ul class="tight">
+        <li><strong>Qué anomalía corrige:</strong> ${escapeHtml(iteration1.motivo)}</li>
+        <li><strong>Efecto esperado:</strong> ${escapeHtml(iteration1.efectoEsperado)}</li>
+        <li><strong>Resumen:</strong> ${escapeHtml(iteration1.resumenImpacto)}</li>
+        <li><strong>Detalle:</strong> ${escapeHtml(iteration1.detalleImpacto)}</li>
+        <li><strong>Portal:</strong> ${escapeHtml(iteration1.portalImpacto)}</li>
+        <li><strong>Exportación Contable:</strong> ${escapeHtml(iteration1.exportImpacto)}</li>
+        <li><strong>Qué sigue roto:</strong> validación observada de febrero no cerrada por bloqueo de ejecución remota.</li>
+        <li><strong>Módulo siguiente:</strong> ejecución asistida de pruebas febrero en Statements (sin tocar recargos/mora/conciliación).</li>
+      </ul>
     </div>
 
     <h4>Objetivo operativo final</h4>
