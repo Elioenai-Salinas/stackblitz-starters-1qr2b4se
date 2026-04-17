@@ -100,46 +100,8 @@
     </aside>
 
     <section class="content">
-      <article id="historial-informes" class="card report-log" aria-live="polite">
-        <h2>Historial de Informes</h2>
-        <p class="small">
-          Esta seccion se actualiza en el mismo enlace. Para ver nuevas entradas, refrescar la pagina.
-        </p>
-        <ol id="reportTimeline" class="report-timeline">
-          <li class="report-entry">
-            <div class="report-head">
-              <strong>Iteración 2 - Statements (evidencia reforzada)</strong>
-              <time datetime="2026-04-16T10:45:00-06:00">2026-04-16 10:45</time>
-            </div>
-            <p>
-              Se ajusto la clasificacion de movimientos por periodo en 09_V3_Statements.gs.js para evitar reclasificacion indebida a saldo anterior, y se agrego funcion de evidencia de febrero con 4 casos obligatorios. La ejecucion remota de evidencia quedo bloqueada por permisos de clasp run.
-            </p>
-          </li>
-          <li class="report-entry">
-            <div class="report-head">
-              <strong>Informe base del tablero</strong>
-              <time datetime="2026-04-16T08:30:00-06:00">2026-04-16 08:30</time>
-            </div>
-            <p>
-              Se habilito lectura completa en HTML visible (sin depender de clics) y estructura semantica para revision externa.
-            </p>
-          </li>
-          <li class="report-entry">
-            <div class="report-head">
-              <strong>Informe de robustez de render</strong>
-              <time datetime="2026-04-16T09:10:00-06:00">2026-04-16 09:10</time>
-            </div>
-            <p>
-              Se reforzo el render de Mermaid para evitar errores en pestanas ocultas y mejorar estabilidad visual.
-            </p>
-          </li>
-        </ol>
-        <div class="note-box">
-          <p class="small"><strong>Regla operativa:</strong> cada bloque de trabajo nuevo debe agregar aqui una entrada con fecha, hora, cambio realizado y resultado observado.</p>
-        </div>
-      </article>
-
       <nav class="tabs">
+        <button class="tab" data-tab="informes">Informes</button>
         <button class="tab active" data-tab="direccion">Vista Dirección</button>
         <button class="tab" data-tab="soluciones">Soluciones y Plan</button>
         <button class="tab" data-tab="resumen">Resumen Técnico</button>
@@ -147,6 +109,47 @@
         <button class="tab" data-tab="conflictos">Conflictos</button>
         <button class="tab" data-tab="detalle">Detalle por Script</button>
       </nav>
+
+      <article id="tab-informes" class="tab-content">
+        <div id="historial-informes" class="card report-log" aria-live="polite">
+          <h2>Informes de CARGOS_MORA</h2>
+          <p class="small">
+            Esta pestaña concentra los reportes de iteración en el mismo enlace. Para ver nuevas entradas, refrescar la página.
+          </p>
+          <ol id="reportTimeline" class="report-timeline">
+            <li class="report-entry">
+              <div class="report-head">
+                <strong>Iteración 2 - Statements (evidencia reforzada)</strong>
+                <time datetime="2026-04-16T10:45:00-06:00">2026-04-16 10:45</time>
+              </div>
+              <p>
+                Se ajustó la clasificación de movimientos por período en 09_V3_Statements.gs.js para evitar reclasificación indebida a saldo anterior, y se agregó función de evidencia de febrero con 4 casos obligatorios. La ejecución remota quedó bloqueada por permisos de clasp run.
+              </p>
+            </li>
+            <li class="report-entry">
+              <div class="report-head">
+                <strong>Informe base del tablero</strong>
+                <time datetime="2026-04-16T08:30:00-06:00">2026-04-16 08:30</time>
+              </div>
+              <p>
+                Se habilitó lectura completa en HTML visible (sin depender de clics) y estructura semántica para revisión externa.
+              </p>
+            </li>
+            <li class="report-entry">
+              <div class="report-head">
+                <strong>Informe de robustez de render</strong>
+                <time datetime="2026-04-16T09:10:00-06:00">2026-04-16 09:10</time>
+              </div>
+              <p>
+                Se reforzó el render de Mermaid para evitar errores en pestañas ocultas y mejorar estabilidad visual.
+              </p>
+            </li>
+          </ol>
+          <div class="note-box">
+            <p class="small"><strong>Regla operativa:</strong> cada bloque de trabajo nuevo debe agregar aquí una entrada con fecha, hora, cambio realizado y resultado observado.</p>
+          </div>
+        </div>
+      </article>
 
       <article id="tab-direccion" class="tab-content active">
         <div id="execKpis" class="card"></div>
