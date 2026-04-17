@@ -126,6 +126,20 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     }
   ];
 
+  const RESULT_REPORT_TEMPLATE = {
+    id: 'iterX-bloque-name',
+    fecha: 'YYYY-MM-DD',
+    titulo: 'Titulo breve del bloque',
+    estado: 'pendiente',
+    alcance: '09_V3_Statements.gs.js',
+    resumen: 'Resumen ejecutable del estado actual.',
+    evidencia: [
+      'Prueba 1: salida observada.',
+      'Prueba 2: validacion en hoja o consola.'
+    ],
+    siguientePaso: 'Siguiente accion concreta para cerrar el bloque.'
+  };
+
   const COTEJO_RECORDS = {
     '00_V3_ActivacionMinima.gs.js': {
       cotejoEstado: 'COTEJADO CON OBSERVACIONES',
@@ -2898,6 +2912,17 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     return 'amarillo';
   }
 
+  function renderReportTemplateBlock() {
+    const templateText = JSON.stringify(RESULT_REPORT_TEMPLATE, null, 2);
+    return `
+      <details class="result-template">
+        <summary>Plantilla JSON para siguiente bloque</summary>
+        <p class="small">Duplica este objeto dentro de result_reports.json, ajusta los campos y vuelve a publicar.</p>
+        <pre class="wrap">${escapeHtml(templateText)}</pre>
+      </details>
+    `;
+  }
+
   function getReportsForScript(script) {
     if (!script) return state.executionReports;
     return state.executionReports.filter(report => {
@@ -2915,6 +2940,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     return `
       <h3>Informes de Resultados por Ejecución</h3>
       <p class="small">Bitácora para revisión externa y seguimiento de bloqueos/avances del script seleccionado.</p>
+      ${renderReportTemplateBlock()}
       <div class="result-report-list">
         ${reports.map(report => `
           <article class="result-report-card status-card ${reportStateClass(report.estado)}">
@@ -2938,11 +2964,13 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
   function renderExternalResultsReports() {
     if (!ui.externalResultsReview) return;
     if (!state.executionReports.length) {
-      ui.externalResultsReview.innerHTML = '<div class="muted-box">No hay informes de resultados cargados.</div>';
+      ui.externalResultsReview.innerHTML = `${renderReportTemplateBlock()}<div class="muted-box">No hay informes de resultados cargados.</div>`;
       return;
     }
 
-    ui.externalResultsReview.innerHTML = state.executionReports.map(report => `
+    ui.externalResultsReview.innerHTML = `
+      ${renderReportTemplateBlock()}
+      ${state.executionReports.map(report => `
       <article class="result-report-card status-card ${reportStateClass(report.estado)}">
         <header class="result-report-head">
           <h4>${escapeHtml(report.titulo)}</h4>
@@ -2955,7 +2983,8 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
         </ul>
         <p class="result-next-step"><strong>Siguiente paso:</strong> ${escapeHtml(report.siguientePaso)}</p>
       </article>
-    `).join('');
+    `).join('')}
+    `;
   }
 
   function renderStats() {

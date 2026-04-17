@@ -1,0 +1,13 @@
+{
+  "id": "iterX-bloque-name",
+  "fecha": "YYYY-MM-DD",
+  "titulo": "Titulo breve del bloque",
+  "estado": "pendiente",
+  "alcance": "09_V3_Statements.gs.js",
+  "resumen": "Resumen ejecutable del estado actual.",
+  "evidencia": [
+    "Prueba 1: salida observada.",
+    "Prueba 2: validacion en hoja o consola."
+  ],
+  "siguientePaso": "Siguiente accion concreta para cerrar el bloque."
+}

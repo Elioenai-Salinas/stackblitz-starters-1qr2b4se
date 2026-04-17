@@ -771,6 +771,19 @@ body {
   padding-top: 8px;
 }
 
+.result-template {
+  border: 1px dashed #9cb6bf;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 12px;
+  background: #f7fbfd;
+}
+
+.result-template summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
 .static-review {
   border: 2px solid #0b7285;
   background: #f8feff;
