@@ -678,6 +678,119 @@ function renderSolutions() {
     }
   ];
 
+  const initialManualSequence = [
+    'Correr febrero manualmente.',
+    'Validar febrero completo.',
+    'Correr marzo manualmente.',
+    'Validar marzo completo.',
+    'Correr abril manualmente.',
+    'Validar abril completo.'
+  ];
+
+  const operationalFlow = [
+    {
+      etapa: '1. CARGOS ESCOLARES',
+      acciones: 'Mensualidad, plataforma, matrícula (si aplica), descuento familiar (si aplica).'
+    },
+    {
+      etapa: '2. REVISIÓN TEMPORAL',
+      acciones: 'Fecha de corte, vencimiento, días de gracia, recargo y mora con política única.'
+    },
+    {
+      etapa: '3. APLICACIÓN DE PAGOS',
+      acciones: 'Aplicar pagos compatibles, parciales, excedentes y saldos a favor.'
+    },
+    {
+      etapa: '4. RECARGOS',
+      acciones: 'Aplicar recargo a impagos vencidos sobre neto descontado, sin duplicar.'
+    },
+    {
+      etapa: '5. MORA',
+      acciones: 'Evaluar mora como estado, no como cargo.'
+    },
+    {
+      etapa: '6. ESTADOS / STATEMENTS',
+      acciones: 'Construir movimientos reales del período sin colapsar a saldo anterior/saldo inicial.'
+    },
+    {
+      etapa: '7. ESTADO DE CUENTA RESUMEN',
+      acciones: 'Totales, saldo final, vencidos, con recargo, meses vencidos y morosidad.'
+    },
+    {
+      etapa: '8. ESTADO DE CUENTA DETALLE',
+      acciones: 'Movimientos completos: cargos, pagos, recargos, ajustes, reversos y saldo acumulado.'
+    },
+    {
+      etapa: '9. PORTAL DE PADRES',
+      acciones: 'Consumidor pasivo: hereda estado consolidado sin recalcular lógica.'
+    },
+    {
+      etapa: '10. CONCILIACIÓN',
+      acciones: 'Vincular pagos reportados con aplicaciones reales, parciales, excedentes y sin match.'
+    },
+    {
+      etapa: '11. EXPORTACIÓN CONTABLE',
+      acciones: 'Exportar solo desde detalle corregido y consolidado.'
+    }
+  ];
+
+  const controlRules = [
+    'No ejecutar marzo si febrero no cerró correctamente.',
+    'No ejecutar abril si marzo no cerró correctamente.',
+    'No activar automático sin febrero, marzo y abril aprobados en manual.',
+    'No correr módulos aislados fuera del flujo completo.',
+    'No correr portal antes de cerrar estados.',
+    'No correr exportación antes de cerrar detalle.',
+    'No correr conciliación con fuente distinta a aplicaciones reales.',
+    'No permitir dos procesos sobre el mismo período al mismo tiempo.'
+  ];
+
+  const monthGateChecklist = [
+    'Cargos base correctos.',
+    'Descuentos correctos.',
+    'Pagos aplicados correctamente.',
+    'Recargos correctos.',
+    'Mora correcta.',
+    'Resumen correcto.',
+    'Detalle completo.',
+    'Portal correcto.',
+    'Conciliación con datos.',
+    'Exportación contable con datos.'
+  ];
+
+  const automaticEnableConditions = [
+    'Febrero pasó completo.',
+    'Marzo pasó completo.',
+    'Abril pasó completo.',
+    'Sin diferencias entre corrida manual esperada y corrida real.',
+    'Flujo completo estable sin intervención extra.',
+    'Salidas derivadas heredando correctamente.'
+  ];
+
+  const automaticRunDesign = [
+    'Seleccionar período a correr (uno por corrida).',
+    'Ejecutar flujo completo en secuencia.',
+    'Validar resultados mínimos de cierre.',
+    'Registrar log de corrida.',
+    'Publicar salidas derivadas.',
+    'Cerrar corrida.'
+  ];
+
+  const runLogFields = [
+    'fecha y hora',
+    'período procesado',
+    'módulos ejecutados',
+    'módulos completados',
+    'módulos fallidos',
+    'filas generadas por hoja',
+    'pagos aplicados',
+    'recargos generados',
+    'alumnos con mora',
+    'conciliaciones generadas',
+    'exportaciones generadas',
+    'estado final de la corrida'
+  ];
+
   const trackedMetrics = [
     'fecha y hora',
     'filas leídas',
@@ -802,6 +915,79 @@ function renderSolutions() {
           ${mandatoryTests.map(t => `<tr><td>${escapeHtml(t.caso)}</td><td>${escapeHtml(t.esperado)}</td></tr>`).join('')}
         </tbody>
       </table>
+    </div>
+
+    <h4>Diseño Operativo Post-Reestructuración</h4>
+    <div class="warning-banner">
+      Política principal: nada corre en simultáneo, nada se salta etapas y nada se ejecuta fuera de orden. Manual y automático deben usar exactamente la misma lógica.
+    </div>
+
+    <h4>Secuencia de validación inicial (manual)</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${initialManualSequence.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+      </ol>
+      <p class="small"><strong>Gate:</strong> solo después de validar febrero, marzo y abril se habilita automático.</p>
+    </div>
+
+    <h4>Flujo operativo obligatorio por período</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Etapa</th><th>Acciones obligatorias</th></tr></thead>
+        <tbody>
+          ${operationalFlow.map(row => `<tr><td>${escapeHtml(row.etapa)}</td><td>${escapeHtml(row.acciones)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Reglas de control de ejecución</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${controlRules.map(rule => `<li>${escapeHtml(rule)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Validación obligatoria de cada mes manual</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${monthGateChecklist.map(check => `<li>${escapeHtml(check)}</li>`).join('')}
+      </ul>
+      <p class="small"><strong>Regla:</strong> si falla un punto, no se avanza al siguiente mes.</p>
+    </div>
+
+    <h4>Condición para habilitar automático</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${automaticEnableConditions.map(c => `<li>${escapeHtml(c)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Diseño del automático (sin atajos)</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${automaticRunDesign.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+      </ol>
+      <p class="small">El automático procesa un solo período por corrida, sin paralelismo y sin reabrir períodos cerrados salvo bandera de reproceso controlado.</p>
+    </div>
+
+    <h4>Log obligatorio de cada corrida (manual o automática)</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Campo</th></tr></thead>
+        <tbody>
+          ${runLogFields.map(field => `<tr><td>${escapeHtml(field)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Objetivo operativo final</h4>
+    <div class="note-box">
+      <p class="small">Primero validación manual mes por mes (febrero, marzo, abril). Después automatización de la misma secuencia exacta sin diferencias funcionales.</p>
+      <ul class="tight">
+        <li>Nunca correr en simultáneo.</li>
+        <li>Nunca saltar una etapa.</li>
+        <li>Nunca publicar salidas derivadas antes de cerrar la etapa anterior.</li>
+      </ul>
     </div>
 
     <h4>Restricciones activas</h4>
