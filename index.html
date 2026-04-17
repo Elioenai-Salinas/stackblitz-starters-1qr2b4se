@@ -119,6 +119,15 @@
           <ol id="reportTimeline" class="report-timeline">
             <li class="report-entry">
               <div class="report-head">
+                <strong>Validación real Iteración 2 - bloqueada por permisos</strong>
+                <time datetime="2026-04-16T20:35:00-06:00">2026-04-16 20:35</time>
+              </div>
+              <p>
+                Se intentó ejecutar febrero manual (run84), rebuild de States (run70), rebuild de Portal (run71) y exportación contable; todas las ejecuciones fallaron con "Unable to run script function". El bloque no puede cerrarse sin validación en hojas reales.
+              </p>
+            </li>
+            <li class="report-entry">
+              <div class="report-head">
                 <strong>Iteración 2 - Statements (evidencia reforzada)</strong>
                 <time datetime="2026-04-16T10:45:00-06:00">2026-04-16 10:45</time>
               </div>
@@ -306,6 +315,35 @@
             <li><strong>¿Cambió el cuello principal?</strong> No. Sigue siendo Statements / Estados hasta cerrar validación funcional de febrero.</li>
             <li><strong>¿Se puede marcar bloque terminado?</strong> No. Falta evidencia observada en Resumen, Detalle, Portal y Exportación en hojas reales.</li>
           </ul>
+        </div>
+
+        <h4>Validación real de Iteración 2 (febrero)</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Caso</th><th>Estado</th><th>Observación</th></tr></thead>
+            <tbody>
+              <tr><td>Alumno sin pagos</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+              <tr><td>Alumno con pagos aplicados</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+              <tr><td>Alumno con descuento familiar</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+              <tr><td>Alumno con saldo negativo o excedente</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Hoja</th><th>Estado</th><th>Resultado</th></tr></thead>
+            <tbody>
+              <tr><td>ESTADO_CUENTA_RESUMEN</td><td>NO EVALUADO</td><td>No se pudo verificar Total_Cargos, Total_Pagos ni Saldo_Anterior por bloqueo de ejecución.</td></tr>
+              <tr><td>ESTADO_CUENTA_DETALLE</td><td>NO EVALUADO</td><td>No se pudo verificar salida de SALDO_INICIAL vs movimientos reales por bloqueo de ejecución.</td></tr>
+              <tr><td>PORTAL_PADRES_EXPORT</td><td>NO EVALUADO</td><td>No se pudo confirmar herencia mejorada desde States.</td></tr>
+              <tr><td>EXPORT_CONTABILIDAD</td><td>NO EVALUADO</td><td>No se pudo confirmar si inicia poblamiento desde Detalle.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="warning-banner">
+          Iteración 2 de Statements permanece ABIERTA. No se puede pasar a Reversals hasta validar febrero en entorno autorizado.
         </div>
 
         <div class="warning-banner">
