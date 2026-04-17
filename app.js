@@ -547,108 +547,282 @@ pie title Distribucion de Riesgo
 }
 
 function renderSolutions() {
-  // Clasificar módulos por criticidad
-  const rojos = state.scripts.filter(s => ((s.indicadores || {}).semaforo || '').toLowerCase().includes('roj'));
-  const amarillos = state.scripts.filter(s => ((s.indicadores || {}).semaforo || '').toLowerCase().includes('amar'));
-  
-  // Ordenar por dependencia (módulos base primero)
-  const orden = ['00_', '01_', '02_', '03_', '04_', '05_', '06_', '07_', '08_', '09_', '10_'];
-  const sortByDependency = (a, b) => {
-    const fileA = a.file || '';
-    const fileB = b.file || '';
-    const idxA = orden.findIndex(prefix => fileA.startsWith(prefix));
-    const idxB = orden.findIndex(prefix => fileB.startsWith(prefix));
-    return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+  const frozenComponents = [
+    'Cálculo base de mensualidad por grado',
+    'Cálculo base de plataforma',
+    'Descuento familiar del hermano menor',
+    'Aplicación básica de pagos compatibles',
+    'Publicación del portal como salida final'
+  ];
+
+  const layerPlan = [
+    {
+      capa: 'CAPA A - Configuración y reglas',
+      objetivo: 'Una sola fuente de verdad para vencimiento, descuento, recargo y mora.',
+      entregables: [
+        'Módulo central REGLAS_COBRO (año, grado, concepto, meses, vencimiento, gracia, recargo, mora).',
+        'Contrato de lectura unificado para todos los módulos consumidores.',
+        'Validaciones de reglas faltantes con logging explícito.'
+      ]
+    },
+    {
+      capa: 'CAPA B - Generación de movimientos',
+      objetivo: 'Generar movimientos puros del período sin resumir ni reclasificar.',
+      entregables: [
+        'Modelo único de movimiento: CARGO_MENSUALIDAD, CARGO_PLATAFORMA, CARGO_MATRICULA, DESCUENTO, RECARGO, PAGO_APLICADO, PAGO_EXCEDENTE, AJUSTE, REVERSO, CREDITO_A_FAVOR.',
+        'Etiqueta ESTADO_MORA como atributo lógico, no como resumen colapsado.',
+        'Bloqueo de transformación temprana a SALDO_ANTERIOR o SALDO_INICIAL.'
+      ]
+    },
+    {
+      capa: 'CAPA C - Aplicación y conciliación',
+      objetivo: 'Aplicar pagos contra movimientos abiertos reales y conciliar sin llave frágil.',
+      entregables: [
+        'Soporte explícito para pagos multiuso, parciales y excedentes.',
+        'Trazabilidad pago -> movimiento aplicado con estado final por fila.',
+        'Conciliación basada en APLICACION_PAGOS real (no solo en Periodo_Reportado exacto).'
+      ]
+    },
+    {
+      capa: 'CAPA D - Motor temporal único',
+      objetivo: 'Centralizar vencido, gracia, recargo y mora en una política temporal única.',
+      entregables: [
+        'Función central: evaluarEstadoTemporal(fechaMovimiento, fechaCorte, reglas).',
+        'Eliminación de doble lógica recargo vs mora en módulos separados.',
+        'Uso obligatorio del mismo resultado temporal en States, Resumen, Detalle y Portal.'
+      ]
+    },
+    {
+      capa: 'CAPA E - Construcción de estados',
+      objetivo: 'Construir Resumen y Detalle desde movimientos aplicados, sin colapso.',
+      entregables: [
+        'Regla dura: movimientos del período permanecen visibles como movimientos.',
+        'Resumen con saldo anterior real + cargos/pagos/recargos/ajustes del período + mora.',
+        'Detalle con fecha, tipo, concepto, período, referencia, cargo, abono, ajuste, saldo acumulado, estado y observación.'
+      ]
+    },
+    {
+      capa: 'CAPA F - Salidas derivadas',
+      objetivo: 'Portal, Conciliación y Exportación como consumidores pasivos.',
+      entregables: [
+        'Portal hereda saldo final, mora, último período pendiente, estado y crédito a favor.',
+        'Conciliación hereda aplicaciones reales, excedentes, sin match y parciales.',
+        'Exportación contable hereda movimientos exportables desde Detalle corregido.'
+      ]
+    }
+  ];
+
+  const sourceOfTruth = [
+    ['REGLAS_COBRO', 'Configuración única de negocio (vencimiento, gracia, recargo, mora, descuento).'],
+    ['CARGOS_ESCOLARES', 'Fuente de cargos generados.'],
+    ['APLICACION_PAGOS', 'Fuente de aplicaciones reales de pagos.'],
+    ['MOVIMIENTOS_CONSOLIDADOS', 'Fuente contable consolidada (motor).'],
+    ['ESTADO_CUENTA_RESUMEN', 'Vista resumida (no motor).'],
+    ['ESTADO_CUENTA_DETALLE', 'Vista detallada (no motor).'],
+    ['PORTAL', 'Vista de publicación (no motor).'],
+    ['CONCILIACION', 'Vista de verificación (no motor).'],
+    ['EXPORT_CONTABILIDAD', 'Salida derivada (no motor).']
+  ];
+
+  const standardStates = [
+    'PAGADO',
+    'PARCIAL',
+    'PENDIENTE',
+    'VENCIDO',
+    'CON_RECARGO',
+    'MOROSO',
+    'CREDITO_A_FAVOR',
+    'PENDIENTE_DE_CONCILIAR'
+  ];
+
+  const semanticNegativeBalances = [
+    'crédito a favor',
+    'excedente',
+    'pago pendiente de aplicar',
+    'matrícula pagada no conciliada',
+    'saldo a regularizar'
+  ];
+
+  const implementationOrder = [
+    'Crear módulo central de reglas y tiempo.',
+    'Crear modelo único de movimientos.',
+    'Rehacer Statements para consumir movimientos y no colapsarlos.',
+    'Rehacer Detalle desde movimientos reales.',
+    'Rehacer Resumen desde Detalle consolidado.',
+    'Rehacer Conciliación desde Aplicación_Pagos y movimientos.',
+    'Rehacer Exportación Contable desde Detalle corregido.',
+    'Ajustar Portal para publicar estados heredados sin recalcular.',
+    'Agregar logging y trazabilidad por corrida.'
+  ];
+
+  const mandatoryTests = [
+    {
+      caso: 'Caso 1 - Alumno sin pagos',
+      esperado: 'Debe mostrar cargo base + recargo + estado vencido/moroso según fecha.'
+    },
+    {
+      caso: 'Caso 2 - Mensualidad y plataforma pagadas a tiempo',
+      esperado: 'Debe mostrar PAGADO, sin recargo y sin mora.'
+    },
+    {
+      caso: 'Caso 3 - Alumno con descuento familiar',
+      esperado: 'Descuento primero; recargo sobre neto si no paga; total correcto.'
+    },
+    {
+      caso: 'Caso 4 - Alumno con pago parcial',
+      esperado: 'Debe mostrar PARCIAL, saldo pendiente y recargo sobre pendiente si aplica.'
+    },
+    {
+      caso: 'Caso 5 - Excedente o saldo negativo',
+      esperado: 'Clasificar como crédito a favor o saldo por aplicar, nunca como negativo mudo.'
+    }
+  ];
+
+  const trackedMetrics = [
+    'fecha y hora',
+    'filas leídas',
+    'filas escritas',
+    'filas descartadas',
+    'motivo del descarte',
+    'módulo origen',
+    'módulo destino',
+    'estado final del paso'
+  ];
+
+  const baselineCheck = [
+    {
+      punto: 'Cuello principal en Statements',
+      estado: 'Alineado',
+      evidencia: 'Ya está marcado como cuello de botella y colapso de movimientos en Vista Dirección.'
+    },
+    {
+      punto: 'Exportación no rota propia',
+      estado: 'Alineado',
+      evidencia: 'Ya se modela como cascade de Detalle incompleto.'
+    },
+    {
+      punto: 'Conciliación no por Periodo_Reportado exacto',
+      estado: 'Parcial',
+      evidencia: 'Diagnóstico lo reconoce; falta rediseño de capa C en código fuente productivo.'
+    },
+    {
+      punto: 'Lógica temporal única',
+      estado: 'Pendiente',
+      evidencia: 'Sigue detectada doble lógica (5 días gracia vs 61 días mora).'
+    },
+    {
+      punto: 'No colapsar movimientos del período',
+      estado: 'Pendiente',
+      evidencia: 'Aún no reestructurado el motor States/Statements real.'
+    }
+  ];
+
+  const statusClass = (value) => {
+    const v = String(value || '').toLowerCase();
+    if (v === 'alineado') return 'verde';
+    if (v === 'parcial') return 'amarillo';
+    return 'rojo';
   };
-  
-  const rojosSorted = rojos.sort(sortByDependency);
-  const amarillosSorted = amarillos.sort(sortByDependency);
-  const toFix = [...rojosSorted, ...amarillosSorted];
-  
+
   let html = `
-    <h3>Plan de Corrección Integral (Disminuir Conflictos a 0%)</h3>
-    <p class="small"><strong>Orden recomendado:</strong> Corregir módulos base primero (00-04), luego captura (05-06), luego procesamiento (07-09), luego integración (10-21).</p>
+    <h3>Plan de Cambio Controlado - Reestructuración Arquitectónica</h3>
+    <p class="small"><strong>Alcance actual:</strong> se valida y adopta tu bloque como blueprint oficial para la implementación por capas, preservando cálculos base correctos y eliminando el colapso a saldo anterior/saldo inicial.</p>
+
+    <h4>Cotejo: bloque recomendado vs estado actual</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Punto</th><th>Estado</th><th>Evidencia</th></tr></thead>
+        <tbody>
+          ${baselineCheck.map(r => `<tr><td>${escapeHtml(r.punto)}</td><td><span class="chip ${statusClass(r.estado)}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml(r.evidencia)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>FASE 1 - Congelar lo que sí funciona</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${frozenComponents.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 2 - Rediseñar flujo en capas</h4>
+    ${layerPlan.map(layer => `
+      <div class="mini-card" style="margin-bottom:12px;">
+        <h5>${escapeHtml(layer.capa)}</h5>
+        <p class="small"><strong>Objetivo:</strong> ${escapeHtml(layer.objetivo)}</p>
+        <ul class="tight">
+          ${layer.entregables.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('')}
+
+    <h4>FASE 3 - Fuentes de verdad por dominio</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Dominio / Módulo</th><th>Rol</th></tr></thead>
+        <tbody>
+          ${sourceOfTruth.map(([dominio, rol]) => `<tr><td>${escapeHtml(dominio)}</td><td>${escapeHtml(rol)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>FASE 4 - Normalizar estados</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${standardStates.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 5 - Semántica de saldos negativos</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${semanticNegativeBalances.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 6 - Trazabilidad obligatoria por corrida</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${trackedMetrics.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 7 - Orden de implementación</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${implementationOrder.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+      </ol>
+    </div>
+
+    <h4>FASE 8 - Pruebas mínimas obligatorias</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Caso</th><th>Esperado</th></tr></thead>
+        <tbody>
+          ${mandatoryTests.map(t => `<tr><td>${escapeHtml(t.caso)}</td><td>${escapeHtml(t.esperado)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Restricciones activas</h4>
+    <div class="warning-banner">
+      No reescribir todo a la vez. No tocar cálculos base correctos. Portal/Conciliación/Exportación no recalculan lógica propia. Prohibido mantener doble lógica temporal. Conciliación no puede depender solo de Periodo_Reportado exacto. No colapsar movimientos del período a saldo anterior.
+    </div>
+
+    <h4>Criterio de parada</h4>
+    <div class="note-box">
+      <ul class="tight">
+        <li>Febrero visible como movimiento del período, no como saldo anterior.</li>
+        <li>Recargos correctos según reglas reales.</li>
+        <li>Mora correcta con única política temporal.</li>
+        <li>Detalle con movimientos reales completos.</li>
+        <li>Conciliación con datos reales de aplicación.</li>
+        <li>Exportación contable con filas reales (no vacía por degradación).</li>
+        <li>Portal heredando estado correcto sin recalcular.</li>
+      </ul>
+    </div>
   `;
-  
-  if (toFix.length === 0) {
-    html += '<div class="note-box"><p><strong>Excelente:</strong> Todos los módulos están en estado verde. Sistema operativo.</p></div>';
-  } else {
-    html += `
-      <h4>Módulos a Corregir (${toFix.length})</h4>
-      <div class="solution-timeline">
-    `;
-    
-    toFix.forEach((script, idx) => {
-      const sem = ((script.indicadores || {}).semaforo || 'Amarillo').toLowerCase();
-      const semClass = sem.includes('roj') ? 'rojo' : 'amarillo';
-      const priority = sem.includes('roj') ? 'CRÍTICA' : 'MEDIA';
-      const step = idx + 1;
-      
-      const problemas = [
-        script.totalLines > 1200 ? `Módulo muy grande (${script.totalLines} líneas) - difícil de mantener` : null,
-        (script.indicadores?.acoplamientoExternoProxy || 0) >= 80 ? `Alto acoplamiento externo (${script.indicadores.acoplamientoExternoProxy})` : null,
-        (script.functions || []).length > 50 ? `Muchas funciones (${(script.functions || []).length}) - consolidar` : null,
-        (script.riesgos || []).length > 0 ? `${(script.riesgos || []).length} riesgos identificados` : null
-      ].filter(x => x);
-      
-      const soluciones = (script.controlesSugeridos || []).slice(0, 4);
-      
-      html += `
-        <div class="solution-item">
-          <div class="solution-header">
-            <span class="step">${step}</span>
-            <strong>${escapeHtml(script.file)}</strong>
-            <span class="chip ${semClass}">${priority}</span>
-          </div>
-          
-          <div class="solution-problems">
-            <h5>Qué está mal:</h5>
-            <ul class="tight">
-              ${problemas.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
-            </ul>
-          </div>
-          
-          <div class="solution-steps">
-            <h5>Soluciones (pasos de corrección):</h5>
-            <ol class="tight">
-              ${soluciones.map((sol, i) => `<li>${escapeHtml(cleanText(sol))}</li>`).join('')}
-            </ol>
-          </div>
-          
-          <div class="solution-impact">
-            <h5>Impacto al resolver:</h5>
-            <ul class="tight">
-              <li>Reduce ${escapeHtml(sem.includes('roj') ? 'riesgo de falla operativa' : 'probabilidad de errores')}</li>
-              <li>Mejora mantenibilidad futura</li>
-              <li>Facilita pruebas y auditoría</li>
-              ${script.totalLines > 1200 ? '<li>Permite refactoring seguro</li>' : ''}
-            </ul>
-          </div>
-          
-          <div class="solution-depends">
-            <h5>Dependencias:</h5>
-            <p class="small">${escapeHtml(buildDependencyText(script))}</p>
-          </div>
-        </div>
-      `;
-    });
-    
-    html += `
-      </div>
-      
-      <h4>Verificación Post-Corrección (Checklist)</h4>
-      <div class="note-box">
-        <ol class="tight">
-          <li><strong>Pruebas unitarias:</strong> Cada módulo corregido debe pasar pruebas de sus funciones críticas</li>
-          <li><strong>Pruebas de integración:</strong> Validar que los cambios no rompan los flujos E2E (pagos → cargos → conciliación)</li>
-          <li><strong>Pruebas de datos:</strong> Reconciliar: Saldos = Sum(cargos) + Sum(pagos) + Sum(ajustes)</li>
-          <li><strong>Auditoría:</strong> Log detallado de quién cambió qué, cuándo, y con qué resultado</li>
-          <li><strong>Sign-off:</strong> Director + Líder técnico + QA aprueban cambios</li>
-        </ol>
-      </div>
-    `;
-  }
-  
+
   ui.solutionsPlan.innerHTML = html;
 }
 
