@@ -100,6 +100,36 @@
     </aside>
 
     <section class="content">
+      <article id="historial-informes" class="card report-log" aria-live="polite">
+        <h2>Historial de Informes</h2>
+        <p class="small">
+          Esta seccion se actualiza en el mismo enlace. Para ver nuevas entradas, refrescar la pagina.
+        </p>
+        <ol id="reportTimeline" class="report-timeline">
+          <li class="report-entry">
+            <div class="report-head">
+              <strong>Informe base del tablero</strong>
+              <time datetime="2026-04-16T08:30:00-06:00">2026-04-16 08:30</time>
+            </div>
+            <p>
+              Se habilito lectura completa en HTML visible (sin depender de clics) y estructura semantica para revision externa.
+            </p>
+          </li>
+          <li class="report-entry">
+            <div class="report-head">
+              <strong>Informe de robustez de render</strong>
+              <time datetime="2026-04-16T09:10:00-06:00">2026-04-16 09:10</time>
+            </div>
+            <p>
+              Se reforzo el render de Mermaid para evitar errores en pestanas ocultas y mejorar estabilidad visual.
+            </p>
+          </li>
+        </ol>
+        <div class="note-box">
+          <p class="small"><strong>Regla operativa:</strong> cada bloque de trabajo nuevo debe agregar aqui una entrada con fecha, hora, cambio realizado y resultado observado.</p>
+        </div>
+      </article>
+
       <nav class="tabs">
         <button class="tab active" data-tab="direccion">Vista Dirección</button>
         <button class="tab" data-tab="soluciones">Soluciones y Plan</button>

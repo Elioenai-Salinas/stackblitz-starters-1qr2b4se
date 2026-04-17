@@ -185,6 +185,40 @@ body {
 }
 .card h3 { margin-top: 0; }
 
+.report-log h2 {
+  margin: 0 0 8px;
+}
+
+.report-timeline {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.report-entry {
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.report-entry p {
+  margin: 8px 0 0;
+}
+
+.report-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.report-head time {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .static-review {
   border: 2px solid #0b7285;
   background: #f8feff;
@@ -536,4 +570,9 @@ pre.wrap {
 @media (max-width: 1000px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
+  .report-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }
