@@ -791,6 +791,55 @@ function renderSolutions() {
     'estado final de la corrida'
   ];
 
+  const iterativeReportSections = [
+    '1. CAMBIO REALIZADO (archivo/módulo, función, cambio exacto, qué no se tocó).',
+    '2. MOTIVO DEL CAMBIO (anomalía, síntoma funcional, impacto esperado).',
+    '3. EFECTO ESPERADO (hoja/columna/estado y dominio impactado).',
+    '4. RESULTADO OBSERVADO (mejoró, no mejoró, igual, empeoró).',
+    '5. ESTADO POR MÓDULO (mini matriz por módulo y observación).',
+    '6. IMPACTO EN HOJAS (cambió, no cambió, vacía, hereda error, correcta).',
+    '7. IMPACTO EN FLUJO (cargos, pagos, recargos, mora, states, resumen, detalle, portal, conciliación, export).',
+    '8. PRUEBA EJECUTADA (período, modo manual/automático, datos, alumnos, alcance parcial/completo).',
+    '9. RIESGOS ABIERTOS (qué puede romperse, dependencias, bloqueos, pendiente).',
+    '10. SIGUIENTE ACCIÓN RECOMENDADA (próximo módulo y validación objetivo).'
+  ];
+
+  const allowedModuleStates = [
+    'FUNCIONA',
+    'FUNCIONA PARCIAL',
+    'BLOQUEADO',
+    'HEREDA ERROR',
+    'REQUIERE VALIDACIÓN'
+  ];
+
+  const iterativeHardRules = [
+    'No hacer cambios silenciosos sin reflejarlos en el informe web.',
+    'No cerrar iteración sin resultado observado.',
+    'No reportar solo intención; reportar cambio real y efecto real.',
+    'No mezclar varios frentes grandes en una sola iteración.',
+    'Trabajar por bloques controlados.',
+    'No reescribir módulos que funcionan sin justificación.',
+    'Siempre separar síntoma funcional, causa técnica, cambio aplicado y resultado real.'
+  ];
+
+  const iterationClosingFormat = [
+    'A) Cambio realizado',
+    'B) Módulos impactados',
+    'C) Resultado observado',
+    'D) Riesgos abiertos',
+    'E) Siguiente paso',
+    'F) Informe web actualizado'
+  ];
+
+  const firstProtocolActivation = {
+    iteracion: 'Iteración 0 - Protocolo activado',
+    cambio: 'Se activó política obligatoria de informe web por cada cambio de scripts.',
+    modulos: 'Gobierno del proceso (sin cambio funcional de motor de cálculo).',
+    resultado: 'Plantilla y reglas de auditoría iterativa disponibles en Soluciones y Plan.',
+    riesgo: 'Si no se sigue el formato, la iteración se considera abierta/no cerrada.',
+    siguiente: 'Aplicar en la próxima intervención de scripts y registrar evidencia completa.'
+  };
+
   const trackedMetrics = [
     'fecha y hora',
     'filas leídas',
@@ -976,6 +1025,54 @@ function renderSolutions() {
         <thead><tr><th>Campo</th></tr></thead>
         <tbody>
           ${runLogFields.map(field => `<tr><td>${escapeHtml(field)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Protocolo de Trabajo Iterativo con Informe Web Obligatorio</h4>
+    <div class="warning-banner">
+      Toda iteración de scripts debe cerrar con actualización del informe web. Una iteración sin evidencia web completa se considera abierta.
+    </div>
+
+    <h4>Contenido obligatorio del informe por iteración</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${iterativeReportSections.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+      </ol>
+    </div>
+
+    <h4>Estados permitidos en matriz por módulo</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${allowedModuleStates.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Reglas obligatorias de iteración</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${iterativeHardRules.map(rule => `<li>${escapeHtml(rule)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Formato de cierre estándar</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${iterationClosingFormat.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+      </ol>
+    </div>
+
+    <h4>Registro base de activación del protocolo</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Campo</th><th>Detalle</th></tr></thead>
+        <tbody>
+          <tr><td>Iteración</td><td>${escapeHtml(firstProtocolActivation.iteracion)}</td></tr>
+          <tr><td>Cambio realizado</td><td>${escapeHtml(firstProtocolActivation.cambio)}</td></tr>
+          <tr><td>Módulos impactados</td><td>${escapeHtml(firstProtocolActivation.modulos)}</td></tr>
+          <tr><td>Resultado observado</td><td>${escapeHtml(firstProtocolActivation.resultado)}</td></tr>
+          <tr><td>Riesgo abierto</td><td>${escapeHtml(firstProtocolActivation.riesgo)}</td></tr>
+          <tr><td>Siguiente acción</td><td>${escapeHtml(firstProtocolActivation.siguiente)}</td></tr>
         </tbody>
       </table>
     </div>
