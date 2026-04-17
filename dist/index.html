@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Informe técnico integral de CARGOS_MORA con diagnóstico operativo, trazabilidad, conflictos y plan de estabilización en formato legible para web e IA." />
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+  <meta name="author" content="Equipo Buen Pastor" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Informe Técnico Integral CARGOS_MORA" />
+  <meta property="og:description" content="Diagnóstico operativo, cuello de botella en Statements, trazabilidad por hoja y plan de corrección por iteraciones." />
+  <meta property="og:url" content="https://elioenai-salinas.github.io/stackblitz-starters-1qr2b4se/" />
+  <link rel="canonical" href="https://elioenai-salinas.github.io/stackblitz-starters-1qr2b4se/" />
+  <title>Informe Técnico CARGOS_MORA</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Informe Técnico Integral CARGOS_MORA",
+      "inLanguage": "es",
+      "author": {
+        "@type": "Organization",
+        "name": "Equipo Buen Pastor"
+      },
+      "dateModified": "2026-04-16",
+      "mainEntityOfPage": "https://elioenai-salinas.github.io/stackblitz-starters-1qr2b4se/",
+      "about": [
+        "Google Apps Script",
+        "CARGOS_MORA",
+        "Diagnóstico de flujo financiero",
+        "Estados de cuenta",
+        "Conciliación",
+        "Exportación contable"
+      ],
+      "description": "Documento técnico en HTML con secciones estáticas y dinámicas para revisión humana y lectura automatizada por IA, sin dependencia de interacción para el contenido crítico."
+    }
+  </script>
+  <script type="module" crossorigin src="/assets/index-DYjXS-8M.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DSwK2H2z.css">
+</head>
+<body>
+  <a class="skip-link" href="#external-review">Saltar al contenido estático completo</a>
+  <header class="topbar">
+    <div>
+      <h1>Informe Técnico Integral CARGOS_MORA</h1>
+      <p>Lectura profesional de arquitectura, flujo y conflictos por script</p>
+    </div>
+    <div class="badge" id="totalScripts">Scripts: --</div>
+  </header>
+
+  <main class="layout">
+    <noscript>
+      <section class="panel noscript-box" aria-label="Aviso sin JavaScript">
+        <h2>Modo sin JavaScript activo</h2>
+        <p>La revisión puede continuar usando el bloque "Reporte Estático para Revisión Externa" con contenido completo en HTML visible.</p>
+      </section>
+    </noscript>
+
+    <aside class="sidebar">
+      <div class="panel">
+        <h2>Navegación</h2>
+        <input id="searchInput" type="text" placeholder="Buscar script..." />
+        <div class="filters-grid">
+          <select id="statusFilter" aria-label="Filtrar por estado">
+            <option value="all">Todos los estados</option>
+          </select>
+          <select id="severityFilter" aria-label="Filtrar por severidad">
+            <option value="all">Toda severidad</option>
+          </select>
+          <select id="priorityFilter" aria-label="Filtrar por prioridad">
+            <option value="all">Toda prioridad</option>
+          </select>
+          <select id="typeFilter" aria-label="Filtrar por tipo de módulo">
+            <option value="all">Todo tipo</option>
+          </select>
+        </div>
+        <button id="clearFilters" class="ghost-button" type="button">Limpiar filtros</button>
+        <div id="scriptList" class="script-list">
+          <div class="small"><strong>Listado visible (fallback sin JS):</strong></div>
+          <ul class="tight static-script-list">
+            <li>00_V3_ActivacionMinima.gs.js</li>
+            <li>01_V3_Core.gs.js</li>
+            <li>02_V3_Schema.gs.js</li>
+            <li>03_V3_ConfigSetup.gs.js</li>
+            <li>04_V3_Sync.gs.js</li>
+            <li>05_V3_Payments.gs.js</li>
+            <li>05A_V3_PaymentsForm.gs.js</li>
+            <li>06_V3_Applications.gs.js</li>
+            <li>07_V3_Charges.gs.js</li>
+            <li>08_V3_Reversals.gs.js</li>
+            <li>09_V3_Statements.gs.js</li>
+            <li>10_V3_PortalExport.gs.js</li>
+            <li>11_V3_RulesSeed.gs.js</li>
+            <li>11A_V3_Task1_ReglasCobroReset.gs.js</li>
+            <li>12_V3_ResetMensual.gs.js</li>
+            <li>12_V3_RulesFix.gs.js</li>
+            <li>13_V3_ComprobantesCargados.gs.js</li>
+            <li>14_V3_FormularioPagosInterno.gs.js</li>
+            <li>15_V3_FormularioPagosV2.gs.js</li>
+            <li>16_V3_Automation.gs.js</li>
+            <li>17_V3_PortalAPI.gs.js</li>
+            <li>18_V3_Conciliacion.gs.js</li>
+            <li>19_V3_Fixes.gs.js</li>
+            <li>20_V3_QA_Smoke.gs.js</li>
+            <li>21_V3_StageFlow.gs.js</li>
+            <li>90_V3_Runners.gs.js</li>
+            <li>91_V3_Orchestrators.gs.js</li>
+            <li>98_Admin_Mantenimiento.gs.js</li>
+            <li>98_V3_GuardianRepair.gs.js</li>
+            <li>99_V3_OrquestadorContable.gs.js</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel stats" id="statsPanel"></div>
+    </aside>
+
+    <section class="content">
+      <section class="context-shell card" aria-label="Contexto del script seleccionado">
+        <div class="context-shell__top">
+          <div>
+            <div id="selectedBreadcrumb" class="breadcrumb">CARGOS_MORA / Script</div>
+            <h2 id="selectedTitle">Selecciona un script</h2>
+            <p id="selectedMeta" class="small">La consola contextual cambiará por archivo.</p>
+          </div>
+          <div class="context-shell__actions">
+            <button id="prevScriptBtn" class="ghost-button" type="button">Anterior</button>
+            <button id="nextScriptBtn" class="ghost-button" type="button">Siguiente</button>
+          </div>
+        </div>
+        <div id="selectedHero" class="hero-grid"></div>
+        <div id="selectedRelations" class="relations-row"></div>
+      </section>
+
+      <nav class="tabs">
+        <button class="tab" data-tab="informe">Informe</button>
+        <button class="tab active" data-tab="direccion">Vista Dirección</button>
+        <button class="tab" data-tab="soluciones">Soluciones y Plan</button>
+        <button class="tab" data-tab="resumen">Resumen Técnico</button>
+        <button class="tab" data-tab="flujo">Flujo Graficado</button>
+        <button class="tab" data-tab="conflictos">Conflictos</button>
+        <button class="tab" data-tab="detalle">Detalle por Script</button>
+      </nav>
+
+      <article id="tab-informe" class="tab-content">
+        <div id="contextInforme" class="card" aria-live="polite"></div>
+      </article>
+
+      <article id="tab-direccion" class="tab-content active">
+        <div id="contextDireccion" class="card"></div>
+      </article>
+
+      <article id="tab-soluciones" class="tab-content">
+        <div id="contextSoluciones" class="card"></div>
+      </article>
+
+      <article id="tab-resumen" class="tab-content">
+        <div id="contextResumen" class="card"></div>
+      </article>
+
+      <article id="tab-flujo" class="tab-content">
+        <div id="contextFlujo" class="card"></div>
+      </article>
+
+      <article id="tab-conflictos" class="tab-content">
+        <div id="contextConflictos" class="card"></div>
+      </article>
+
+      <article id="tab-detalle" class="tab-content">
+        <div id="contextDetalle" class="card"></div>
+      </article>
+
+      <article id="external-review" class="card static-review">
+        <h3>Reporte Estático para Revisión Externa (Sin Interacción)</h3>
+        <p class="small">Este bloque deja visible el análisis técnico completo en HTML para lectura automatizada cuando el navegador no ejecuta interacción de pestañas o render dinámico.</p>
+
+        <h4>Vista Dirección</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Módulo</th><th>Estado</th><th>Observación</th></tr></thead>
+            <tbody>
+              <tr><td>Cargos Escolares</td><td>FUNCIONA</td><td>Genera cargos base.</td></tr>
+              <tr><td>Aplicación de Pagos</td><td>FUNCIONA PARCIAL</td><td>Aplica pagos con casos pendientes.</td></tr>
+              <tr><td>Statements / Estados</td><td>EN CORRECCIÓN (cuello principal)</td><td>Ajuste técnico aplicado; cierre bloqueado por validación pendiente en entorno autorizado.</td></tr>
+              <tr><td>Detalle</td><td>FUNCIONA PARCIAL</td><td>Dependiente de corrección en Statements.</td></tr>
+              <tr><td>Portal</td><td>HEREDA ERROR</td><td>No recalcula; hereda salida de Resumen/Detalle.</td></tr>
+              <tr><td>Conciliación</td><td>REQUIERE VALIDACIÓN</td><td>Dependiente de aplicaciones reales.</td></tr>
+              <tr><td>Exportación Contable</td><td>REQUIERE VALIDACIÓN</td><td>Depende de detalle exportable real.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Soluciones y Plan</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li>Reestructuración por capas A-F activada.</li>
+            <li>Flujo operativo secuencial activado (manual febrero-marzo-abril antes de automático).</li>
+            <li>Protocolo iterativo obligatorio con evidencia web por cada cambio.</li>
+            <li>Primer bloque enfocado en 09_V3_Statements.gs.js (estado: NO CERRADO hasta validar febrero en hojas).</li>
+          </ul>
+        </div>
+
+        <h4>Resumen Técnico</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Indicador</th><th>Valor</th></tr></thead>
+            <tbody>
+              <tr><td>Scripts analizados</td><td>30</td></tr>
+              <tr><td>Semáforo rojo</td><td>18</td></tr>
+              <tr><td>Semáforo amarillo</td><td>8</td></tr>
+              <tr><td>Semáforo verde</td><td>4</td></tr>
+              <tr><td>Cuello principal</td><td>Statements / Estados</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Flujo Graficado (lectura textual)</h4>
+        <div class="note-box">
+          <ol class="tight">
+            <li>CARGOS_ESCOLARES</li>
+            <li>APLICACION_PAGOS</li>
+            <li>RECARGOS</li>
+            <li>STATES / STATEMENTS (cuello de botella)</li>
+            <li>RESUMEN</li>
+            <li>DETALLE</li>
+            <li>PORTAL</li>
+            <li>CONCILIACION</li>
+            <li>EXPORT_CONTABILIDAD</li>
+          </ol>
+        </div>
+
+        <h4>Conflictos</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li>Total_Cargos y Total_Pagos pueden quedar en 0 cuando movimientos del período se reclasifican.</li>
+            <li>Detalle puede degradarse a SALDO_INICIAL si no entra movimiento del período.</li>
+            <li>Portal y Exportación heredan degradación aguas arriba.</li>
+            <li>Mora y recargo siguen con validación pendiente de alineación final.</li>
+          </ul>
+        </div>
+
+        <h4>Detalle por Script (visible sin clic)</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Archivo</th><th>Rol</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>07_V3_Charges.gs.js</td><td>Generación de cargos</td><td>FUNCIONA</td></tr>
+              <tr><td>06_V3_Applications.gs.js</td><td>Aplicación de pagos</td><td>FUNCIONA PARCIAL</td></tr>
+              <tr><td>08_V3_Reversals.gs.js</td><td>Recargos / vencimientos</td><td>REQUIERE VALIDACIÓN</td></tr>
+              <tr><td>09_V3_Statements.gs.js</td><td>Detalle y Resumen</td><td>PRIMER BLOQUE EN VALIDACIÓN (NO CERRADO)</td></tr>
+              <tr><td>10_V3_PortalExport.gs.js</td><td>Portal + Export Contable</td><td>HEREDA RESULTADOS DE STATES</td></tr>
+              <tr><td>18_V3_Conciliacion.gs.js</td><td>Conciliación</td><td>REQUIERE VALIDACIÓN</td></tr>
+              <tr><td>90_V3_Runners.gs.js</td><td>Secuencias de ejecución</td><td>OPERATIVO</td></tr>
+              <tr><td>99_V3_OrquestadorContable.gs.js</td><td>Orquestación</td><td>OPERATIVO</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Verificación del primer bloque - Statements</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li><strong>Función tocada:</strong> v3StatementsResolverPeriodoMovimiento_, v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_, v3StatementsConstruirContexto_.</li>
+            <li><strong>Regla cambiada:</strong> si un movimiento no trae período explícito, se infiere por fecha de movimiento antes de excluirlo o enviarlo a saldo anterior.</li>
+            <li><strong>Síntoma a corregir:</strong> movimientos reales de febrero degradados a SALDO_INICIAL y Total_Cargos/Total_Pagos en 0 por pérdida de clasificación.</li>
+            <li><strong>Cambio en Resumen:</strong> se habilita cómputo de cargos/pagos del periodo al recuperar movimientos sin periodo explícito pero con fecha válida.</li>
+            <li><strong>Cambio en Detalle:</strong> se prioriza movimiento real del periodo y se reduce degradación a SALDO_INICIAL por faltante de periodo explícito.</li>
+            <li><strong>Cambio en Portal:</strong> sin ajuste directo; hereda mejora cuando Resumen del scope de febrero se reconstruye correctamente.</li>
+            <li><strong>Cambio en Exportación:</strong> sin ajuste directo; puede poblarse cuando Detalle de febrero tenga movimientos exportables.</li>
+            <li><strong>Qué sigue roto:</strong> ejecución remota bloqueada por permisos en clasp run; no hay cierre funcional de febrero en hoja real.</li>
+            <li><strong>Estado de cierre:</strong> PRIMER BLOQUE NO CERRADO.</li>
+          </ul>
+        </div>
+
+        <h4>Antes / Después</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Criterio</th><th>Resultado esperado</th><th>Observado antes</th><th>Observado después</th><th>Estado final</th></tr></thead>
+            <tbody>
+              <tr><td>Clasificación de movimientos de febrero</td><td>Movimientos quedan en el periodo, no en saldo anterior</td><td>Se reclasificaban por falta de periodo explícito</td><td>Regla corregida en código con fallback por fecha de movimiento</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Resumen (Total_Cargos / Total_Pagos)</td><td>Valores reales cuando existan movimientos</td><td>Podían quedar en 0 aunque había actividad</td><td>Cómputo recupera movimientos antes omitidos por periodo vacío</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Detalle</td><td>Mostrar movimientos reales del periodo</td><td>Degradación a SALDO_INICIAL en casos afectados</td><td>Se reduce degradación al inferir periodo por fecha</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Portal</td><td>Heredar resumen corregido</td><td>Heredaba estados degradados</td><td>Sin cambio directo; depende de rebuild de states validado</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Exportación contable</td><td>Poblarse cuando haya detalle exportable</td><td>Vacía por falta de detalle útil</td><td>Sin cambio directo; depende de detalle corregido en ejecución real</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Prueba obligatoria de febrero (4 casos)</td><td>Validar sin pagos, con pagos, descuento familiar, excedente</td><td>No consolidada</td><td>Ejecución remota bloqueada por permisos de entorno</td><td>BLOQUEADA POR PERMISOS</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Estado actual del cuello principal</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li><strong>¿Cambió el cuello principal?</strong> No. Sigue siendo Statements / Estados hasta cerrar validación funcional de febrero.</li>
+            <li><strong>¿Se puede marcar bloque terminado?</strong> No. Falta evidencia observada en Resumen, Detalle, Portal y Exportación en hojas reales.</li>
+          </ul>
+        </div>
+
+        <h4>Validación real de Iteración 2 (febrero)</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Caso</th><th>Estado</th><th>Observación</th></tr></thead>
+            <tbody>
+              <tr><td>Alumno sin pagos</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+              <tr><td>Alumno con pagos aplicados</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+              <tr><td>Alumno con descuento familiar</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+              <tr><td>Alumno con saldo negativo o excedente</td><td>NO EVALUADO</td><td>Ejecución bloqueada por permisos de Apps Script.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Hoja</th><th>Estado</th><th>Resultado</th></tr></thead>
+            <tbody>
+              <tr><td>ESTADO_CUENTA_RESUMEN</td><td>NO EVALUADO</td><td>No se pudo verificar Total_Cargos, Total_Pagos ni Saldo_Anterior por bloqueo de ejecución.</td></tr>
+              <tr><td>ESTADO_CUENTA_DETALLE</td><td>NO EVALUADO</td><td>No se pudo verificar salida de SALDO_INICIAL vs movimientos reales por bloqueo de ejecución.</td></tr>
+              <tr><td>PORTAL_PADRES_EXPORT</td><td>NO EVALUADO</td><td>No se pudo confirmar herencia mejorada desde States.</td></tr>
+              <tr><td>EXPORT_CONTABILIDAD</td><td>NO EVALUADO</td><td>No se pudo confirmar si inicia poblamiento desde Detalle.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="warning-banner">
+          Iteración 2 de Statements permanece ABIERTA. No se puede pasar a Reversals hasta validar febrero en entorno autorizado.
+        </div>
+
+        <div class="warning-banner">
+          Si la versión interactiva no renderiza por restricciones del entorno, este bloque estático sigue dejando accesible el análisis para revisión externa.
+        </div>
+      </article>
+    </section>
+  </main>
+
+</body>
+</html>

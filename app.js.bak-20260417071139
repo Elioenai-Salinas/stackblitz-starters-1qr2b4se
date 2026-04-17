@@ -1,0 +1,2304 @@
+mermaid.initialize({ startOnLoad: false, theme: 'default' });
+
+const state = {
+  data: null,
+  execMd: '',
+  scripts: [],
+  selected: null
+};
+
+const ui = {
+  totalScripts: document.getElementById('totalScripts'),
+  searchInput: document.getElementById('searchInput'),
+  scriptList: document.getElementById('scriptList'),
+  statsPanel: document.getElementById('statsPanel'),
+  execKpis: document.getElementById('execKpis'),
+  execRisks: document.getElementById('execRisks'),
+  execNarrative: document.getElementById('execNarrative'),
+  solutionsPlan: document.getElementById('solutionsPlan'),
+  globalSummary: document.getElementById('globalSummary'),
+  callsSummary: document.getElementById('callsSummary'),
+  conflictsPanel: document.getElementById('conflictsPanel'),
+  scriptDetail: document.getElementById('scriptDetail'),
+  mermaidFlow: document.getElementById('mermaidFlow'),
+  flowNotes: document.getElementById('flowNotes')
+};
+
+init();
+
+function isElementVisible(node) {
+  if (!node) return false;
+  return !!(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+}
+
+function safeMermaidRun(nodes) {
+  if (!window.mermaid || !Array.isArray(nodes)) return;
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+
+  const state = {
+    data: null,
+    execMd: '',
+    scripts: [],
+    selected: null,
+    activeTab: 'direccion',
+    filters: {
+      search: '',
+      status: 'all',
+      severity: 'all',
+      priority: 'all',
+      type: 'all'
+    },
+    indexes: {
+      functionToScripts: new Map(),
+      upstream: new Map(),
+      downstream: new Map()
+    }
+  };
+
+  const ui = {
+    totalScripts: document.getElementById('totalScripts'),
+    searchInput: document.getElementById('searchInput'),
+    statusFilter: document.getElementById('statusFilter'),
+    severityFilter: document.getElementById('severityFilter'),
+    priorityFilter: document.getElementById('priorityFilter'),
+    typeFilter: document.getElementById('typeFilter'),
+    clearFilters: document.getElementById('clearFilters'),
+    scriptList: document.getElementById('scriptList'),
+    statsPanel: document.getElementById('statsPanel'),
+    selectedBreadcrumb: document.getElementById('selectedBreadcrumb'),
+    selectedTitle: document.getElementById('selectedTitle'),
+    selectedMeta: document.getElementById('selectedMeta'),
+    selectedHero: document.getElementById('selectedHero'),
+    selectedRelations: document.getElementById('selectedRelations'),
+    prevScriptBtn: document.getElementById('prevScriptBtn'),
+    nextScriptBtn: document.getElementById('nextScriptBtn'),
+    contextInforme: document.getElementById('contextInforme'),
+    contextDireccion: document.getElementById('contextDireccion'),
+    contextSoluciones: document.getElementById('contextSoluciones'),
+    contextResumen: document.getElementById('contextResumen'),
+    contextFlujo: document.getElementById('contextFlujo'),
+    contextConflictos: document.getElementById('contextConflictos'),
+    contextDetalle: document.getElementById('contextDetalle')
+  };
+
+  const FILE_OVERRIDES = {
+    '08_V3_Reversals.gs.js': {
+      status: 'requiere validacion',
+      diagnosis: 'Motor temporal todavía requiere validación completa de recargos y alineación con mora.',
+      recommendation: 'observar primero'
+    },
+    '09_V3_Statements.gs.js': {
+      status: 'requiere validacion',
+      diagnosis: 'Cuello principal del sistema: clasifica mal parte de los movimientos del período y degrada la cadena descendente.',
+      recommendation: 'tocar ahora',
+      maturity: 'en reparacion'
+    },
+    '10_V3_PortalExport.gs.js': {
+      status: 'hereda error',
+      diagnosis: 'No concentra la causa raíz; hereda degradación desde Statements y Detalle.',
+      recommendation: 'no tocar todavia'
+    },
+    '18_V3_Conciliacion.gs.js': {
+      status: 'requiere validacion',
+      diagnosis: 'Puede quedar vacío por filtros estrictos y por herencia de datos inconsistentes aguas arriba.',
+      recommendation: 'observar primero'
+    },
+    '90_V3_Runners.gs.js': {
+      status: 'funciona',
+      diagnosis: 'Coordina secuencias; se toca al final salvo que un runner rompa el flujo por sí mismo.',
+      recommendation: 'no tocar todavia'
+    },
+    '99_V3_OrquestadorContable.gs.js': {
+      status: 'funciona',
+      diagnosis: 'Orquesta el cierre contable; la prioridad está en estabilizar las salidas que consume.',
+      recommendation: 'no tocar todavia'
+    }
+  };
+
+  init();
+
+  function isElementVisible(node) {
+    if (!node) return false;
+    return !!(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+  }
+
+  function safeMermaidRun(nodes) {
+    if (!window.mermaid || !Array.isArray(nodes)) return;
+    const visibleNodes = nodes.filter(node => node && node.isConnected && isElementVisible(node));
+    if (!visibleNodes.length) return;
+
+    Promise.resolve(mermaid.run({ nodes: visibleNodes })).catch(() => {
+      // Evita romper la UI si Mermaid falla.
+    });
+  }
+
+  function runActiveTabMermaid() {
+    const activeTab = document.querySelector('.tab-content.active');
+    if (!activeTab) return;
+    safeMermaidRun(Array.from(activeTab.querySelectorAll('.mermaid')));
+  }
+
+  async function init() {
+    wireTabs();
+    wireFilters();
+    wireNavigation();
+
+    const [jsonText, mdText] = await Promise.all([
+      fetch('report_data.json').then(r => r.arrayBuffer()).then(buf => new TextDecoder('utf-8').decode(buf)),
+      fetch('INFORME_EJECUTIVO_DETALLADO.md').then(r => r.arrayBuffer()).then(buf => new TextDecoder('utf-8').decode(buf)).catch(() => '')
+    ]);
+
+    state.data = JSON.parse(jsonText);
+    normalizeDataStrings(state.data);
+    state.execMd = mdText || '';
+    state.scripts = enrichScripts((state.data.scripts || []).slice(), state.data.generatedAt || '');
+    state.selected = state.scripts[0] || null;
+
+    populateFilterOptions();
+    renderAll();
+  }
+
+  function normalizeDataStrings(obj) {
+    if (typeof obj !== 'object' || obj === null) return;
+
+    Object.keys(obj).forEach(key => {
+      if (typeof obj[key] === 'string') {
+        obj[key] = fixText(obj[key]);
+      } else if (Array.isArray(obj[key])) {
+        obj[key] = obj[key].map(item => {
+          if (typeof item === 'string') return fixText(item);
+          if (typeof item === 'object' && item) normalizeDataStrings(item);
+          return item;
+        });
+      } else if (typeof obj[key] === 'object') {
+        normalizeDataStrings(obj[key]);
+      }
+    });
+  }
+
+  function enrichScripts(rawScripts, generatedAt) {
+    const functionToScripts = new Map();
+
+    rawScripts.forEach(script => {
+      (script.functions || []).forEach(fn => {
+        const current = functionToScripts.get(fn.name) || [];
+        current.push(script.file);
+        functionToScripts.set(fn.name, current);
+      });
+    });
+
+    state.indexes.functionToScripts = functionToScripts;
+
+    const downstream = new Map();
+    const upstream = new Map();
+
+    rawScripts.forEach(script => {
+      const ownFunctions = new Set((script.functions || []).map(fn => fn.name));
+      const downstreamSet = new Set();
+      const upstreamSet = new Set();
+
+      (script.calls || []).forEach(callName => {
+        const targets = functionToScripts.get(callName) || [];
+        targets.forEach(targetFile => {
+          if (targetFile !== script.file) {
+            downstreamSet.add(targetFile);
+          }
+        });
+      });
+
+      rawScripts.forEach(other => {
+        if (other.file === script.file) return;
+        const otherCalls = new Set(other.calls || []);
+        const touchesScript = [...ownFunctions].some(fnName => otherCalls.has(fnName));
+        if (touchesScript) {
+          upstreamSet.add(other.file);
+        }
+      });
+
+      downstream.set(script.file, [...downstreamSet]);
+      upstream.set(script.file, [...upstreamSet]);
+    });
+
+    state.indexes.downstream = downstream;
+    state.indexes.upstream = upstream;
+
+    return rawScripts.map(script => {
+      const file = script.file || 'sin_nombre';
+      const scriptType = deriveScriptType(file, script);
+      const severity = deriveSeverity(script);
+      const status = deriveStatus(file, severity);
+      const priority = derivePriority(file, severity, script);
+      const maturity = deriveMaturity(file, severity);
+      const score = deriveRiskScore(file, severity, script);
+      const impactAreas = deriveImpactAreas(file, script);
+      const affectedSheets = deriveAffectedSheets(file, impactAreas);
+      const diagnosis = deriveDiagnosis(file, script, severity);
+      const role = cleanText((script.indicadores || {}).rolModulo || buildRoleFromType(scriptType, impactAreas));
+      const purpose = derivePurpose(file, script, impactAreas);
+      const conclusion = deriveConclusion(file, severity, priority);
+      const upstreamFiles = upstream.get(file) || [];
+      const downstreamFiles = downstream.get(file) || [];
+      const recommendedOrder = deriveInterventionOrder(file);
+      const recommendation = (FILE_OVERRIDES[file] && FILE_OVERRIDES[file].recommendation) || deriveRecommendation(severity, file);
+      const symptoms = deriveSymptoms(file, impactAreas, severity, downstreamFiles);
+      const causes = deriveCauses(file, script, severity);
+      const whatNotDo = deriveWhatNotDo(file, scriptType);
+      const badPatterns = deriveBadPatterns(script);
+      const rules = deriveBusinessRules(file, impactAreas);
+      const history = deriveHistory(file, generatedAt);
+      const glossary = deriveGlossary(file, impactAreas, scriptType);
+      const criticalConstants = (script.constants || []).slice(0, 8).map(c => c.name);
+      const totalFunctions = (script.functions || []).length;
+      const orphanFunctions = deriveOrphanFunctions(script, upstreamFiles);
+      const hardcodedFunctions = deriveHardcodedFunctions(script);
+      const coupledFunctions = deriveCoupledFunctions(script);
+      const fragileFunctions = deriveFragileFunctions(script, severity);
+      const splitCandidates = deriveSplitCandidates(script);
+      const protectedFunctions = deriveProtectedFunctions(file, script);
+      const relatedFiles = uniqueList([...upstreamFiles, ...downstreamFiles]).slice(0, 8);
+
+      return {
+        ...script,
+        scriptType,
+        severity,
+        status,
+        priority,
+        maturity,
+        score,
+        role,
+        purpose,
+        diagnosis,
+        conclusion,
+        impactAreas,
+        affectedSheets,
+        upstreamFiles,
+        downstreamFiles,
+        recommendedOrder,
+        recommendation,
+        symptoms,
+        causes,
+        whatNotDo,
+        badPatterns,
+        rules,
+        history,
+        glossary,
+        criticalConstants,
+        orphanFunctions,
+        hardcodedFunctions,
+        coupledFunctions,
+        fragileFunctions,
+        splitCandidates,
+        protectedFunctions,
+        relatedFiles,
+        functionHealthSummary: {
+          totalFunctions,
+          orphan: orphanFunctions.length,
+          hardcoded: hardcodedFunctions.length,
+          coupled: coupledFunctions.length,
+          fragile: fragileFunctions.length
+        }
+      };
+    });
+  }
+
+  function renderAll() {
+    renderSidebar();
+    renderStats();
+    renderContextHeader();
+    renderTabsForSelected();
+    activateTab(state.activeTab);
+  }
+
+  function renderSidebar() {
+    const visible = getFilteredScripts();
+    ui.scriptList.innerHTML = '';
+
+    visible.forEach(script => {
+      const btn = document.createElement('button');
+      btn.className = 'script-btn' + (state.selected && state.selected.file === script.file ? ' active' : '');
+      btn.innerHTML = `${escapeHtml(script.file)} <span class="chip ${semaforoClass(script.severity)}">${escapeHtml(script.status.toUpperCase())}</span>`;
+      btn.onclick = () => {
+        state.selected = script;
+        renderAll();
+      };
+      ui.scriptList.appendChild(btn);
+    });
+
+    if (!visible.length) {
+      ui.scriptList.innerHTML = '<div class="muted-box small">No hay scripts que coincidan con los filtros actuales.</div>';
+    }
+
+    ui.totalScripts.textContent = `Scripts: ${visible.length}/${state.scripts.length}`;
+  }
+
+  function renderStats() {
+    const visible = getFilteredScripts();
+    const counts = countBySeverity(visible);
+    const critical = visible.filter(script => script.score >= 85).length;
+
+    ui.statsPanel.innerHTML = `
+      <h2>Panel de Control</h2>
+      <div class="mini-kpi-grid">
+        <div class="mini-kpi"><div class="hero-card__label">Visibles</div><div class="hero-card__value">${visible.length}</div></div>
+        <div class="mini-kpi"><div class="hero-card__label">Crítico</div><div class="hero-card__value">${critical}</div></div>
+        <div class="mini-kpi"><div class="hero-card__label">Rojo</div><div class="hero-card__value">${counts.rojo}</div></div>
+        <div class="mini-kpi"><div class="hero-card__label">Amarillo</div><div class="hero-card__value">${counts.amarillo}</div></div>
+        <div class="mini-kpi"><div class="hero-card__label">Verde</div><div class="hero-card__value">${counts.verde}</div></div>
+        <div class="mini-kpi"><div class="hero-card__label">Validación real</div><div class="hero-card__value">Pendiente</div></div>
+      </div>
+      <div class="recommendation-banner small">
+        La sidebar ahora manda toda la consola. Cambiar de archivo actualiza Informe, Dirección, Plan, Resumen, Flujo, Conflictos y Detalle.
+      </div>
+    `;
+  }
+
+  function renderContextHeader() {
+    const script = state.selected;
+    if (!script) return;
+
+    ui.selectedBreadcrumb.textContent = `CARGOS_MORA / ${script.scriptType} / ${script.file}`;
+    ui.selectedTitle.textContent = script.file;
+    ui.selectedMeta.textContent = `${capitalize(script.status)} · ${capitalize(script.priority)} · ${capitalize(script.maturity)} · Riesgo ${script.score}/100`;
+    ui.selectedHero.innerHTML = `
+      <div class="hero-card"><div class="hero-card__label">Tipo</div><div class="hero-card__value">${escapeHtml(script.scriptType)}</div></div>
+      <div class="hero-card"><div class="hero-card__label">Estado</div><div class="hero-card__value">${escapeHtml(capitalize(script.status))}</div></div>
+      <div class="hero-card"><div class="hero-card__label">Prioridad</div><div class="hero-card__value">${escapeHtml(capitalize(script.priority))}</div></div>
+      <div class="hero-card"><div class="hero-card__label">Impacto</div><div class="hero-card__value">${escapeHtml(script.impactAreas.filter(area => area.active).length)} dominios</div></div>
+      <div class="hero-card"><div class="hero-card__label">Dependencias</div><div class="hero-card__value">↑ ${script.upstreamFiles.length} · ↓ ${script.downstreamFiles.length}</div></div>
+      <div class="hero-card"><div class="hero-card__label">Madurez</div><div class="hero-card__value">${escapeHtml(capitalize(script.maturity))}</div></div>
+    `;
+
+    ui.selectedRelations.innerHTML = script.relatedFiles.length
+      ? script.relatedFiles.map(file => `<span class="relation-pill">Relacionado: ${escapeHtml(file)}</span>`).join('')
+      : '<span class="relation-pill">Sin relaciones cruzadas confirmadas en el dataset</span>';
+
+    const visible = getFilteredScripts();
+    const currentIndex = visible.findIndex(item => item.file === script.file);
+    ui.prevScriptBtn.disabled = currentIndex <= 0;
+    ui.nextScriptBtn.disabled = currentIndex === -1 || currentIndex >= visible.length - 1;
+  }
+
+  function renderTabsForSelected() {
+    const script = state.selected;
+    if (!script) return;
+
+    ui.contextInforme.innerHTML = renderInformeTab(script);
+    ui.contextDireccion.innerHTML = renderDireccionTab(script);
+    ui.contextSoluciones.innerHTML = renderSolucionesTab(script);
+    ui.contextResumen.innerHTML = renderResumenTab(script);
+    ui.contextFlujo.innerHTML = renderFlujoTab(script);
+    ui.contextConflictos.innerHTML = renderConflictosTab(script);
+    ui.contextDetalle.innerHTML = renderDetalleTab(script);
+  }
+
+  function renderInformeTab(script) {
+    const statusClass = semaforoClass(script.severity);
+    const historyRows = script.history.map(item => `
+      <tr>
+        <td>${escapeHtml(item.date)}</td>
+        <td>${escapeHtml(item.change)}</td>
+        <td>${escapeHtml(item.reason)}</td>
+        <td>${escapeHtml(item.result)}</td>
+        <td>${escapeHtml(item.state)}</td>
+      </tr>
+    `).join('');
+
+    const symptomRows = script.symptoms.map((symptom, index) => `
+      <tr>
+        <td>${escapeHtml(symptom)}</td>
+        <td>${escapeHtml(script.causes[index] || script.causes[0] || 'Hipótesis pendiente')}</td>
+        <td>${escapeHtml(buildEvidence(script, index))}</td>
+      </tr>
+    `).join('');
+
+    return `
+      <h3>Informe Técnico del Archivo <span class="chip ${statusClass}">${escapeHtml(capitalize(script.status))}</span></h3>
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Ficha Ejecutiva</h4>
+          <p><strong>Archivo:</strong> ${escapeHtml(script.file)}</p>
+          <p><strong>Propósito general:</strong> ${escapeHtml(script.purpose)}</p>
+          <p><strong>Rol dentro del sistema:</strong> ${escapeHtml(script.role)}</p>
+          <p><strong>Tipo:</strong> ${escapeHtml(capitalize(script.scriptType))}</p>
+          <p><strong>Prioridad técnica:</strong> ${escapeHtml(capitalize(script.priority))}</p>
+          <p><strong>Impacto funcional:</strong> ${escapeHtml(summarizeImpact(script.impactAreas))}</p>
+        </div>
+        <div class="section-card">
+          <h4>Diagnóstico Principal</h4>
+          <p>${escapeHtml(script.diagnosis)}</p>
+          <div class="hero-card__label">Riesgo técnico</div>
+          <div class="hero-card__value">${script.score}/100</div>
+          <div class="score-bar ${statusClass === 'rojo' ? 'danger' : statusClass === 'amarillo' ? 'warn' : ''}"><span style="width:${Math.min(script.score, 100)}%"></span></div>
+          <p class="small"><strong>Conclusión ejecutiva:</strong> ${escapeHtml(script.conclusion)}</p>
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Lo que hace bien</h4>
+          <ul class="tight">
+            ${deriveWhatWorks(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Lo que no está haciendo bien</h4>
+          <ul class="tight">
+            ${script.symptoms.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Por qué importa</h4>
+          <ul class="tight">
+            ${deriveWhyMatters(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Madurez del script</h4>
+          <p>${escapeHtml(capitalize(script.maturity))}</p>
+          <div class="visual-semaphore">
+            <span class="${script.severity === 'rojo' ? 'active red' : ''}"></span>
+            <span class="${script.severity === 'amarillo' ? 'active yellow' : ''}"></span>
+            <span class="${script.severity === 'verde' ? 'active green' : ''}"></span>
+          </div>
+        </div>
+        <div class="section-card">
+          <h4>Glosario funcional</h4>
+          <p><strong>En lenguaje sencillo:</strong> ${escapeHtml(script.glossary.simple)}</p>
+          <p><strong>Qué hace:</strong> ${escapeHtml(script.glossary.job)}</p>
+          <p><strong>Por qué debe importar:</strong> ${escapeHtml(script.glossary.why)}</p>
+        </div>
+        <div class="section-card">
+          <h4>Lo que no hace este script</h4>
+          <ul class="tight">
+            ${script.whatNotDo.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <h4>Historial de intervenciones</h4>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead><tr><th>Fecha</th><th>Cambio realizado</th><th>Motivo</th><th>Resultado observado</th><th>Estado</th></tr></thead>
+          <tbody>${historyRows}</tbody>
+        </table>
+      </div>
+
+      <h4>Relación entre síntoma y causa</h4>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead><tr><th>Síntoma visible</th><th>Causa técnica probable</th><th>Evidencia</th></tr></thead>
+          <tbody>${symptomRows}</tbody>
+        </table>
+      </div>
+
+      <div class="recommendation-banner">
+        <strong>Recomendación final por archivo:</strong> ${escapeHtml(capitalize(script.recommendation))}
+      </div>
+    `;
+  }
+
+  function renderDireccionTab(script) {
+    const executiveRows = `
+      <tr><td>${escapeHtml(script.file)}</td><td>${escapeHtml(summarizeImpact(script.impactAreas))}</td><td>${escapeHtml(capitalize(script.status))}</td><td>${escapeHtml(capitalize(script.severity))}</td><td>${escapeHtml(capitalize(script.priority))}</td><td>${escapeHtml(script.upstreamFiles[0] || 'Ninguna confirmada')}</td></tr>
+    `;
+
+    return `
+      <h3>Vista Dirección del Archivo</h3>
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Por qué importa</h4>
+          <ul class="tight">
+            ${deriveDirectionImportance(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Qué parte del negocio escolar afecta</h4>
+          <ul class="tight">
+            ${script.impactAreas.filter(area => area.active).map(area => `<li>${escapeHtml(area.label)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Riesgo de no corregir</h4>
+          <ul class="tight">
+            ${deriveDirectionRisk(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <h4>Mini tabla ejecutiva</h4>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead><tr><th>Archivo</th><th>Impacto en negocio</th><th>Estado</th><th>Riesgo</th><th>Prioridad</th><th>Dependencia crítica</th></tr></thead>
+          <tbody>${executiveRows}</tbody>
+        </table>
+      </div>
+
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Semáforo ejecutivo</h4>
+          <div class="visual-semaphore">
+            <span class="${script.severity === 'rojo' ? 'active red' : ''}"></span>
+            <span class="${script.severity === 'amarillo' ? 'active yellow' : ''}"></span>
+            <span class="${script.severity === 'verde' ? 'active green' : ''}"></span>
+          </div>
+          <p class="small">Severidad del problema</p>
+        </div>
+        <div class="section-card">
+          <h4>Impacto funcional</h4>
+          <div class="score-bar ${script.severity === 'rojo' ? 'danger' : 'warn'}"><span style="width:${impactScore(script)}%"></span></div>
+          <p class="small">Cobertura del módulo sobre flujos escolares clave.</p>
+        </div>
+        <div class="section-card">
+          <h4>Dependencia con otros módulos</h4>
+          <div class="score-bar ${script.upstreamFiles.length + script.downstreamFiles.length > 5 ? 'danger' : 'warn'}"><span style="width:${Math.min((script.upstreamFiles.length + script.downstreamFiles.length) * 12, 100)}%"></span></div>
+          <p class="small">Dependencias confirmadas por llamadas detectadas.</p>
+        </div>
+      </div>
+
+      <div class="recommendation-banner">
+        <strong>Decisión sugerida:</strong> ${escapeHtml(directionDecision(script))}
+      </div>
+    `;
+  }
+
+  function renderSolucionesTab(script) {
+    return `
+      <h3>Soluciones y Plan para ${escapeHtml(script.file)}</h3>
+      <div class="two-col">
+        <div class="section-card">
+          <h4>Diagnóstico de intervención</h4>
+          <p><strong>Problema actual:</strong> ${escapeHtml(script.symptoms[0] || script.diagnosis)}</p>
+          <p><strong>Hipótesis técnica:</strong> ${escapeHtml(script.causes[0] || 'Pendiente de aislar en pruebas.')}</p>
+          <p><strong>Solución recomendada:</strong> ${escapeHtml(script.controlesSugeridos && script.controlesSugeridos[0] ? script.controlesSugeridos[0] : 'Reparar el flujo específico del módulo sin reescribir el ecosistema.')}</p>
+          <p><strong>Tipo de intervención:</strong> ${escapeHtml(script.score >= 80 ? 'reestructuracion fuerte' : 'refactor ligero')}</p>
+          <p><strong>Qué no se debe tocar:</strong> ${escapeHtml(script.whatNotDo[0] || 'Responsabilidades ajenas del módulo.')}</p>
+        </div>
+        <div class="section-card">
+          <h4>Orden recomendado</h4>
+          <ol class="tight">
+            ${script.recommendedOrder.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ol>
+          <h5>Archivos dependientes afectados</h5>
+          <ul class="tight">
+            ${(script.downstreamFiles.length ? script.downstreamFiles : ['No confirmados en dataset']).map(file => `<li>${escapeHtml(file)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Solución inmediata</h4>
+          <ul class="tight">
+            ${deriveImmediateActions(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Solución estructural</h4>
+          <ul class="tight">
+            ${deriveStructuralActions(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Prueba mínima obligatoria</h4>
+          <ul class="tight">
+            ${deriveMinimumTests(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Validación esperada</h4>
+          <ul class="tight">
+            ${deriveExpectedValidation(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Criterio de cierre del bloque</h4>
+          <ul class="tight">
+            ${deriveClosureCriteria(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderResumenTab(script) {
+    const dependencyRows = buildDependencyRows(script).map(row => `
+      <tr>
+        <td>${escapeHtml(row.alimentadoPor)}</td>
+        <td>${escapeHtml(row.dependeDe)}</td>
+        <td>${escapeHtml(row.impactaA)}</td>
+        <td>${escapeHtml(row.hojaOrigen)}</td>
+        <td>${escapeHtml(row.hojaDestino)}</td>
+        <td>${escapeHtml(row.acoplamiento)}</td>
+      </tr>
+    `).join('');
+
+    return `
+      <h3>Resumen Técnico del Archivo</h3>
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Funciones principales</h4>
+          <ul class="tight">
+            ${(script.functions || []).slice(0, 10).map(fn => `<li>${escapeHtml(fn.name)} (${fn.startLine}-${fn.endLine})</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Entradas y salidas</h4>
+          <p><strong>Entradas:</strong> ${escapeHtml(deriveInputs(script).join(', '))}</p>
+          <p><strong>Salidas:</strong> ${escapeHtml(deriveOutputs(script).join(', '))}</p>
+          <p><strong>Dependencias upstream:</strong> ${escapeHtml(script.upstreamFiles.join(', ') || 'Sin evidencia en dataset')}</p>
+          <p><strong>Dependencias downstream:</strong> ${escapeHtml(script.downstreamFiles.join(', ') || 'Sin evidencia en dataset')}</p>
+        </div>
+        <div class="section-card">
+          <h4>Variables críticas y reglas</h4>
+          <p><strong>Constantes/variables críticas:</strong> ${escapeHtml(script.criticalConstants.join(', ') || 'No visibles en dataset')}</p>
+          <ul class="tight">
+            ${script.rules.map(rule => `<li>${escapeHtml(rule)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Puntos frágiles</h4>
+          <ul class="tight">
+            ${script.badPatterns.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Puntos fuertes</h4>
+          <ul class="tight">
+            ${deriveStrengths(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Síntomas y propagación</h4>
+          <ul class="tight">
+            ${deriveVisibleSymptoms(script).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <h4>Matriz de dependencias por archivo</h4>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead><tr><th>Alimentado por</th><th>Depende de</th><th>Impacta a</th><th>Hoja origen</th><th>Hoja destino</th><th>Nivel de acoplamiento</th></tr></thead>
+          <tbody>${dependencyRows}</tbody>
+        </table>
+      </div>
+
+      <h4>Matriz de impacto funcional</h4>
+      <div class="heat-grid">
+        ${script.impactAreas.map(area => `<div class="heat-cell ${area.active ? 'on' : ''}"><strong>${escapeHtml(area.label)}</strong><div class="small">${area.active ? 'Afecta' : 'Sin evidencia fuerte'}</div></div>`).join('')}
+      </div>
+    `;
+  }
+
+  function renderFlujoTab(script) {
+    const flowId = `flow-${slugify(script.file)}`;
+    const flowText = buildScriptFlow(script);
+    return `
+      <h3>Flujo Individual de ${escapeHtml(script.file)}</h3>
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Qué recibe, procesa y entrega</h4>
+          <ul class="tight">
+            <li><strong>Recibe:</strong> ${escapeHtml(deriveInputs(script).join(', '))}</li>
+            <li><strong>Procesa:</strong> ${escapeHtml(script.purpose)}</li>
+            <li><strong>Transforma:</strong> ${escapeHtml(script.rules[0] || 'Reglas del módulo y datos intermedios')}</li>
+            <li><strong>Entrega:</strong> ${escapeHtml(deriveOutputs(script).join(', '))}</li>
+          </ul>
+        </div>
+        <div class="section-card">
+          <h4>Hojas y salidas impactadas</h4>
+          <ul class="tight">
+            ${script.affectedSheets.map(sheet => `<li>${escapeHtml(sheet)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div id="${flowId}" class="mermaid">${flowText}</div>
+      </div>
+
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Scripts que alimentan</h4>
+          <ul class="tight">${(script.upstreamFiles.length ? script.upstreamFiles : ['Sin evidencia en dataset']).map(file => `<li>${escapeHtml(file)}</li>`).join('')}</ul>
+        </div>
+        <div class="section-card">
+          <h4>Scripts alimentados</h4>
+          <ul class="tight">${(script.downstreamFiles.length ? script.downstreamFiles : ['Sin evidencia en dataset']).map(file => `<li>${escapeHtml(file)}</li>`).join('')}</ul>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderConflictosTab(script) {
+    const conflicts = buildConflicts(script);
+    return `
+      <h3>Conflictos del Archivo</h3>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead><tr><th>Conflicto</th><th>Tipo</th><th>Severidad</th><th>Impacto</th><th>Evidencia</th><th>Archivo relacionado</th><th>Estado de investigación</th></tr></thead>
+          <tbody>
+            ${conflicts.map(conflict => `
+              <tr>
+                <td>${escapeHtml(conflict.title)}</td>
+                <td>${escapeHtml(conflict.type)}</td>
+                <td><span class="severity-dot ${semaforoClass(conflict.severity)}"></span>${escapeHtml(capitalize(conflict.severity))}</td>
+                <td>${escapeHtml(conflict.impact)}</td>
+                <td>${escapeHtml(conflict.evidence)}</td>
+                <td>${escapeHtml(conflict.related)}</td>
+                <td>${escapeHtml(conflict.state)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="section-grid">
+        <div class="section-card">
+          <h4>Conflictos internos</h4>
+          <ul class="tight">${conflicts.filter(item => item.type === 'interno').map(item => `<li>${escapeHtml(item.title)}</li>`).join('') || '<li>No detectados</li>'}</ul>
+        </div>
+        <div class="section-card">
+          <h4>Conflictos por dependencia</h4>
+          <ul class="tight">${conflicts.filter(item => item.type === 'dependencia').map(item => `<li>${escapeHtml(item.title)}</li>`).join('') || '<li>No detectados</li>'}</ul>
+        </div>
+        <div class="section-card">
+          <h4>Conflictos heredados o provocados</h4>
+          <ul class="tight">${conflicts.filter(item => item.type === 'heredado' || item.type === 'provoca').map(item => `<li>${escapeHtml(item.title)}</li>`).join('') || '<li>No detectados</li>'}</ul>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDetalleTab(script) {
+    const flowId = `detail-${slugify(script.file)}`;
+    return `
+      <h3>Detalle Profundo por Script</h3>
+      <div class="recommendation-banner">
+        Aquí se mezclan datos confirmados del dataset con inferencias funcionales marcadas en lenguaje conservador para no tocar el módulo equivocado.
+      </div>
+
+      <div class="detail-stack">
+        <details class="detail-block" open>
+          <summary>Listado de funciones y salud técnica</summary>
+          <div class="table-wrap">
+            <table class="function-table">
+              <thead>
+                <tr>
+                  <th>Función</th>
+                  <th>Propósito</th>
+                  <th>Entrada</th>
+                  <th>Salida esperada</th>
+                  <th>Hoja / datos</th>
+                  <th>Dependencia</th>
+                  <th>Crítica</th>
+                  <th>Riesgo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(script.functions || []).map(fn => renderFunctionRow(script, fn)).join('')}
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <details class="detail-block" open>
+          <summary>Funciones especiales y observaciones</summary>
+          <div class="section-grid">
+            <div class="section-card"><h4>Huérfanas</h4><ul class="tight">${renderList(script.orphanFunctions, 'Sin huérfanas detectadas')}</ul></div>
+            <div class="section-card"><h4>Duplicadas / redundantes</h4><ul class="tight">${renderList(deriveRedundantFunctions(script), 'Sin redundancias evidentes')}</ul></div>
+            <div class="section-card"><h4>Hardcoded</h4><ul class="tight">${renderList(script.hardcodedFunctions, 'Sin hardcoding visible por nombre')}</ul></div>
+            <div class="section-card"><h4>Alto acoplamiento</h4><ul class="tight">${renderList(script.coupledFunctions, 'Sin funciones fuertemente acopladas por evidencia')}</ul></div>
+            <div class="section-card"><h4>Propensas a romper flujo</h4><ul class="tight">${renderList(script.fragileFunctions, 'Sin puntos frágiles dominantes')}</ul></div>
+            <div class="section-card"><h4>Deberían separarse</h4><ul class="tight">${renderList(script.splitCandidates, 'Sin necesidad fuerte de separar')}</ul></div>
+            <div class="section-card"><h4>Deben quedarse intactas</h4><ul class="tight">${renderList(script.protectedFunctions, 'No hay blindadas por criterio especial')}</ul></div>
+          </div>
+        </details>
+
+        <details class="detail-block" open>
+          <summary>Bloques y flujo interno</summary>
+          <div id="${flowId}" class="mermaid">${buildInternalFlow(script)}</div>
+          <div class="section-grid">
+            ${(script.blocks || []).slice(0, 14).map(block => renderBlockCard(script, block)).join('')}
+          </div>
+        </details>
+
+        <details class="detail-block" open>
+          <summary>Patrones y malas prácticas</summary>
+          <ul class="tight">
+            ${script.badPatterns.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </details>
+      </div>
+    `;
+  }
+
+  function renderFunctionRow(script, fn) {
+    const entry = inferFunctionEntry(script, fn);
+    return `
+      <tr>
+        <td>${escapeHtml(fn.name)}</td>
+        <td>${escapeHtml(entry.purpose)}</td>
+        <td>${escapeHtml(entry.input)}</td>
+        <td>${escapeHtml(entry.output)}</td>
+        <td>${escapeHtml(entry.sheet)}</td>
+        <td>${escapeHtml(entry.dependency)}</td>
+        <td>${escapeHtml(entry.critical)}</td>
+        <td>${escapeHtml(entry.risk)}</td>
+        <td>${escapeHtml(entry.health)}</td>
+      </tr>
+    `;
+  }
+
+  function renderBlockCard(script, block) {
+    const explain = explainBlock(block, script);
+    return `
+      <div class="section-card">
+        <h4>${escapeHtml(block.name || block.type)} · ${block.startLine}-${block.endLine}</h4>
+        <p><strong>Qué hace:</strong> ${escapeHtml(explain.queHace)}</p>
+        <p><strong>Impacto:</strong> ${escapeHtml(explain.impacto)}</p>
+        <p><strong>Riesgo:</strong> ${escapeHtml(explain.riesgo)}</p>
+        <p><strong>Control:</strong> ${escapeHtml(explain.control)}</p>
+        <p class="small"><strong>Llamadas:</strong> ${escapeHtml((block.calls || []).join(', ') || 'Sin llamadas detectadas')}</p>
+      </div>
+    `;
+  }
+
+  function buildConflicts(script) {
+    const conflicts = [];
+
+    script.badPatterns.forEach(pattern => {
+      conflicts.push({
+        title: pattern,
+        type: 'interno',
+        severity: script.severity,
+        impact: summarizeImpact(script.impactAreas),
+        evidence: script.summaryTecnico || 'Evidencia derivada de análisis estructural',
+        related: script.file,
+        state: script.score >= 80 ? 'confirmado' : 'hipotesis'
+      });
+    });
+
+    script.upstreamFiles.slice(0, 3).forEach(file => {
+      conflicts.push({
+        title: `Dependencia aguas arriba desde ${file}`,
+        type: 'dependencia',
+        severity: script.severity,
+        impact: 'Puede romper entrada o contratos implícitos',
+        evidence: 'Relación deducida por llamadas detectadas',
+        related: file,
+        state: 'hipotesis'
+      });
+    });
+
+    if (FILE_OVERRIDES[script.file] && FILE_OVERRIDES[script.file].status === 'hereda error') {
+      conflicts.push({
+        title: 'El módulo hereda un error aguas arriba',
+        type: 'heredado',
+        severity: 'amarillo',
+        impact: 'La salida se degrada aunque la causa raíz esté fuera del archivo',
+        evidence: FILE_OVERRIDES[script.file].diagnosis,
+        related: script.upstreamFiles[0] || 'Statements / Detalle',
+        state: 'confirmado'
+      });
+    }
+
+    script.downstreamFiles.slice(0, 3).forEach(file => {
+      conflicts.push({
+        title: `Puede propagar error hacia ${file}`,
+        type: 'provoca',
+        severity: script.severity,
+        impact: 'Propagación descendente del estado o de datos incompletos',
+        evidence: script.symptoms[0] || 'Dependencia descendente confirmada',
+        related: file,
+        state: 'hipotesis'
+      });
+    });
+
+    return conflicts.slice(0, 12);
+  }
+
+  function buildScriptFlow(script) {
+    const selectedId = `S${slugify(script.file)}`;
+    const lines = ['flowchart LR'];
+
+    (script.upstreamFiles.slice(0, 4)).forEach((file, index) => {
+      lines.push(`U${index}["${escapeMermaid(file)}"] --> ${selectedId}`);
+    });
+
+    lines.push(`${selectedId}["${escapeMermaid(script.file)}\n${escapeMermaid(capitalize(script.status))}"]`);
+
+    script.affectedSheets.slice(0, 3).forEach((sheet, index) => {
+      lines.push(`${selectedId} --> H${index}["${escapeMermaid(sheet)}"]`);
+    });
+
+    script.downstreamFiles.slice(0, 4).forEach((file, index) => {
+      lines.push(`${selectedId} --> D${index}["${escapeMermaid(file)}"]`);
+    });
+
+    lines.push(`style ${selectedId} fill:${script.severity === 'rojo' ? '#ffe5e5' : script.severity === 'amarillo' ? '#fff7dd' : '#e6f7ec'},stroke:${script.severity === 'rojo' ? '#9b1c1c' : script.severity === 'amarillo' ? '#8a6a00' : '#136f3a'},stroke-width:3px`);
+    return lines.join('\n');
+  }
+
+  function buildInternalFlow(script) {
+    const lines = ['flowchart TD'];
+    const functions = (script.functions || []).slice(0, 8);
+    if (!functions.length) {
+      lines.push('N0["Sin funciones detectadas"]');
+      return lines.join('\n');
+    }
+
+    functions.forEach((fn, index) => {
+      lines.push(`N${index}["${escapeMermaid(fn.name)}"]`);
+      if (index > 0) {
+        lines.push(`N${index - 1} --> N${index}`);
+      }
+    });
+
+    return lines.join('\n');
+  }
+
+  function explainBlock(block, script) {
+    const domain = detectDomain(`${script.file} ${(block.name || '')} ${((block.calls || []).join(' '))}`);
+    if (block.type === 'constants') {
+      return {
+        queHace: `Define parámetros base que gobiernan el comportamiento del módulo en ${domain}.`,
+        impacto: `Ayuda a mantener consistencia de cálculo, validación o configuración.`,
+        riesgo: `Un valor incorrecto puede alterar resultados sin fallo visible inmediato.`,
+        control: `Validar encabezados, nombres y rango funcional antes de cambiar estas constantes.`
+      };
+    }
+
+    return {
+      queHace: `Ejecuta ${(block.name || 'la función')} dentro del dominio ${domain}.`,
+      impacto: `Puede alterar la trazabilidad del flujo ${domain}.`,
+      riesgo: `Si falla, puede dejar salidas parciales o incoherentes.`,
+      control: `Probar entradas normales, vacías e inválidas para este bloque.`
+    };
+  }
+
+  function inferFunctionEntry(script, fn) {
+    const fnName = fn.name || 'Funcion';
+    const callBlock = (script.blocks || []).find(block => block.name === fnName) || {};
+    const callCount = (callBlock.calls || []).length;
+    const domain = detectDomain(`${script.file} ${fnName}`);
+    return {
+      purpose: `Gestiona una porción de ${domain} en ${script.file}.`,
+      input: 'No visible en dataset; inferir desde nombre y llamadas.',
+      output: callCount ? `Entrega resultado intermedio para ${callBlock.calls[0] || 'flujo siguiente'}.` : 'Salida interna no documentada en dataset.',
+      sheet: deriveFunctionSheet(script, fnName),
+      dependency: callCount ? `${callCount} llamadas asociadas` : 'Sin dependencias visibles',
+      critical: isCriticalFunction(script, fnName) ? 'Sí' : 'No',
+      risk: callCount >= 4 || script.severity === 'rojo' ? 'Alto' : callCount >= 2 ? 'Medio' : 'Bajo',
+      health: deriveFunctionHealth(script, fnName)
+    };
+  }
+
+  function deriveFunctionSheet(script, fnName) {
+    const text = `${script.file} ${fnName}`.toLowerCase();
+    if (text.includes('statement') || text.includes('detalle')) return 'ESTADO_CUENTA_DETALLE / RESUMEN';
+    if (text.includes('portal') || text.includes('export')) return 'PORTAL / EXPORT_CONTABILIDAD';
+    if (text.includes('payment') || text.includes('application')) return 'PAGOS_REPORTADOS / APLICACION_PAGOS';
+    if (text.includes('charge') || text.includes('cargo')) return 'CARGOS_ESCOLARES';
+    if (text.includes('concili')) return 'CONCILIACION';
+    if (text.includes('config') || text.includes('schema')) return 'CONFIG / PARAMETROS / REGLAS_COBRO';
+    return 'No visible en dataset';
+  }
+
+  function deriveFunctionHealth(script, fnName) {
+    if (script.hardcodedFunctions.includes(fnName)) return 'Sospechosa por hardcoding';
+    if (script.coupledFunctions.includes(fnName)) return 'Sospechosa por acoplamiento';
+    if (script.protectedFunctions.includes(fnName)) return 'Sana / conservar';
+    return script.severity === 'rojo' ? 'Revisar con prioridad' : 'Estable con validación pendiente';
+  }
+
+  function isCriticalFunction(script, fnName) {
+    return script.protectedFunctions.includes(fnName) || /run|build|resolver|aplicar|generar|concili|statement/i.test(fnName);
+  }
+
+  function populateFilterOptions() {
+    populateSelect(ui.statusFilter, ['funciona', 'funciona parcial', 'bloqueado', 'requiere validacion', 'hereda error']);
+    populateSelect(ui.severityFilter, ['rojo', 'amarillo', 'verde']);
+    populateSelect(ui.priorityFilter, ['alta', 'media', 'baja']);
+    populateSelect(ui.typeFilter, uniqueList(state.scripts.map(script => script.scriptType)));
+  }
+
+  function populateSelect(select, values) {
+    values.forEach(value => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = capitalize(value);
+      select.appendChild(option);
+    });
+  }
+
+  function wireTabs() {
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.onclick = () => activateTab(btn.dataset.tab);
+    });
+  }
+
+  function wireFilters() {
+    ui.searchInput.addEventListener('input', event => {
+      state.filters.search = String(event.target.value || '').toLowerCase();
+      syncSelectedWithFilters();
+      renderAll();
+    });
+
+    ui.statusFilter.addEventListener('change', event => updateFilter('status', event.target.value));
+    ui.severityFilter.addEventListener('change', event => updateFilter('severity', event.target.value));
+    ui.priorityFilter.addEventListener('change', event => updateFilter('priority', event.target.value));
+    ui.typeFilter.addEventListener('change', event => updateFilter('type', event.target.value));
+    ui.clearFilters.addEventListener('click', clearFilters);
+  }
+
+  function wireNavigation() {
+    ui.prevScriptBtn.addEventListener('click', () => moveSelection(-1));
+    ui.nextScriptBtn.addEventListener('click', () => moveSelection(1));
+  }
+
+  function moveSelection(delta) {
+    const visible = getFilteredScripts();
+    const currentIndex = visible.findIndex(script => state.selected && script.file === state.selected.file);
+    if (currentIndex === -1) return;
+    const next = visible[currentIndex + delta];
+    if (!next) return;
+    state.selected = next;
+    renderAll();
+  }
+
+  function updateFilter(key, value) {
+    state.filters[key] = value;
+    syncSelectedWithFilters();
+    renderAll();
+  }
+
+  function clearFilters() {
+    state.filters = { search: '', status: 'all', severity: 'all', priority: 'all', type: 'all' };
+    ui.searchInput.value = '';
+    ui.statusFilter.value = 'all';
+    ui.severityFilter.value = 'all';
+    ui.priorityFilter.value = 'all';
+    ui.typeFilter.value = 'all';
+    syncSelectedWithFilters();
+    renderAll();
+  }
+
+  function syncSelectedWithFilters() {
+    const visible = getFilteredScripts();
+    if (!visible.length) return;
+    const exists = visible.some(script => state.selected && script.file === state.selected.file);
+    if (!exists) {
+      state.selected = visible[0];
+    }
+  }
+
+  function activateTab(tab) {
+    state.activeTab = tab;
+    document.querySelectorAll('.tab').forEach(button => button.classList.toggle('active', button.dataset.tab === tab));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.toggle('active', content.id === `tab-${tab}`));
+    runActiveTabMermaid();
+  }
+
+  function getFilteredScripts() {
+    return state.scripts.filter(script => {
+      const searchMatch = !state.filters.search || script.file.toLowerCase().includes(state.filters.search);
+      const statusMatch = state.filters.status === 'all' || script.status === state.filters.status;
+      const severityMatch = state.filters.severity === 'all' || script.severity === state.filters.severity;
+      const priorityMatch = state.filters.priority === 'all' || script.priority === state.filters.priority;
+      const typeMatch = state.filters.type === 'all' || script.scriptType === state.filters.type;
+      return searchMatch && statusMatch && severityMatch && priorityMatch && typeMatch;
+    });
+  }
+
+  function deriveScriptType(file, script) {
+    const value = `${file} ${(script.indicadores || {}).rolModulo || ''}`.toLowerCase();
+    if (/runner|orquest/.test(value)) return 'runner';
+    if (/repair|mantenimiento|fix/.test(value)) return 'reparacion';
+    if (/portal|api|formulario|interfaz/.test(value)) return 'interfaz';
+    if (/export|concili|integration|integraci/.test(value)) return 'integracion';
+    if (/core|schema|config|sync/.test(value)) return 'nucleo';
+    if (/charges|payments|applications|reversals|statements|automation/.test(value)) return 'soporte';
+    return 'salida';
+  }
+
+  function deriveSeverity(script) {
+    const raw = String(((script.indicadores || {}).semaforo || '')).toLowerCase();
+    if (raw.includes('roj')) return 'rojo';
+    if (raw.includes('verd')) return 'verde';
+    return 'amarillo';
+  }
+
+  function deriveStatus(file, severity) {
+    if (FILE_OVERRIDES[file] && FILE_OVERRIDES[file].status) return FILE_OVERRIDES[file].status;
+    if (severity === 'rojo') return 'bloqueado';
+    if (severity === 'amarillo') return 'funciona parcial';
+    return 'funciona';
+  }
+
+  function derivePriority(file, severity, script) {
+    if (/^9\d_|^99_/.test(file) && severity !== 'rojo') return 'media';
+    if (severity === 'rojo') return 'alta';
+    if ((script.indicadores || {}).acoplamientoExternoProxy >= 80) return 'alta';
+    if (severity === 'amarillo') return 'media';
+    return 'baja';
+  }
+
+  function deriveMaturity(file, severity) {
+    if (FILE_OVERRIDES[file] && FILE_OVERRIDES[file].maturity) return FILE_OVERRIDES[file].maturity;
+    if (severity === 'rojo') return 'requiere rediseño';
+    if (severity === 'amarillo') return 'pendiente de validacion real';
+    return 'estable';
+  }
+
+  function deriveRiskScore(file, severity, script) {
+    let score = severity === 'rojo' ? 85 : severity === 'amarillo' ? 62 : 28;
+    score += Math.min(((script.indicadores || {}).acoplamientoExternoProxy || 0) / 4, 12);
+    score += Math.min((script.totalLines || 0) / 180, 10);
+    score += Math.min((script.riesgos || []).length * 2, 8);
+    if (file === '09_V3_Statements.gs.js') score = 96;
+    if (file === '10_V3_PortalExport.gs.js') score = Math.max(score, 74);
+    return Math.round(Math.min(score, 100));
+  }
+
+  function derivePurpose(file, script, impactAreas) {
+    const business = summarizeImpact(impactAreas);
+    const source = cleanText(script.summaryEjecutivo || script.summaryTecnico || '');
+    if (source) return `${source} Impacta especialmente ${business}.`;
+    return `Gestiona el bloque ${script.scriptType} del proyecto y toca ${business}.`;
+  }
+
+  function deriveDiagnosis(file, script, severity) {
+    if (FILE_OVERRIDES[file] && FILE_OVERRIDES[file].diagnosis) return FILE_OVERRIDES[file].diagnosis;
+    const risk = cleanText((script.riesgos || [])[0] || '');
+    if (risk) return risk;
+    if (severity === 'rojo') return 'Presenta señales de alta fragilidad por tamaño, acoplamiento o dependencia externa.';
+    if (severity === 'amarillo') return 'Opera, pero necesita validación real y pruebas dirigidas antes de tratarse como estable.';
+    return 'No muestra conflicto crítico en el análisis estructural actual.';
+  }
+
+  function deriveConclusion(file, severity, priority) {
+    if (file === '09_V3_Statements.gs.js') {
+      return 'Es el archivo más sensible del sistema actual: cualquier cierre debe apoyarse en validación real de febrero y no solo en revisión de código.';
+    }
+    if (severity === 'rojo') return `Conviene intervenirlo pronto porque combina riesgo ${priority} y posibilidad de propagación a otros módulos.`;
+    if (severity === 'amarillo') return 'Debe observarse con pruebas y no declararse estable sin evidencia operativa.';
+    return 'Puede conservarse mientras se estabilizan primero los módulos más críticos.';
+  }
+
+  function deriveImpactAreas(file, script) {
+    const source = `${file} ${(script.summaryTecnico || '')} ${(script.summaryEjecutivo || '')} ${(script.calls || []).join(' ')}`.toLowerCase();
+    const checks = [
+      ['cargos escolares', /charge|cargo/],
+      ['pagos', /payment|pago/],
+      ['recargos', /reversal|recargo/],
+      ['mora', /mora/],
+      ['resumen', /resumen|statement/],
+      ['detalle', /detalle|statement/],
+      ['portal', /portal/],
+      ['conciliacion', /concili/],
+      ['exportacion contable', /export|contable/],
+      ['automatizacion', /automation|runner|orquest/],
+      ['runners', /runner|orquest/],
+      ['configuracion', /config|schema|core|sync/],
+      ['formularios', /formulario|form/]
+    ];
+
+    return checks.map(([label, regex]) => ({ label, active: regex.test(source) }));
+  }
+
+  function deriveAffectedSheets(file, impactAreas) {
+    const list = [];
+    if (hasImpact(impactAreas, 'cargos escolares')) list.push('CARGOS_ESCOLARES');
+    if (hasImpact(impactAreas, 'pagos')) list.push('PAGOS_REPORTADOS', 'APLICACION_PAGOS');
+    if (hasImpact(impactAreas, 'resumen')) list.push('ESTADO_CUENTA_RESUMEN');
+    if (hasImpact(impactAreas, 'detalle')) list.push('ESTADO_CUENTA_DETALLE');
+    if (hasImpact(impactAreas, 'portal')) list.push('PORTAL_PADRES_EXPORT');
+    if (hasImpact(impactAreas, 'conciliacion')) list.push('CONCILIACION');
+    if (hasImpact(impactAreas, 'exportacion contable')) list.push('EXPORT_CONTABILIDAD');
+    if (hasImpact(impactAreas, 'configuracion')) list.push('CONFIG', 'PARAMETROS', 'REGLAS_COBRO');
+    return uniqueList(list);
+  }
+
+  function deriveRecommendation(severity, file) {
+    if (severity === 'rojo') return file.startsWith('09_') ? 'tocar ahora' : 'observar primero';
+    if (severity === 'amarillo') return 'tocar despues';
+    return 'conservar porque funciona';
+  }
+
+  function deriveSymptoms(file, impactAreas, severity, downstreamFiles) {
+    const symptoms = [];
+    if (file === '09_V3_Statements.gs.js') {
+      return [
+        'Puede colapsar movimientos del período en saldo anterior o SALDO_INICIAL.',
+        'Puede dejar Total_Cargos o Total_Pagos en cero aun con actividad real.',
+        'Puede degradar Resumen, Detalle, Portal y Exportación contable por propagación.'
+      ];
+    }
+    if (file === '10_V3_PortalExport.gs.js') {
+      return [
+        'Puede mostrar salidas vacías o degradadas si Resumen y Detalle llegan incompletos.',
+        'Puede trasladar el síntoma al portal o al archivo contable aunque la causa raíz esté fuera del módulo.'
+      ];
+    }
+    if (hasImpact(impactAreas, 'pagos')) symptoms.push('Puede dejar pagos sin aplicar o sin reflejo completo en hojas derivadas.');
+    if (hasImpact(impactAreas, 'cargos escolares')) symptoms.push('Puede afectar la generación correcta de cargos base o descuentos.');
+    if (hasImpact(impactAreas, 'conciliacion')) symptoms.push('Puede dejar conciliaciones vacías o fuera de corte.');
+    if (hasImpact(impactAreas, 'portal')) symptoms.push('Puede alterar la lectura final que ve operación o familias.');
+    if (!symptoms.length) symptoms.push(severity === 'rojo' ? 'Puede romper el flujo general por acoplamiento alto.' : 'No hay síntoma operativo crítico confirmado en este momento.');
+    if (downstreamFiles.length) symptoms.push(`Si falla, se propaga hacia ${downstreamFiles.slice(0, 3).join(', ')}.`);
+    return symptoms;
+  }
+
+  function deriveCauses(file, script, severity) {
+    if (file === '09_V3_Statements.gs.js') {
+      return [
+        'Clasificación de movimientos del período versus saldo anterior todavía es frágil en escenarios reales.',
+        'La propagación descendente depende de reconstruir correctamente Resumen y Detalle.',
+        'La validación funcional quedó bloqueada por permisos de ejecución remota.'
+      ];
+    }
+    const causes = [];
+    if ((script.indicadores || {}).acoplamientoExternoProxy >= 80) causes.push('Acoplamiento externo alto: cambios aguas arriba pueden romperlo sin aviso.');
+    if ((script.totalLines || 0) >= 900) causes.push('Concentración alta de lógica en un solo archivo.');
+    if ((script.riesgos || []).length) causes.push(cleanText(script.riesgos[0]));
+    if (!causes.length) causes.push(severity === 'verde' ? 'No se observa causa crítica fuerte en el dataset.' : 'Requiere análisis de contrato de entradas y salidas.');
+    return causes;
+  }
+
+  function deriveWhatNotDo(file, type) {
+    const generic = [
+      'No corregir aquí síntomas cuya causa raíz esté aguas arriba.',
+      'No mezclar cambios funcionales y refactor estructural en el mismo ciclo.',
+      'No tocar reglas contables o de producción sin validación real del flujo.'
+    ];
+    if (type === 'runner') generic.unshift('No usar este archivo para arreglar lógica de negocio que debe vivir en módulos funcionales.');
+    if (type === 'integracion' || type === 'interfaz') generic.unshift('No intentar recalcular negocio aquí si la fuente viene mal desde módulos anteriores.');
+    return generic;
+  }
+
+  function deriveBadPatterns(script) {
+    const patterns = [];
+    if ((script.totalLines || 0) >= 1000) patterns.push('Sobrecarga de responsabilidades en un solo archivo.');
+    if ((script.indicadores || {}).acoplamientoExternoProxy >= 80) patterns.push('Dependencias frágiles con otros módulos.');
+    if ((script.functions || []).length >= 18) patterns.push('Densidad funcional alta; el módulo puede estar haciendo demasiadas cosas.');
+    if (deriveHardcodedFunctions(script).length) patterns.push('Existen funciones con hardcoding temporal o por fecha.');
+    if ((script.riesgos || []).length) patterns.push(cleanText((script.riesgos || [])[0]));
+    if (!patterns.length) patterns.push('No se detecta mala práctica dominante en la evidencia disponible.');
+    return uniqueList(patterns);
+  }
+
+  function deriveBusinessRules(file, impactAreas) {
+    const rules = [];
+    if (hasImpact(impactAreas, 'cargos escolares')) rules.push('Debe respetar reglas de cobro, grado, período y descuentos configurados.');
+    if (hasImpact(impactAreas, 'pagos')) rules.push('Debe conservar trazabilidad entre pago reportado, aplicación y saldo final.');
+    if (hasImpact(impactAreas, 'recargos') || hasImpact(impactAreas, 'mora')) rules.push('Debe aplicar temporalidad y vencimiento sin romper consistencia del estado de cuenta.');
+    if (hasImpact(impactAreas, 'resumen') || hasImpact(impactAreas, 'detalle')) rules.push('Debe distinguir saldo anterior, movimientos del período y salidas derivadas.');
+    if (hasImpact(impactAreas, 'portal') || hasImpact(impactAreas, 'exportacion contable')) rules.push('No debe publicar o exportar información degradada sin advertencia.');
+    if (!rules.length) rules.push('Reglas de negocio específicas no visibles en el dataset actual.');
+    return rules;
+  }
+
+  function deriveHistory(file, generatedAt) {
+    const history = [{
+      date: generatedAt || '2026-04-16',
+      change: 'Generación de análisis estructural del archivo.',
+      reason: 'Documentar riesgo, funciones y llamadas.',
+      result: 'Archivo incorporado al tablero técnico.',
+      state: 'documentado'
+    }];
+
+    if (file === '09_V3_Statements.gs.js') {
+      history.unshift({
+        date: '2026-04-16 10:45',
+        change: 'Ajuste de clasificación por período con fallback por fecha.',
+        reason: 'Evitar degradación de movimientos a saldo anterior.',
+        result: 'Cambio de código aplicado; falta validación real en hojas.',
+        state: 'abierto'
+      });
+      history.unshift({
+        date: '2026-04-16 20:35',
+        change: 'Intento de validación real de febrero.',
+        reason: 'Cerrar iteración 2 con evidencia observada.',
+        result: 'Bloqueado por permisos de ejecución remota.',
+        state: 'bloqueado'
+      });
+    }
+
+    return history;
+  }
+
+  function deriveGlossary(file, impactAreas, type) {
+    return {
+      simple: `${file} es una pieza ${type} del sistema escolar.` ,
+      job: `Se encarga principalmente de ${summarizeImpact(impactAreas)} dentro del flujo de CARGOS_MORA.`,
+      why: `Si falla, puede afectar visibilidad, cálculo o salida de ${summarizeImpact(impactAreas)}.`
+    };
+  }
+
+  function deriveOrphanFunctions(script, upstreamFiles) {
+    const calledWithinScript = new Set((script.calls || []).filter(name => (script.functions || []).some(fn => fn.name === name)));
+    return (script.functions || [])
+      .map(fn => fn.name)
+      .filter(name => !calledWithinScript.has(name) && !/^run/i.test(name) && !upstreamFiles.length);
+  }
+
+  function deriveHardcodedFunctions(script) {
+    return (script.functions || []).map(fn => fn.name).filter(name => /2026|feb|hoy|preview|real/i.test(name));
+  }
+
+  function deriveCoupledFunctions(script) {
+    return (script.blocks || [])
+      .filter(block => block.type === 'function' && (block.calls || []).length >= 5)
+      .map(block => block.name)
+      .filter(Boolean);
+  }
+
+  function deriveFragileFunctions(script, severity) {
+    return (script.functions || [])
+      .filter(fn => severity === 'rojo' || /aplicar|resolver|construir|concili|statement/i.test(fn.name))
+      .slice(0, 6)
+      .map(fn => fn.name);
+  }
+
+  function deriveSplitCandidates(script) {
+    if ((script.totalLines || 0) < 800 && (script.functions || []).length < 16) return [];
+    return (script.functions || []).slice(0, 4).map(fn => `${fn.name} podría separarse en helper especializado.`);
+  }
+
+  function deriveProtectedFunctions(file, script) {
+    if (/^00_|^01_|^02_/.test(file)) {
+      return (script.functions || []).slice(0, 3).map(fn => fn.name);
+    }
+    if (file === '09_V3_Statements.gs.js') {
+      return ['v3StatementsResolverPeriodoMovimiento_', 'v3StatementsMovimientoPerteneceAPeriodo_', 'v3StatementsMovimientoEsAnteriorAPeriodo_'];
+    }
+    return [];
+  }
+
+  function deriveDirectionImportance(script) {
+    return [
+      `Importa porque gobierna ${summarizeImpact(script.impactAreas)}.`,
+      `Toca ${script.affectedSheets.join(', ') || 'salidas del proyecto'}.`,
+      `Si falla, afecta ${script.downstreamFiles.length ? script.downstreamFiles.slice(0, 3).join(', ') : 'la operación del bloque actual'}.`
+    ];
+  }
+
+  function deriveDirectionRisk(script) {
+    return [
+      `Riesgo técnico ${script.score}/100 con severidad ${script.severity}.`,
+      `No corregirlo puede amplificar síntomas en ${script.affectedSheets.slice(0, 3).join(', ') || 'salidas dependientes'}.`,
+      `Conviene ${directionDecision(script)}.`
+    ];
+  }
+
+  function directionDecision(script) {
+    if (script.recommendation === 'tocar ahora') return 'intervenirlo ahora';
+    if (script.recommendation === 'no tocar todavia') return 'esperar a estabilizar sus entradas';
+    if (script.recommendation === 'observar primero') return 'observarlo primero con pruebas controladas';
+    return 'programarlo después de los módulos críticos';
+  }
+
+  function deriveImmediateActions(script) {
+    return [
+      `Aislar el síntoma principal: ${script.symptoms[0] || script.diagnosis}`,
+      `Ejecutar prueba mínima sobre ${script.affectedSheets[0] || 'la salida principal'}.`,
+      `No modificar ${script.whatNotDo[0]}`
+    ];
+  }
+
+  function deriveStructuralActions(script) {
+    return [
+      script.badPatterns[0] || 'Reducir acoplamiento y separar responsabilidades.',
+      'Formalizar contratos de entrada/salida entre módulos dependientes.',
+      'Agregar validación explícita y evidencia poscambio.'
+    ];
+  }
+
+  function deriveMinimumTests(script) {
+    return [
+      'Caso normal con datos esperados.',
+      'Caso vacío o sin filas relevantes.',
+      'Caso inválido o inconsistente que no debe romper el flujo.',
+      `Verificación manual en ${script.affectedSheets.slice(0, 2).join(' y ') || 'la hoja de salida'}.`
+    ];
+  }
+
+  function deriveExpectedValidation(script) {
+    return [
+      `La salida de ${script.affectedSheets[0] || 'la hoja principal'} debe reflejar el cambio sin degradar módulos descendentes.`,
+      'No deben aparecer nuevos vacíos, saldos colapsados o bloqueos en el flujo.',
+      'Las dependencias relacionadas deben seguir operando con el mismo contrato.'
+    ];
+  }
+
+  function deriveClosureCriteria(script) {
+    return [
+      'Síntoma principal reproducido, corregido y revalidado.',
+      'Salida observada en hoja o portal consistente con el objetivo del bloque.',
+      'No hay regresión visible en scripts dependientes inmediatos.',
+      `Decisión final alineada con: ${capitalize(script.recommendation)}.`
+    ];
+  }
+
+  function deriveInputs(script) {
+    const values = [];
+    if (script.upstreamFiles.length) values.push(...script.upstreamFiles.map(file => `Salida de ${file}`));
+    if (script.criticalConstants.length) values.push(`Configuración: ${script.criticalConstants.slice(0, 3).join(', ')}`);
+    if (script.calls && script.calls.length) values.push(`Dependencias invocadas: ${script.calls.slice(0, 4).join(', ')}`);
+    return uniqueList(values.length ? values : ['Entradas no explícitas en dataset']);
+  }
+
+  function deriveOutputs(script) {
+    const values = [];
+    if (script.downstreamFiles.length) values.push(...script.downstreamFiles.map(file => `Alimenta a ${file}`));
+    if (script.affectedSheets.length) values.push(...script.affectedSheets.map(sheet => `Impacta ${sheet}`));
+    return uniqueList(values.length ? values : ['Salidas no explícitas en dataset']);
+  }
+
+  function deriveStrengths(script) {
+    const strengths = [];
+    if (script.severity === 'verde') strengths.push('No aparece en el grupo de mayor riesgo del tablero.');
+    if ((script.functions || []).length <= 10) strengths.push('Tamaño funcional relativamente controlable.');
+    if ((script.constants || []).length) strengths.push('Tiene constantes visibles que ayudan a estructurar configuración o reglas.');
+    if (script.downstreamFiles.length <= 2) strengths.push('Cadena descendente acotada frente a otros módulos más acoplados.');
+    if (!strengths.length) strengths.push('Tiene una responsabilidad identificable dentro del ecosistema y puede analizarse por archivo.');
+    return strengths;
+  }
+
+  function deriveVisibleSymptoms(script) {
+    return [
+      ...script.symptoms,
+      `Errores propagables hacia: ${script.downstreamFiles.join(', ') || 'sin dependencia descendente visible'}`
+    ];
+  }
+
+  function deriveWhatWorks(script) {
+    const items = [];
+    if (script.severity === 'verde') items.push('No muestra señales de riesgo crítico en el dataset actual.');
+    if (script.functions && script.functions.length) items.push(`El módulo expone ${script.functions.length} funciones identificables para trazabilidad.`);
+    if (script.affectedSheets.length) items.push(`Su ámbito funcional se puede seguir hasta ${script.affectedSheets.slice(0, 3).join(', ')}.`);
+    if (!items.length) items.push('Tiene una responsabilidad reconocible dentro del flujo general.');
+    return items;
+  }
+
+  function deriveWhyMatters(script) {
+    return [
+      `Participa en ${summarizeImpact(script.impactAreas)}.`,
+      `Su salida toca ${script.affectedSheets.join(', ') || 'módulos dependientes'}.`,
+      `Puede alterar ${script.downstreamFiles.length ? script.downstreamFiles.slice(0, 3).join(', ') : 'el flujo interno del sistema'} si se rompe.`
+    ];
+  }
+
+  function buildDependencyRows(script) {
+    return [{
+      alimentadoPor: script.upstreamFiles.join(', ') || 'Sin evidencia',
+      dependeDe: deriveInputs(script)[0] || 'Sin evidencia',
+      impactaA: script.downstreamFiles.join(', ') || 'Sin evidencia',
+      hojaOrigen: script.affectedSheets[0] || 'No visible',
+      hojaDestino: script.affectedSheets.slice(1).join(', ') || script.affectedSheets[0] || 'No visible',
+      acoplamiento: couplingLabel(script)
+    }];
+  }
+
+  function buildEvidence(script, index) {
+    if (script.file === '09_V3_Statements.gs.js') {
+      return index === 0
+        ? 'Incidencia documentada en iteración 2 y comparación antes/después del tablero.'
+        : 'Bloque de validación real todavía pendiente por permisos.';
+    }
+    return cleanText(script.summaryTecnico || 'Evidencia indirecta desde estructura, llamadas y riesgos.');
+  }
+
+  function countBySeverity(scripts) {
+    return scripts.reduce((acc, script) => {
+      acc[script.severity] = (acc[script.severity] || 0) + 1;
+      return acc;
+    }, { rojo: 0, amarillo: 0, verde: 0 });
+  }
+
+  function impactScore(script) {
+    return Math.min(script.impactAreas.filter(area => area.active).length * 12 + script.downstreamFiles.length * 8, 100);
+  }
+
+  function hasImpact(impactAreas, label) {
+    return impactAreas.some(area => area.label === label && area.active);
+  }
+
+  function buildRoleFromType(type, impactAreas) {
+    return `Módulo ${type} que participa en ${summarizeImpact(impactAreas)}.`;
+  }
+
+  function couplingLabel(script) {
+    const value = (script.indicadores || {}).acoplamientoExternoProxy || 0;
+    if (value >= 80) return 'alto';
+    if (value >= 45) return 'medio';
+    return 'bajo';
+  }
+
+  function detectDomain(text) {
+    const value = String(text || '').toLowerCase();
+    if (/charge|cargo/.test(value)) return 'cargos';
+    if (/payment|pago|application/.test(value)) return 'pagos y aplicación';
+    if (/reversal|mora|recargo/.test(value)) return 'recargos y mora';
+    if (/statement|resumen|detalle/.test(value)) return 'estados de cuenta';
+    if (/portal|export|api|contable/.test(value)) return 'integración y exportación';
+    if (/schema|config|setup|sync/.test(value)) return 'configuración y sincronización';
+    if (/runner|orquest|automation/.test(value)) return 'orquestación';
+    if (/concili/.test(value)) return 'conciliación';
+    return 'operación del sistema';
+  }
+
+  function deriveInterventionOrder(file) {
+    if (/^00_|^01_|^02_/.test(file)) {
+      return ['Validar base y encabezados.', 'Verificar contratos de configuración.', 'Usar como piso antes de tocar módulos dependientes.'];
+    }
+    if (/^03_|^04_/.test(file)) {
+      return ['Confirmar configuración base.', 'Validar sincronización.', 'Luego intervenir captura o procesamiento.'];
+    }
+    if (/^05_|^06_/.test(file)) {
+      return ['Asegurar entradas válidas.', 'Validar aplicación de datos.', 'Recién después tocar estados o exportación.'];
+    }
+    if (/^07_|^08_|^09_/.test(file)) {
+      return ['Aislar el cálculo núcleo.', 'Probar con febrero y escenarios de negocio.', 'Reconstruir salidas derivadas.'];
+    }
+    if (/^10_|^17_|^18_/.test(file)) {
+      return ['Confirmar primero las entradas aguas arriba.', 'Validar salidas visibles.', 'No reabrir cálculo base aquí.'];
+    }
+    return ['Revisar dependencias reales.', 'Tocar al final si no es causa raíz.', 'Cerrar con evidencia visible.'];
+  }
+
+  function deriveRedundantFunctions(script) {
+    const names = new Map();
+    (script.functions || []).forEach(fn => {
+      const key = fn.name.toLowerCase().replace(/preview|real|hoy|ahora|feb2026|ano2026/g, '');
+      names.set(key, (names.get(key) || []).concat(fn.name));
+    });
+    return [...names.values()].filter(group => group.length > 1).map(group => group.join(' / '));
+  }
+
+  function summarizeImpact(impactAreas) {
+    const active = impactAreas.filter(area => area.active).map(area => area.label);
+    if (!active.length) return 'operación técnica interna';
+    return active.slice(0, 4).join(', ');
+  }
+
+  function semaforoClass(value) {
+    const text = String(value || '').toLowerCase();
+    if (text.includes('roj')) return 'rojo';
+    if (text.includes('verd')) return 'verde';
+    if (text.includes('crit')) return 'critico';
+    return 'amarillo';
+  }
+
+  function renderList(items, fallback) {
+    return items.length ? items.map(item => `<li>${escapeHtml(item)}</li>`).join('') : `<li>${escapeHtml(fallback)}</li>`;
+  }
+
+  function uniqueList(values) {
+    return [...new Set((values || []).filter(Boolean))];
+  }
+
+  function slugify(text) {
+    return String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function fixText(value) {
+    return String(value || '')
+      .replace(/\?/g, '')
+      .replace(/lneas/g, 'líneas')
+      .replace(/funcin/g, 'función')
+      .replace(/funciones top-level/g, 'funciones top-level')
+      .replace(/crtico/g, 'crítico')
+      .replace(/tecnico/g, 'técnico')
+      .replace(/modulo/g, 'módulo')
+      .replace(/dependencia implcita/g, 'dependencia implícita')
+      .replace(/regresin/g, 'regresión')
+      .replace(/bitcora/g, 'bitácora')
+      .replace(/validacin/g, 'validación')
+      .replace(/ejecucin/g, 'ejecución')
+      .replace(/relacin/g, 'relación')
+      .replace(/configuracin/g, 'configuración')
+      .replace(/informacin/g, 'información')
+      .replace(/auditoria/g, 'auditoría')
+      .replace(/operacin/g, 'operación')
+      .replace(/lógica hardcoded/g, 'lógica hardcoded')
+      .trim();
+  }
+
+  function cleanText(value) {
+    return fixText(value)
+      .replace(/\s+/g, ' ')
+      .replace(/[^\x20-\x7E\xA0-\xFF]/g, '')
+      .trim();
+  }
+
+  function capitalize(value) {
+    const text = cleanText(value);
+    return text ? text.charAt(0).toUpperCase() + text.slice(1) : '';
+  }
+
+  function escapeMermaid(value) {
+    return String(value || '').replace(/"/g, '').replace(/</g, '').replace(/>/g, '');
+  }
+
+  function escapeHtml(value) {
+    const text = cleanText(value);
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+    <h4>FASE 1 - Congelar lo que sí funciona</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${frozenComponents.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 2 - Rediseñar flujo en capas</h4>
+    ${layerPlan.map(layer => `
+      <div class="mini-card" style="margin-bottom:12px;">
+        <h5>${escapeHtml(layer.capa)}</h5>
+        <p class="small"><strong>Objetivo:</strong> ${escapeHtml(layer.objetivo)}</p>
+        <ul class="tight">
+          ${layer.entregables.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('')}
+
+    <h4>FASE 3 - Fuentes de verdad por dominio</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Dominio / Módulo</th><th>Rol</th></tr></thead>
+        <tbody>
+          ${sourceOfTruth.map(([dominio, rol]) => `<tr><td>${escapeHtml(dominio)}</td><td>${escapeHtml(rol)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>FASE 4 - Normalizar estados</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${standardStates.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 5 - Semántica de saldos negativos</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${semanticNegativeBalances.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 6 - Trazabilidad obligatoria por corrida</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${trackedMetrics.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>FASE 7 - Orden de implementación</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${implementationOrder.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+      </ol>
+    </div>
+
+    <h4>FASE 8 - Pruebas mínimas obligatorias</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Caso</th><th>Esperado</th></tr></thead>
+        <tbody>
+          ${mandatoryTests.map(t => `<tr><td>${escapeHtml(t.caso)}</td><td>${escapeHtml(t.esperado)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Diseño Operativo Post-Reestructuración</h4>
+    <div class="warning-banner">
+      Política principal: nada corre en simultáneo, nada se salta etapas y nada se ejecuta fuera de orden. Manual y automático deben usar exactamente la misma lógica.
+    </div>
+
+    <h4>Secuencia de validación inicial (manual)</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${initialManualSequence.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+      </ol>
+      <p class="small"><strong>Gate:</strong> solo después de validar febrero, marzo y abril se habilita automático.</p>
+    </div>
+
+    <h4>Flujo operativo obligatorio por período</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Etapa</th><th>Acciones obligatorias</th></tr></thead>
+        <tbody>
+          ${operationalFlow.map(row => `<tr><td>${escapeHtml(row.etapa)}</td><td>${escapeHtml(row.acciones)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Reglas de control de ejecución</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${controlRules.map(rule => `<li>${escapeHtml(rule)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Validación obligatoria de cada mes manual</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${monthGateChecklist.map(check => `<li>${escapeHtml(check)}</li>`).join('')}
+      </ul>
+      <p class="small"><strong>Regla:</strong> si falla un punto, no se avanza al siguiente mes.</p>
+    </div>
+
+    <h4>Condición para habilitar automático</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${automaticEnableConditions.map(c => `<li>${escapeHtml(c)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Diseño del automático (sin atajos)</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${automaticRunDesign.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+      </ol>
+      <p class="small">El automático procesa un solo período por corrida, sin paralelismo y sin reabrir períodos cerrados salvo bandera de reproceso controlado.</p>
+    </div>
+
+    <h4>Log obligatorio de cada corrida (manual o automática)</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Campo</th></tr></thead>
+        <tbody>
+          ${runLogFields.map(field => `<tr><td>${escapeHtml(field)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Protocolo de Trabajo Iterativo con Informe Web Obligatorio</h4>
+    <div class="warning-banner">
+      Toda iteración de scripts debe cerrar con actualización del informe web. Una iteración sin evidencia web completa se considera abierta.
+    </div>
+
+    <h4>Contenido obligatorio del informe por iteración</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${iterativeReportSections.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+      </ol>
+    </div>
+
+    <h4>Estados permitidos en matriz por módulo</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${allowedModuleStates.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Reglas obligatorias de iteración</h4>
+    <div class="note-box">
+      <ul class="tight">
+        ${iterativeHardRules.map(rule => `<li>${escapeHtml(rule)}</li>`).join('')}
+      </ul>
+    </div>
+
+    <h4>Formato de cierre estándar</h4>
+    <div class="note-box">
+      <ol class="tight">
+        ${iterationClosingFormat.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+      </ol>
+    </div>
+
+    <h4>Registro base de activación del protocolo</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Campo</th><th>Detalle</th></tr></thead>
+        <tbody>
+          <tr><td>Iteración</td><td>${escapeHtml(firstProtocolActivation.iteracion)}</td></tr>
+          <tr><td>Cambio realizado</td><td>${escapeHtml(firstProtocolActivation.cambio)}</td></tr>
+          <tr><td>Módulos impactados</td><td>${escapeHtml(firstProtocolActivation.modulos)}</td></tr>
+          <tr><td>Resultado observado</td><td>${escapeHtml(firstProtocolActivation.resultado)}</td></tr>
+          <tr><td>Riesgo abierto</td><td>${escapeHtml(firstProtocolActivation.riesgo)}</td></tr>
+          <tr><td>Siguiente acción</td><td>${escapeHtml(firstProtocolActivation.siguiente)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Verificación del primer bloque (no cerrado)</h4>
+    <div class="table-wrap">
+      <table class="diag-table">
+        <thead><tr><th>Bloque</th><th>Evidencia</th></tr></thead>
+        <tbody>
+          <tr><td>A) Cambio realizado</td><td><strong>${escapeHtml(iteration1.archivo)}</strong><br>${escapeHtml(iteration1.funcion)}<br>${escapeHtml(iteration1.cambio)}<br><em>No tocado:</em> ${escapeHtml(iteration1.noTocado)}</td></tr>
+          <tr><td>B) Módulos impactados</td><td>Statements/Estados (directo), Resumen/Detalle (directo), Portal/Exportación (herencia).</td></tr>
+          <tr><td>C) Resultado observado</td><td>${escapeHtml(iteration1.resultado)}<br><em>Prueba:</em> ${escapeHtml(iteration1.prueba)}</td></tr>
+          <tr><td>D) Riesgos abiertos</td><td>${escapeHtml(iteration1.riesgos)}</td></tr>
+          <tr><td>E) Siguiente paso</td><td>${escapeHtml(iteration1.siguiente)}</td></tr>
+          <tr><td>F) Informe web actualizado</td><td>SI - Bloque registrado como NO CERRADO hasta validar febrero en hojas reales.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Salida obligatoria del primer bloque (detalle técnico)</h4>
+    <div class="note-box">
+      <ul class="tight">
+        <li><strong>Qué anomalía corrige:</strong> ${escapeHtml(iteration1.motivo)}</li>
+        <li><strong>Efecto esperado:</strong> ${escapeHtml(iteration1.efectoEsperado)}</li>
+        <li><strong>Resumen:</strong> ${escapeHtml(iteration1.resumenImpacto)}</li>
+        <li><strong>Detalle:</strong> ${escapeHtml(iteration1.detalleImpacto)}</li>
+        <li><strong>Portal:</strong> ${escapeHtml(iteration1.portalImpacto)}</li>
+        <li><strong>Exportación Contable:</strong> ${escapeHtml(iteration1.exportImpacto)}</li>
+        <li><strong>Qué sigue roto:</strong> cierre de febrero no validado en hojas por bloqueo de permisos de ejecución.</li>
+        <li><strong>Módulo siguiente:</strong> ejecución asistida de pruebas febrero en Statements (sin tocar recargos/mora/conciliación).</li>
+      </ul>
+    </div>
+
+    <h4>Objetivo operativo final</h4>
+    <div class="note-box">
+      <p class="small">Primero validación manual mes por mes (febrero, marzo, abril). Después automatización de la misma secuencia exacta sin diferencias funcionales.</p>
+      <ul class="tight">
+        <li>Nunca correr en simultáneo.</li>
+        <li>Nunca saltar una etapa.</li>
+        <li>Nunca publicar salidas derivadas antes de cerrar la etapa anterior.</li>
+      </ul>
+    </div>
+
+    <h4>Restricciones activas</h4>
+    <div class="warning-banner">
+      No reescribir todo a la vez. No tocar cálculos base correctos. Portal/Conciliación/Exportación no recalculan lógica propia. Prohibido mantener doble lógica temporal. Conciliación no puede depender solo de Periodo_Reportado exacto. No colapsar movimientos del período a saldo anterior.
+    </div>
+
+    <h4>Criterio de parada</h4>
+    <div class="note-box">
+      <ul class="tight">
+        <li>Febrero visible como movimiento del período, no como saldo anterior.</li>
+        <li>Recargos correctos según reglas reales.</li>
+        <li>Mora correcta con única política temporal.</li>
+        <li>Detalle con movimientos reales completos.</li>
+        <li>Conciliación con datos reales de aplicación.</li>
+        <li>Exportación contable con filas reales (no vacía por degradación).</li>
+        <li>Portal heredando estado correcto sin recalcular.</li>
+      </ul>
+    </div>
+  `;
+
+  ui.solutionsPlan.innerHTML = html;
+}
+
+function buildDependencyText(script) {
+  const file = script.file || '';
+  
+  if (file.startsWith('00_') || file.startsWith('01_') || file.startsWith('02_')) {
+    return 'Módulo base. PRIMERO: sin dependencias previas, lo primero que corregir.';
+  } else if (file.startsWith('03_') || file.startsWith('04_')) {
+    return 'Modulo de configuración. Esperar a que 00-02 estén OK.';
+  } else if (file.startsWith('05_') || file.startsWith('06_')) {
+    return 'Módulo de ingesta. Requiere que 00-04 estén corregidos primero.';
+  } else if (file.startsWith('07_') || file.startsWith('08_') || file.startsWith('09_')) {
+    return 'Módulo de procesamiento. Requiere 05-06 OK. Crítico para flujo financiero.';
+  } else if (file.startsWith('10_') || file.startsWith('17_')) {
+    return 'Módulo de integración/salida. Requiere 07-09 OK antes.';
+  } else if (file.startsWith('90_') || file.startsWith('91_')) {
+    return 'Orquestador. ÚLTIMO: corregir solo después de que todos los módulos de negocio estén OK.';
+  }
+  return 'Dependencia determinada por número de módulo en nombre.';
+}
+
+function renderSummary() {
+  const avgCalls = avgBy(s => (s.calls || []).length);
+  const avgFns = avgBy(s => (s.functions || []).length);
+
+  ui.globalSummary.innerHTML = `
+    <h3>Resumen Técnico Global</h3>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${avgCalls.toFixed(1)}</div><div class="k">Llamadas promedio por script</div></div>
+      <div class="kpi"><div class="v">${avgFns.toFixed(1)}</div><div class="k">Funciones promedio por script</div></div>
+      <div class="kpi"><div class="v">${countUniqueCalls()}</div><div class="k">Símbolos invocados</div></div>
+    </div>
+  `;
+
+  const topCalls = topCallsGlobal(20)
+    .map(([n, c]) => `<li><strong>${escapeHtml(n)}</strong>: ${c}</li>`)
+    .join('');
+
+  ui.callsSummary.innerHTML = `
+    <h3>Top de llamadas detectadas</h3>
+    <ul class="tight">${topCalls || '<li>Sin datos</li>'}</ul>
+  `;
+}
+
+function renderConflicts() {
+  const rojo = state.scripts.filter(s => ((s.indicadores || {}).semaforo || '').toLowerCase() === 'rojo');
+  const coupling = state.scripts.filter(s => ((s.indicadores || {}).acoplamientoExternoProxy || 0) >= 80);
+  const longFiles = state.scripts.filter(s => (s.totalLines || 0) >= 1000);
+
+  ui.conflictsPanel.innerHTML = `
+    <h3>Conflictos y Puntos de Choque</h3>
+    <div class="line-grid">
+      <div class="mini-card">
+        <h5>Riesgo Alto (Rojo)</h5>
+        <ul class="tight">${rojo.map(s => `<li>${escapeHtml(s.file)}</li>`).join('') || '<li>Sin módulos en rojo</li>'}</ul>
+      </div>
+      <div class="mini-card">
+        <h5>Acoplamiento Externo Alto</h5>
+        <ul class="tight">${coupling.map(s => `<li>${escapeHtml(s.file)} (${(s.indicadores || {}).acoplamientoExternoProxy})</li>`).join('') || '<li>No detectado</li>'}</ul>
+      </div>
+      <div class="mini-card">
+        <h5>Tamaño Crítico</h5>
+        <ul class="tight">${longFiles.map(s => `<li>${escapeHtml(s.file)} (${s.totalLines} líneas)</li>`).join('') || '<li>No detectado</li>'}</ul>
+      </div>
+    </div>
+  `;
+}
+
+function renderFlow() {
+  // Mapa de propagación de datos con estado de cada flecha
+  const mainFlow = `flowchart LR
+    A["CARGOS_ESCOLARES"] -->|OK| B["APLICACION_PAGOS"]
+    B -->|PARCIAL| C["RECARGOS"]
+    C -->|DEGRADA| D["STATES\nCUELLO DE BOTELLA"]
+    D -->|PARCIAL| E["RESUMEN"]
+    D -->|INCOMPLETO| F["DETALLE"]
+    E -->|HEREDA| G["PORTAL"]
+    F -->|HEREDA| G
+    B -->|VACIO| H["CONCILIACION"]
+    D -->|VACIO| H
+    F -->|CASCADE| I["EXPORT\nCONTABILIDAD"]
+
+    style A fill:#e6f7ec,stroke:#136f3a,stroke-width:3px
+    style B fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style C fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style D fill:#ffe5e5,stroke:#9b1c1c,stroke-width:4px
+    style E fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style F fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style G fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
+    style H fill:#ececec,stroke:#616161,stroke-width:3px
+    style I fill:#ececec,stroke:#616161,stroke-width:3px`;
+
+  ui.mermaidFlow.textContent = mainFlow;
+  safeMermaidRun([ui.mermaidFlow]);
+
+  ui.flowNotes.innerHTML = `
+    <div class="flow-container">
+      <h3>Mapa de Propagación y Trazabilidad</h3>
+
+      <div class="flow-stage">
+        <h4>Leyenda de Flechas</h4>
+        <div class="flow-detail">
+          <p><strong>OK:</strong> pasa datos correctamente</p>
+          <p><strong>PARCIAL:</strong> pasa datos parcialmente</p>
+          <p><strong>VACIO:</strong> no pasa datos</p>
+          <p><strong>DEGRADA:</strong> reubica datos de forma incorrecta</p>
+        </div>
+      </div>
+
+      <div class="flow-stage">
+        <h4>Trazabilidad por Hoja (entrada/salida/dependencia)</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead>
+              <tr><th>Hoja</th><th>Entradas</th><th>Salidas</th><th>Estado</th><th>Qué sí llena</th><th>Qué no llena</th><th>Qué depende de esta hoja</th><th>Riesgo</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CARGOS_ESCOLARES</td><td>Reglas y estudiantes</td><td>Cargos base</td><td>Funciona</td><td>Mensualidad y descuentos</td><td>Temporalidad avanzada</td><td>Aplicación, Statements</td><td>Bajo</td></tr>
+              <tr><td>APLICACION_PAGOS</td><td>Pagos reportados</td><td>Aplicaciones</td><td>Funciona parcial</td><td>Aplicación principal</td><td>Casos multiuso</td><td>States, Conciliación</td><td>Medio</td></tr>
+              <tr><td>STATES / RESUMEN</td><td>Cargos + pagos + reglas</td><td>Estados consolidados</td><td>Cuello de botella</td><td>Saldos iniciales</td><td>Movimientos completos</td><td>Detalle, Portal, Export</td><td>Alto</td></tr>
+              <tr><td>ESTADO_CUENTA_DETALLE</td><td>States</td><td>Detalle por movimiento</td><td>Incompleto</td><td>Estructura base</td><td>Recargo/mora propagada</td><td>Portal, Exportación</td><td>Alto</td></tr>
+              <tr><td>PORTAL</td><td>Resumen + detalle</td><td>Salida usuario</td><td>Hereda incompleto</td><td>Datos base</td><td>Mora/recargo consistente</td><td>Operación final</td><td>Medio-alto</td></tr>
+              <tr><td>CONCILIACION</td><td>Aplicaciones reales</td><td>Cierre reconciliado</td><td>No generada</td><td>N/A</td><td>Filas de salida</td><td>Control financiero</td><td>Alto</td></tr>
+              <tr><td>EXPORT_CONTABILIDAD</td><td>Detalle corregido</td><td>Archivo contable</td><td>No generada</td><td>N/A</td><td>Asientos exportables</td><td>Contabilidad</td><td>Alto</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flow-stage">
+        <h4>Conclusión Operativa del Flujo (Diagnóstico Validado)</h4>
+        <div class="flow-detail">
+          <p><strong>Cargos funciona. Aplicación de Pagos funciona parcialmente. El problema no empieza ahí.</strong></p>
+          <p><strong>El problema empieza en Statements:</strong> toma los movimientos y decide cuáles son "del período" y cuáles se mandan a Saldo_Anterior. Esa clasificación incorrecta colapsa cargos, pagos, recargos, ajustes y excedentes en una sola línea de saldo.</p>
+          <p><strong>Conciliación</strong> no está rota por sí misma. Depende de Periodo_Reportado exacto y puede dejar fuera pagos válidos aunque las aplicaciones sí existan.</p>
+          <p><strong>Exportación Contable</strong> no está rota por sí misma. Solo lee ESTADO_CUENTA_DETALLE. Si Detalle solo tiene SALDO_INICIAL, Export queda vacía. Se resuelve al reparar States y Detalle.</p>
+          <p><strong>Portal</strong> no tiene problema propio. Hereda saldo final, mora, estado y último período pendiente desde Resumen.</p>
+          <p><strong>Mora y Recargo</strong> tienen dos reglas independientes (5 días gracia vs 61 días mora) que no están sincronizadas entre sí.</p>
+          <p>El proyecto no necesita reescritura completa. Reparar Statements desbloquea toda la cadena descendente.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+function findCallers(targetFunctionName, allData) {
+  // Busca todos los scripts y funciones que llaman a targetFunctionName
+  const callers = {};
+  if (!allData || !allData.scripts) return callers;
+  
+  for (const script of allData.scripts) {
+    for (const fn of (script.functions || [])) {
+      if ((fn.calls || []).includes(targetFunctionName)) {
+        if (!callers[script.file]) {
+          callers[script.file] = { scriptName: script.file, functions: [] };
+        }
+        callers[script.file].functions.push(fn.name);
+      }
+    }
+    for (const block of (script.blocks || [])) {
+      if (block.type === 'function' && (block.calls || []).includes(targetFunctionName)) {
+        if (!callers[script.file]) {
+          callers[script.file] = { scriptName: script.file, functions: [] };
+        }
+        if (!callers[script.file].functions.includes(block.name)) {
+          callers[script.file].functions.push(block.name);
+        }
+      }
+    }
+  }
+  return callers;
+}
+
+function renderDetail() {
+  const s = state.selected;
+  if (!s) return;
+
+  const sem = semaforoClass((s.indicadores || {}).semaforo);
+
+  const blocks = (s.blocks || []).map(b => {
+    const explain = explainBlock(b, s);
+    const calls = (b.calls || []).slice(0, 12);
+    
+    // Buscar qué otros scripts llaman a este bloque
+    let impactHtml = '';
+    if (b.type === 'function' && b.name) {
+      const callers = findCallers(b.name, state.data);
+      if (Object.keys(callers).length > 0) {
+        const callerList = Object.entries(callers)
+          .map(([file, info]) => {
+            const shortFile = file.split('/').pop();
+            return `${shortFile} (${info.functions.join(', ')})`;
+          })
+          .slice(0, 5);
+        
+        impactHtml = `
+          <div class="impact-warning">
+            <div class="impact-icon">⚠️ IMPACTO DE CAMBIOS</div>
+            <div class="impact-text"><strong>Esta función es llamada por:</strong> ${escapeHtml(callerList.join(' | '))}</div>
+            <div class="impact-note">⚡ Cambios aquí pueden dañar estos scripts. Verificar antes de editar.</div>
+          </div>
+        `;
+      }
+    }
+    
+    return `
+      <div class="line-block">
+        <div class="line-range">Línea ${b.startLine} a ${b.endLine}</div>
+        <div class="small">Tipo: ${escapeHtml(b.type === 'function' ? 'Función' : 'Constantes / Configuración')}${b.name ? ` | ${escapeHtml(b.name)}` : ''}</div>
+        <div class="line-grid">
+          <div class="mini-card"><h5>Qué hace</h5><div>${escapeHtml(explain.queHace)}</div></div>
+          <div class="mini-card"><h5>Impacto al negocio</h5><div>${escapeHtml(explain.impacto)}</div></div>
+          <div class="mini-card"><h5>Riesgo si falla</h5><div>${escapeHtml(explain.riesgo)}</div></div>
+          <div class="mini-card"><h5>Control recomendado</h5><div>${escapeHtml(explain.control)}</div></div>
+        </div>
+        ${calls.length ? `<div class="small" style="margin-top:8px;"><strong>Llamadas clave:</strong> ${escapeHtml(calls.join(', '))}</div>` : ''}
+        ${impactHtml}
+      </div>
+    `;
+  }).join('');
+
+  const scriptFlow = buildScriptFlow(s);
+
+  let detailHtml = `
+    <h3>${escapeHtml(s.file)} <span class="chip ${sem}">${escapeHtml((s.indicadores || {}).semaforo || 'N/D')}</span></h3>
+    <p><strong>Rol del módulo:</strong> ${escapeHtml(((s.indicadores || {}).rolModulo) || 'No definido')}</p>
+    <p><strong>Lectura ejecutiva:</strong> ${escapeHtml(cleanText((s.summaryEjecutivo || '').replace(/\?/g, '')))}</p>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${s.totalLines}</div><div class="k">Líneas</div></div>
+      <div class="kpi"><div class="v">${(s.functions || []).length}</div><div class="k">Funciones</div></div>
+      <div class="kpi"><div class="v">${(s.constants || []).length}</div><div class="k">Constantes</div></div>
+      <div class="kpi"><div class="v">${(s.calls || []).length}</div><div class="k">Llamadas detectadas</div></div>
+    </div>
+  `;
+
+  // Agregar sección de soluciones si está en rojo o amarillo
+  const semaforo = ((s.indicadores || {}).semaforo || '').toLowerCase();
+  if (semaforo.includes('roj') || semaforo.includes('amar')) {
+    const soluciones = (s.controlesSugeridos || []).slice(0, 5);
+    const riesgos = (s.riesgos || []).slice(0, 3);
+    
+    detailHtml += `
+      <h4>Soluciones Recomendadas para Este Módulo</h4>
+      <div class="solution-box">
+        ${riesgos.length > 0 ? `
+          <h5>Riesgos Identificados:</h5>
+          <ul class="tight">
+            ${riesgos.map(r => `<li>${escapeHtml(cleanText(r))}</li>`).join('')}
+          </ul>
+        ` : ''}
+        
+        ${soluciones.length > 0 ? `
+          <h5>Pasos de Corrección:</h5>
+          <ol class="tight">
+            ${soluciones.map(sol => `<li>${escapeHtml(cleanText(sol))}</li>`).join('')}
+          </ol>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  detailHtml += `
+    <h4>Infografía del script</h4>
+    <div id="scriptMermaid" class="mermaid">${scriptFlow}</div>
+    <h4>Detalle minucioso por rango de líneas</h4>
+    ${blocks || '<p>No hay bloques.</p>'}
+  `;
+
+  ui.scriptDetail.innerHTML = detailHtml;
+
+  const scriptNode = document.getElementById('scriptMermaid');
+  safeMermaidRun([scriptNode]);
+}
+
+function explainBlock(block, script) {
+  const domain = detectDomain(`${script.file} ${(block.name || '')} ${((block.calls || []).join(' '))}`);
+  if (block.type === 'constants') {
+    return {
+      queHace: `Define parámetros base que gobiernan el comportamiento del módulo en ${domain}.`,
+      impacto: `Si estos valores están bien definidos, el proceso mantiene consistencia y previsibilidad.`,
+      riesgo: `Un valor mal configurado puede alterar cálculos o rutas de ejecución sin aviso evidente.`,
+      control: `Validar valores de configuración con checklist y comparar contra ambiente esperado antes de correr.`
+    };
+  }
+
+  const fn = block.name || 'funcion';
+  return {
+    queHace: `Ejecuta ${fn} y coordina acciones de ${domain} en el rango indicado.`,
+    impacto: `Este tramo afecta directamente la trazabilidad y resultado operativo del flujo ${domain}.`,
+    riesgo: `Si falla, puede generar datos incompletos, estados inconsistentes o resultados no conciliables.`,
+    control: `Revisar entrada/salida de este rango y registrar evidencia de ejecución en pruebas de punta a punta.`
+  };
+}
+
+function detectDomain(txt) {
+  const t = String(txt || '').toLowerCase();
+  if (/charge|cargo/.test(t)) return 'cargos';
+  if (/payment|pago|application/.test(t)) return 'pagos y aplicación';
+  if (/reversal|mora|recargo/.test(t)) return 'recargos y mora';
+  if (/statement|resumen|detalle/.test(t)) return 'estados de cuenta';
+  if (/portal|export|api|contable/.test(t)) return 'integración y exportación';
+  if (/schema|config|setup|sync/.test(t)) return 'configuración y sincronización';
+  if (/runner|orchestr|automation/.test(t)) return 'orquestación';
+  if (/concili/.test(t)) return 'conciliación';
+  return 'operación del sistema';
+}
+
+function buildScriptFlow(script) {
+  const nodes = (script.functions || []).slice(0, 9);
+  let out = 'flowchart TD\n';
+  nodes.forEach((fn, i) => {
+    out += `N${i}["${String(fn.name || `Fn ${i + 1}`).replace(/"/g, '')}"]\n`;
+  });
+  for (let i = 0; i < nodes.length - 1; i++) {
+    out += `N${i} --> N${i + 1}\n`;
+  }
+  if (!nodes.length) out += 'N0["Sin funciones detectadas"]\n';
+  return out;
+}
+
+function semaforoCounts() {
+  const counts = { rojo: 0, amarillo: 0, verde: 0 };
+  state.scripts.forEach(s => {
+    const v = ((s.indicadores || {}).semaforo || '').toLowerCase();
+    if (v.includes('roj')) counts.rojo++;
+    else if (v.includes('amar')) counts.amarillo++;
+    else if (v.includes('verd')) counts.verde++;
+  });
+  return counts;
+}
+
+function semaforoClass(v) {
+  const t = String(v || '').toLowerCase();
+  if (t.includes('roj')) return 'rojo';
+  if (t.includes('amar')) return 'amarillo';
+  if (t.includes('verd')) return 'verde';
+  return 'amarillo';
+}
+
+function topCallsGlobal(limit = 15) {
+  const map = new Map();
+  state.scripts.forEach(s => (s.calls || []).forEach(c => map.set(c, (map.get(c) || 0) + 1)));
+  return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+}
+
+function countUniqueCalls() {
+  const set = new Set();
+  state.scripts.forEach(s => (s.calls || []).forEach(c => set.add(c)));
+  return set.size;
+}
+
+function sumBy(fn) {
+  return state.scripts.reduce((acc, s) => acc + (Number(fn(s)) || 0), 0);
+}
+
+function avgBy(fn) {
+  if (!state.scripts.length) return 0;
+  return sumBy(fn) / state.scripts.length;
+}
+
+function wireTabs() {
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.onclick = () => activateTab(btn.dataset.tab);
+  });
+}
+
+function activateTab(tab) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${tab}`));
+  runActiveTabMermaid();
+}
+
+function wireSearch() {
+  ui.searchInput.addEventListener('input', e => {
+    renderSidebar(e.target.value || '');
+  });
+}
+
+function cleanText(t) {
+  return String(t || '')
+    .replace(/\s+/g, ' ')
+    .replace(/\?/g, '')
+    .replace(/[^\x20-\x7E\xA0-\xFF]/g, '')
+    .trim();
+}
+
+function escapeHtml(str) {
+  const s = String(str || '')
+    .replace(/\?/g, '')
+    .replace(/[^\x20-\x7E\xA0-\xFF]/g, (c) => {
+      try {
+        return c.normalize('NFC');
+      } catch (e) {
+        return '';
+      }
+    });
+  
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
