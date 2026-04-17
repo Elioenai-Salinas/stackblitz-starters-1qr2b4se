@@ -84,6 +84,20 @@ body {
   flex-direction: column;
   gap: 6px;
 }
+
+.static-script-list {
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 8px 8px 20px;
+  background: #fff;
+}
+
+.static-script-list li {
+  font-size: 0.82rem;
+  margin: 2px 0;
+}
 .script-btn {
   border: 1px solid var(--line);
   background: #fff;
@@ -143,6 +157,16 @@ body {
   margin-bottom: 12px;
 }
 .card h3 { margin-top: 0; }
+
+.static-review {
+  border: 2px solid #0b7285;
+  background: #f8feff;
+}
+
+.static-review h4 {
+  color: #0b4f5c;
+  margin-top: 14px;
+}
 
 .kpis {
   display: grid;

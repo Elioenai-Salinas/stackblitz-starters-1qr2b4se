@@ -21,7 +21,41 @@
       <div class="panel">
         <h2>Navegación</h2>
         <input id="searchInput" type="text" placeholder="Buscar script..." />
-        <div id="scriptList" class="script-list"></div>
+        <div id="scriptList" class="script-list">
+          <div class="small"><strong>Listado visible (fallback sin JS):</strong></div>
+          <ul class="tight static-script-list">
+            <li>00_V3_ActivacionMinima.gs.js</li>
+            <li>01_V3_Core.gs.js</li>
+            <li>02_V3_Schema.gs.js</li>
+            <li>03_V3_ConfigSetup.gs.js</li>
+            <li>04_V3_Sync.gs.js</li>
+            <li>05_V3_Payments.gs.js</li>
+            <li>05A_V3_PaymentsForm.gs.js</li>
+            <li>06_V3_Applications.gs.js</li>
+            <li>07_V3_Charges.gs.js</li>
+            <li>08_V3_Reversals.gs.js</li>
+            <li>09_V3_Statements.gs.js</li>
+            <li>10_V3_PortalExport.gs.js</li>
+            <li>11_V3_RulesSeed.gs.js</li>
+            <li>11A_V3_Task1_ReglasCobroReset.gs.js</li>
+            <li>12_V3_ResetMensual.gs.js</li>
+            <li>12_V3_RulesFix.gs.js</li>
+            <li>13_V3_ComprobantesCargados.gs.js</li>
+            <li>14_V3_FormularioPagosInterno.gs.js</li>
+            <li>15_V3_FormularioPagosV2.gs.js</li>
+            <li>16_V3_Automation.gs.js</li>
+            <li>17_V3_PortalAPI.gs.js</li>
+            <li>18_V3_Conciliacion.gs.js</li>
+            <li>19_V3_Fixes.gs.js</li>
+            <li>20_V3_QA_Smoke.gs.js</li>
+            <li>21_V3_StageFlow.gs.js</li>
+            <li>90_V3_Runners.gs.js</li>
+            <li>91_V3_Orchestrators.gs.js</li>
+            <li>98_Admin_Mantenimiento.gs.js</li>
+            <li>98_V3_GuardianRepair.gs.js</li>
+            <li>99_V3_OrquestadorContable.gs.js</li>
+          </ul>
+        </div>
       </div>
       <div class="panel stats" id="statsPanel"></div>
     </aside>
@@ -66,6 +100,97 @@
       <article id="tab-detalle" class="tab-content">
         <div id="scriptDetail" class="card">
           <h3>Selecciona un script en la barra lateral</h3>
+        </div>
+      </article>
+
+      <article id="external-review" class="card static-review">
+        <h3>Reporte Estático para Revisión Externa (Sin Interacción)</h3>
+        <p class="small">Este bloque deja visible el análisis técnico completo en HTML para lectura automatizada cuando el navegador no ejecuta interacción de pestañas o render dinámico.</p>
+
+        <h4>Vista Dirección</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Módulo</th><th>Estado</th><th>Observación</th></tr></thead>
+            <tbody>
+              <tr><td>Cargos Escolares</td><td>FUNCIONA</td><td>Genera cargos base.</td></tr>
+              <tr><td>Aplicación de Pagos</td><td>FUNCIONA PARCIAL</td><td>Aplica pagos con casos pendientes.</td></tr>
+              <tr><td>Statements / Estados</td><td>BLOQUEADO (cuello)</td><td>Colapsa movimientos de período a saldo.</td></tr>
+              <tr><td>Detalle</td><td>FUNCIONA PARCIAL</td><td>Dependiente de corrección en Statements.</td></tr>
+              <tr><td>Portal</td><td>HEREDA ERROR</td><td>No recalcula; hereda salida de Resumen/Detalle.</td></tr>
+              <tr><td>Conciliación</td><td>REQUIERE VALIDACIÓN</td><td>Dependiente de aplicaciones reales.</td></tr>
+              <tr><td>Exportación Contable</td><td>REQUIERE VALIDACIÓN</td><td>Depende de detalle exportable real.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Soluciones y Plan</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li>Reestructuración por capas A-F activada.</li>
+            <li>Flujo operativo secuencial activado (manual febrero-marzo-abril antes de automático).</li>
+            <li>Protocolo iterativo obligatorio con evidencia web por cada cambio.</li>
+            <li>Iteración 1 enfocada en 09_V3_Statements.gs.js (normalización y clasificación de período).</li>
+          </ul>
+        </div>
+
+        <h4>Resumen Técnico</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Indicador</th><th>Valor</th></tr></thead>
+            <tbody>
+              <tr><td>Scripts analizados</td><td>30</td></tr>
+              <tr><td>Semáforo rojo</td><td>18</td></tr>
+              <tr><td>Semáforo amarillo</td><td>8</td></tr>
+              <tr><td>Semáforo verde</td><td>4</td></tr>
+              <tr><td>Cuello principal</td><td>Statements / Estados</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Flujo Graficado (lectura textual)</h4>
+        <div class="note-box">
+          <ol class="tight">
+            <li>CARGOS_ESCOLARES</li>
+            <li>APLICACION_PAGOS</li>
+            <li>RECARGOS</li>
+            <li>STATES / STATEMENTS (cuello de botella)</li>
+            <li>RESUMEN</li>
+            <li>DETALLE</li>
+            <li>PORTAL</li>
+            <li>CONCILIACION</li>
+            <li>EXPORT_CONTABILIDAD</li>
+          </ol>
+        </div>
+
+        <h4>Conflictos</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li>Total_Cargos y Total_Pagos pueden quedar en 0 cuando movimientos del período se reclasifican.</li>
+            <li>Detalle puede degradarse a SALDO_INICIAL si no entra movimiento del período.</li>
+            <li>Portal y Exportación heredan degradación aguas arriba.</li>
+            <li>Mora y recargo siguen con validación pendiente de alineación final.</li>
+          </ul>
+        </div>
+
+        <h4>Detalle por Script (visible sin clic)</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Archivo</th><th>Rol</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>07_V3_Charges.gs.js</td><td>Generación de cargos</td><td>FUNCIONA</td></tr>
+              <tr><td>06_V3_Applications.gs.js</td><td>Aplicación de pagos</td><td>FUNCIONA PARCIAL</td></tr>
+              <tr><td>08_V3_Reversals.gs.js</td><td>Recargos / vencimientos</td><td>REQUIERE VALIDACIÓN</td></tr>
+              <tr><td>09_V3_Statements.gs.js</td><td>Detalle y Resumen</td><td>ITERACIÓN 1 EN CURSO</td></tr>
+              <tr><td>10_V3_PortalExport.gs.js</td><td>Portal + Export Contable</td><td>HEREDA RESULTADOS DE STATES</td></tr>
+              <tr><td>18_V3_Conciliacion.gs.js</td><td>Conciliación</td><td>REQUIERE VALIDACIÓN</td></tr>
+              <tr><td>90_V3_Runners.gs.js</td><td>Secuencias de ejecución</td><td>OPERATIVO</td></tr>
+              <tr><td>99_V3_OrquestadorContable.gs.js</td><td>Orquestación</td><td>OPERATIVO</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="warning-banner">
+          Si la versión interactiva no renderiza por restricciones del entorno, este bloque estático sigue dejando accesible el análisis para revisión externa.
         </div>
       </article>
     </section>
