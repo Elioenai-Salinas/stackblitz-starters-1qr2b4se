@@ -108,6 +108,15 @@
         <ol id="reportTimeline" class="report-timeline">
           <li class="report-entry">
             <div class="report-head">
+              <strong>Iteración 2 - Statements (evidencia reforzada)</strong>
+              <time datetime="2026-04-16T10:45:00-06:00">2026-04-16 10:45</time>
+            </div>
+            <p>
+              Se ajusto la clasificacion de movimientos por periodo en 09_V3_Statements.gs.js para evitar reclasificacion indebida a saldo anterior, y se agrego funcion de evidencia de febrero con 4 casos obligatorios. La ejecucion remota de evidencia quedo bloqueada por permisos de clasp run.
+            </p>
+          </li>
+          <li class="report-entry">
+            <div class="report-head">
               <strong>Informe base del tablero</strong>
               <time datetime="2026-04-16T08:30:00-06:00">2026-04-16 08:30</time>
             </div>
@@ -249,11 +258,40 @@
               <tr><td>07_V3_Charges.gs.js</td><td>Generación de cargos</td><td>FUNCIONA</td></tr>
               <tr><td>06_V3_Applications.gs.js</td><td>Aplicación de pagos</td><td>FUNCIONA PARCIAL</td></tr>
               <tr><td>08_V3_Reversals.gs.js</td><td>Recargos / vencimientos</td><td>REQUIERE VALIDACIÓN</td></tr>
-              <tr><td>09_V3_Statements.gs.js</td><td>Detalle y Resumen</td><td>ITERACIÓN 1 EN CURSO</td></tr>
+              <tr><td>09_V3_Statements.gs.js</td><td>Detalle y Resumen</td><td>ITERACIÓN 2 EN CURSO</td></tr>
               <tr><td>10_V3_PortalExport.gs.js</td><td>Portal + Export Contable</td><td>HEREDA RESULTADOS DE STATES</td></tr>
               <tr><td>18_V3_Conciliacion.gs.js</td><td>Conciliación</td><td>REQUIERE VALIDACIÓN</td></tr>
               <tr><td>90_V3_Runners.gs.js</td><td>Secuencias de ejecución</td><td>OPERATIVO</td></tr>
               <tr><td>99_V3_OrquestadorContable.gs.js</td><td>Orquestación</td><td>OPERATIVO</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Iteración 2 - Evidencia de Statements</h4>
+        <div class="note-box">
+          <ul class="tight">
+            <li><strong>Función tocada:</strong> v3StatementsMovimientoPerteneceAPeriodo_, v3StatementsMovimientoEsAnteriorAPeriodo_, v3StatementsConstruirContexto_, v3StatementsEvidenciaIteracionFebrero.</li>
+            <li><strong>Regla cambiada:</strong> si un movimiento no trae periodo explícito, ahora se infiere por fecha de movimiento antes de excluirlo o enviarlo a saldo anterior.</li>
+            <li><strong>Síntoma a corregir:</strong> movimientos reales de febrero degradados a SALDO_INICIAL y Total_Cargos/Total_Pagos en 0 por pérdida de clasificación.</li>
+            <li><strong>Cambio en Resumen:</strong> se habilita cómputo de cargos/pagos del periodo al recuperar movimientos sin periodo explícito pero con fecha válida.</li>
+            <li><strong>Cambio en Detalle:</strong> se prioriza movimiento real del periodo y se reduce degradación a SALDO_INICIAL por faltante de periodo explícito.</li>
+            <li><strong>Cambio en Portal:</strong> sin ajuste directo; hereda mejora cuando Resumen del scope de febrero se reconstruye correctamente.</li>
+            <li><strong>Cambio en Exportación:</strong> sin ajuste directo; puede poblarse cuando Detalle de febrero tenga movimientos exportables.</li>
+            <li><strong>Qué sigue roto:</strong> ejecución remota bloqueada por permisos en clasp run para validar evidencia en hoja real con los 4 casos obligatorios.</li>
+          </ul>
+        </div>
+
+        <h4>Antes / Después</h4>
+        <div class="table-wrap">
+          <table class="diag-table">
+            <thead><tr><th>Criterio</th><th>Resultado esperado</th><th>Observado antes</th><th>Observado después</th><th>Estado final</th></tr></thead>
+            <tbody>
+              <tr><td>Clasificación de movimientos de febrero</td><td>Movimientos quedan en el periodo, no en saldo anterior</td><td>Se reclasificaban por falta de periodo explícito</td><td>Regla corregida en código con fallback por fecha de movimiento</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Resumen (Total_Cargos / Total_Pagos)</td><td>Valores reales cuando existan movimientos</td><td>Podían quedar en 0 aunque había actividad</td><td>Cómputo recupera movimientos antes omitidos por periodo vacío</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Detalle</td><td>Mostrar movimientos reales del periodo</td><td>Degradación a SALDO_INICIAL en casos afectados</td><td>Se reduce degradación al inferir periodo por fecha</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Portal</td><td>Heredar resumen corregido</td><td>Heredaba estados degradados</td><td>Sin cambio directo; depende de rebuild de states validado</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Exportación contable</td><td>Poblarse cuando haya detalle exportable</td><td>Vacía por falta de detalle útil</td><td>Sin cambio directo; depende de detalle corregido en ejecución real</td><td>PENDIENTE VALIDACIÓN EN SHEETS</td></tr>
+              <tr><td>Prueba obligatoria de febrero (4 casos)</td><td>Validar sin pagos, con pagos, descuento familiar, excedente</td><td>No consolidada</td><td>Función v3StatementsEvidenciaIteracionFebrero agregada; ejecución remota bloqueada</td><td>BLOQUEADA POR PERMISOS</td></tr>
             </tbody>
           </table>
         </div>
