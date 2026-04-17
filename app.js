@@ -142,13 +142,13 @@ function renderExecutive() {
   const moduleStatus = [
     { modulo: 'Cargos Escolares', estado: 'FUNCIONA', clase: 'verde' },
     { modulo: 'Aplicación de Pagos', estado: 'FUNCIONA PARCIAL', clase: 'amarillo' },
-    { modulo: 'Recargos', estado: 'NO FUNCIONA', clase: 'rojo' },
-    { modulo: 'Mora', estado: 'NO FUNCIONA', clase: 'rojo' },
-    { modulo: 'Statements / Estados', estado: 'CUELLO DE BOTELLA', clase: 'rojo' },
-    { modulo: 'Detalle', estado: 'INCOMPLETO', clase: 'amarillo' },
-    { modulo: 'Portal', estado: 'HEREDA DATOS INCOMPLETOS', clase: 'amarillo' },
-    { modulo: 'Conciliación', estado: 'NO GENERADA / VACÍA', clase: 'gris' },
-    { modulo: 'Exportación Contable', estado: 'NO GENERADA / VACÍA', clase: 'gris' }
+    { modulo: 'Recargos', estado: 'NO FUNCIONA (motor temporal)', clase: 'rojo' },
+    { modulo: 'Mora', estado: 'DESALINEADA (61 días ≠ gracia de recargo)', clase: 'rojo' },
+    { modulo: 'Statements / Estados', estado: 'CUELLO DE BOTELLA — COLAPSA MOVIMIENTOS', clase: 'rojo' },
+    { modulo: 'Detalle', estado: 'INCOMPLETO (solo SALDO_INICIAL)', clase: 'amarillo' },
+    { modulo: 'Portal', estado: 'SIN PROBLEMA PROPIO — HEREDA DE RESUMEN', clase: 'amarillo' },
+    { modulo: 'Conciliación', estado: 'VACÍA (Periodo_Reportado excluye pagos válidos)', clase: 'amarillo' },
+    { modulo: 'Exportación Contable', estado: 'VACÍA — CASCADE DE DETALLE INCOMPLETO', clase: 'amarillo' }
   ];
 
   const stableComponents = [
@@ -170,28 +170,36 @@ function renderExecutive() {
       sospecha: 'Match de reglas o ejecución incompleta del motor'
     },
     {
-      modulo: 'Statements',
-      esperado: 'Estados con movimientos completos y saldo final consistente',
-      observado: 'Colapso a saldo anterior/saldo inicial',
-      impacto: 'Rompe resumen, detalle y portal',
+      modulo: 'Statements / Estados',
+      esperado: 'Mantener visibles: cargos, pagos, recargos, ajustes, excedentes y conciliaciones por período',
+      observado: 'Colapsa todo a Saldo_Anterior o SALDO_INICIAL; Total_Cargos=0, Total_Pagos=0',
+      impacto: 'Contamina Resumen, Detalle, Portal, Conciliación y Export Contable',
       prioridad: 'Alta',
-      sospecha: 'Unificación incorrecta de movimientos'
+      sospecha: 'Clasificación "del período" vs "Saldo_Anterior" incorrecta en Statements'
+    },
+    {
+      modulo: 'Mora / Recargo (doble lógica)',
+      esperado: 'Gracia de 5 días para recargo; mora activa tras 61 días; ambas reglas alineadas',
+      observado: 'Sistema puede aplicar recargo sin mora, o mora sin recargo',
+      impacto: 'Subestima o sobreestima deuda; estados de cuenta inconsistentes',
+      prioridad: 'Alta',
+      sospecha: 'Dos reglas temporales independientes sin sincronización entre sí'
     },
     {
       modulo: 'Conciliación',
-      esperado: 'Hoja con pagos aplicados reconciliados',
-      observado: 'Salida vacía',
-      impacto: 'No hay control financiero final',
+      esperado: 'Hoja con pagos aplicados reconciliados por período',
+      observado: 'Vacía — Periodo_Reportado exacto puede excluir pagos válidos aunque existan aplicaciones',
+      impacto: 'Sin control financiero; pagos válidos quedan fuera del corte',
       prioridad: 'Alta',
-      sospecha: 'Fuente errónea o filtro excesivo'
+      sospecha: 'Filtro de Periodo_Reportado demasiado estricto vs aplicaciones reales'
     },
     {
       modulo: 'Exportación Contable',
       esperado: 'Archivo contable generado por período',
-      observado: 'No se generan filas exportables',
-      impacto: 'Cierre contable bloqueado',
+      observado: 'Vacía — no es problema propio; cascade porque Detalle solo tiene SALDO_INICIAL',
+      impacto: 'Cierre contable bloqueado por herencia de States/Detalle',
       prioridad: 'Media-Alta',
-      sospecha: 'Detalle no entrega movimientos válidos'
+      sospecha: 'No roto propio — resolución automática al reparar States y Detalle'
     }
   ];
 
@@ -236,7 +244,7 @@ function renderExecutive() {
     },
     {
       hoja: 'STATES / RESUMEN', entradas: 'Cargos + Aplicaciones + Reglas temporales', salidas: 'Estado consolidado', estado: 'CUELLO DE BOTELLA',
-      siLlena: 'Saldo inicial/anterior', noLlena: 'Movimientos completos', depende: 'Detalle, Portal, Exportación', riesgo: 'Alto'
+      siLlena: 'Saldo_Anterior / SALDO_INICIAL', noLlena: 'Cargos, pagos, recargos, ajustes, excedentes y conciliaciones (colapsados a saldo)', depende: 'Detalle, Portal, Exportación', riesgo: 'Alto'
     },
     {
       hoja: 'ESTADO_CUENTA_DETALLE', entradas: 'States', salidas: 'Movimientos exportables', estado: 'INCOMPLETO',
@@ -248,11 +256,11 @@ function renderExecutive() {
     },
     {
       hoja: 'CONCILIACION', entradas: 'Aplicaciones reales', salidas: 'Conciliación por corte', estado: 'NO GENERADA',
-      siLlena: 'Nada estable', noLlena: 'Filas de conciliación', depende: 'Control de cierre', riesgo: 'Alto'
+      siLlena: 'N/A', noLlena: 'Filas de conciliación (Periodo_Reportado puede excluir pagos válidos)', depende: 'Control de cierre', riesgo: 'Alto'
     },
     {
       hoja: 'EXPORT_CONTABILIDAD', entradas: 'Detalle corregido', salidas: 'Asientos/archivo contable', estado: 'NO GENERADA',
-      siLlena: 'Nada estable', noLlena: 'Archivo exportable', depende: 'Cierre contable', riesgo: 'Alto'
+      siLlena: 'N/A', noLlena: 'Archivo exportable — no roto propio; cascade de Detalle vacío', depende: 'Cierre contable', riesgo: 'Alto'
     }
   ];
 
@@ -264,12 +272,15 @@ function renderExecutive() {
   ];
 
   const alerts = [
-    'Detalle solo contiene SALDO_INICIAL',
+    'Statements clasifica movimientos como Saldo_Anterior en vez de mantenerlos como movimientos del período',
+    'Detalle solo contiene SALDO_INICIAL — Statements no propagó los movimientos',
     'Resumen tiene Total_Cargos = 0 con Saldo_Anterior > 0',
-    'Portal no heredó mora',
-    'Conciliación vacía con pagos aplicados existentes',
-    'Exportación contable vacía porque Detalle no tiene movimientos exportables',
-    'Recargo en 0.00 para cargos vencidos',
+    'Portal hereda estados degradados desde Resumen (saldo final, mora, estado, último período pendiente)',
+    'Conciliación vacía — Periodo_Reportado exacto puede estar excluyendo pagos válidos',
+    'Exportación contable vacía — no rota propia; cascade de Detalle incompleto',
+    'Recargo en 0.00 para cargos vencidos — motor temporal no eleva a vencido',
+    'Mora (61 días) y recargo (5 días gracia) no alineados — pueden aplicarse de forma independiente',
+    'Saldo negativo sin semántica — no distingue: crédito a favor / excedente / saldo por aplicar / pago pendiente de conciliar',
     'Regla de cobro no encontrada para concepto/grado/período'
   ];
 
@@ -303,14 +314,14 @@ pie title Distribucion de Riesgo
         ${stableComponents.map(x => `<li>${escapeHtml(x)}</li>`).join('')}
       </ul>
     </div>
-    <h4>Cuello de Botella Principal</h4>
+    <h4>Cuello de Botella Principal — Mecanismo Exacto</h4>
     <div class="bottleneck-box">
       <ul class="tight">
-        <li>El flujo no se rompe primero en Cargos.</li>
-        <li>El flujo no se rompe primero en Aplicaciones.</li>
-        <li>El cuello principal empieza en States / Statements.</li>
-        <li>En esa etapa, los movimientos se colapsan a saldo anterior o saldo inicial.</li>
-        <li>Por eso Resumen, Detalle, Portal y Exportación Contable salen degradados.</li>
+        <li><strong>El problema empieza en Statements:</strong> toma los movimientos y decide cuáles son "del período" y cuáles se mandan a Saldo_Anterior.</li>
+        <li>Esa clasificación incorrecta colapsa cargos, pagos, recargos, ajustes, excedentes y conciliaciones en una sola línea de saldo.</li>
+        <li>Resultado observable: Saldo_Anterior lleno → Total_Cargos = 0 → Total_Pagos = 0 → Detalle con solo SALDO_INICIAL.</li>
+        <li>El problema <strong>no</strong> empieza en Cargos ni en Aplicación de Pagos — ambos funcionan.</li>
+        <li>Por eso Resumen, Detalle, Portal, Conciliación y Exportación Contable quedan degradados por herencia.</li>
       </ul>
     </div>
     <div class="warning-banner">NO REESCRIBIR TODO EL SISTEMA: conservar base estable y reparar propagación, recargos, mora, detalle, conciliación, exportación y trazabilidad.</div>
@@ -467,13 +478,13 @@ pie title Distribucion de Riesgo
       <div class="kpi"><div class="v">0</div><div class="k">Filas en exportación contable</div></div>
     </div>
 
-    <h4>Clasificación de Saldos Negativos</h4>
+    <h4>Semántica de Saldos Negativos — Clasificación Requerida</h4>
+    <p class="small">El sistema detecta saldos negativos pero no les asigna significado. Se deben distinguir estas 4 categorías:</p>
     <div class="line-grid">
-      <div class="mini-card"><h5>Crédito a favor</h5><p class="small">Pago válido mayor al cargo del período.</p></div>
-      <div class="mini-card"><h5>Excedente</h5><p class="small">Saldo positivo trasladable a siguiente período.</p></div>
-      <div class="mini-card"><h5>Pago pendiente de aplicar</h5><p class="small">Pago existente sin match final.</p></div>
-      <div class="mini-card"><h5>Saldo negativo técnico</h5><p class="small">Error de cálculo o secuencia, no crédito real.</p></div>
-      <div class="mini-card"><h5>Saldo reclasificado</h5><p class="small">Saldo revisado y movido a categoría correcta.</p></div>
+      <div class="mini-card"><h5>Crédito a favor</h5><p class="small">Pago válido que excede el cargo del período. Debe mostrarse explícitamente como crédito, no como saldo en cero.</p></div>
+      <div class="mini-card"><h5>Excedente</h5><p class="small">Saldo trasladable al siguiente período de cobro.</p></div>
+      <div class="mini-card"><h5>Saldo por aplicar</h5><p class="small">Pago existente sin match de concepto/período aún asignado.</p></div>
+      <div class="mini-card"><h5>Pago pendiente de conciliar</h5><p class="small">Pago aplicado pero no reconciliado formalmente en el corte.</p></div>
     </div>
 
     <h4>Alertas Automáticas</h4>
@@ -486,12 +497,12 @@ pie title Distribucion de Riesgo
     <h4>Orden Recomendado de Reparación</h4>
     <div class="note-box">
       <ol class="tight">
-        <li>Reparar Statements / Estados</li>
-        <li>Alinear lógica temporal entre Reversals y Statements</li>
-        <li>Reparar Conciliación usando Aplicación_Pagos como fuente real</li>
-        <li>Reparar Exportación Contable a partir de Detalle ya corregido</li>
-        <li>Revisar motor de recargos contra reglas vivas</li>
-        <li>Mejorar clasificación semántica de saldos negativos</li>
+        <li><strong>Reparar Statements / Estados:</strong> corregir clasificación "del período" vs "Saldo_Anterior" para que cargos, pagos, recargos y ajustes no se colapsen a una sola línea</li>
+        <li><strong>Alinear lógica temporal mora/recargo:</strong> sincronizar regla de recargo (5 días gracia) con regla de mora (61 días) para que no operen de forma independiente</li>
+        <li><strong>Reparar Detalle:</strong> a partir de States corregido, propagar movimientos completos a ESTADO_CUENTA_DETALLE</li>
+        <li><strong>Reparar Conciliación:</strong> usar Aplicación_Pagos como fuente real; revisar criterio de Periodo_Reportado para no excluir pagos válidos</li>
+        <li><strong>Reparar Exportación Contable:</strong> al reparar States y Detalle, la exportación debe generarse automáticamente (no está rota propia)</li>
+        <li><strong>Agregar semántica a saldos negativos:</strong> distinguir crédito a favor, excedente, saldo por aplicar y pago pendiente de conciliar</li>
       </ol>
     </div>
 
@@ -503,11 +514,12 @@ pie title Distribucion de Riesgo
     <h4>Preguntas Abiertas</h4>
     <div class="note-box">
       <ul class="tight">
-        <li>¿Cuál es la fuente de verdad final para conciliación?</li>
-        <li>¿Cuál es el criterio exacto vigente de mora?</li>
-        <li>¿Recargo debe depender 100% de reglas vivas?</li>
-        <li>¿Pago multiuso debe conciliarse por aplicación y no por período reportado?</li>
-        <li>¿Saldos negativos deben mostrarse como crédito a favor?</li>
+        <li>¿Cuál es el criterio exacto de clasificación en Statements: qué es "del período" y qué se manda a Saldo_Anterior?</li>
+        <li>¿Cuántos días exactamente activa la mora, y a partir de qué fecha se cuenta?</li>
+        <li>¿Cómo se sincronizan la regla de gracia de recargo (5 días) y la de mora (61 días) para que no operen de forma independiente?</li>
+        <li>¿Cuál es la fuente de verdad para conciliación: Aplicacion_Pagos o Periodo_Reportado?</li>
+        <li>¿Pago multiuso debe conciliarse por aplicación real y no por período reportado?</li>
+        <li>¿Saldo negativo debe mostrarse como crédito a favor o excedente según su origen?</li>
       </ul>
     </div>
   `;
@@ -710,13 +722,15 @@ function renderFlow() {
   // Mapa de propagación de datos con estado de cada flecha
   const mainFlow = `flowchart LR
     A["CARGOS_ESCOLARES"] -->|OK| B["APLICACION_PAGOS"]
-    B -->|PARCIAL| C["RECARGOS / REVERSALS"]
-    C -->|DEGRADA| D["STATES / STATEMENTS"]
+    B -->|PARCIAL| C["RECARGOS"]
+    C -->|DEGRADA| D["STATES\nCUELLO DE BOTELLA"]
     D -->|PARCIAL| E["RESUMEN"]
-    E -->|PARCIAL| F["DETALLE"]
-    F -->|PARCIAL| G["PORTAL"]
-    G -->|VACIO| H["CONCILIACION"]
-    H -->|VACIO| I["EXPORT_CONTABILIDAD"]
+    D -->|INCOMPLETO| F["DETALLE"]
+    E -->|HEREDA| G["PORTAL"]
+    F -->|HEREDA| G
+    B -->|VACIO| H["CONCILIACION"]
+    D -->|VACIO| H
+    F -->|CASCADE| I["EXPORT\nCONTABILIDAD"]
 
     style A fill:#e6f7ec,stroke:#136f3a,stroke-width:3px
     style B fill:#fff7dd,stroke:#8a6a00,stroke-width:3px
@@ -766,12 +780,15 @@ function renderFlow() {
       </div>
 
       <div class="flow-stage">
-        <h4>Conclusión Operativa del Flujo</h4>
+        <h4>Conclusión Operativa del Flujo (Diagnóstico Validado)</h4>
         <div class="flow-detail">
-          <p>El proyecto no necesita reescritura completa.</p>
-          <p>Necesita visibilidad de flujo, trazabilidad de propagación y alertas de ruptura entre módulos.</p>
-          <p>Origen de ruptura principal: States / Statements.</p>
-          <p>Módulos finales degradados por herencia: Resumen, Detalle, Portal, Conciliación y Exportación.</p>
+          <p><strong>Cargos funciona. Aplicación de Pagos funciona parcialmente. El problema no empieza ahí.</strong></p>
+          <p><strong>El problema empieza en Statements:</strong> toma los movimientos y decide cuáles son "del período" y cuáles se mandan a Saldo_Anterior. Esa clasificación incorrecta colapsa cargos, pagos, recargos, ajustes y excedentes en una sola línea de saldo.</p>
+          <p><strong>Conciliación</strong> no está rota por sí misma. Depende de Periodo_Reportado exacto y puede dejar fuera pagos válidos aunque las aplicaciones sí existan.</p>
+          <p><strong>Exportación Contable</strong> no está rota por sí misma. Solo lee ESTADO_CUENTA_DETALLE. Si Detalle solo tiene SALDO_INICIAL, Export queda vacía. Se resuelve al reparar States y Detalle.</p>
+          <p><strong>Portal</strong> no tiene problema propio. Hereda saldo final, mora, estado y último período pendiente desde Resumen.</p>
+          <p><strong>Mora y Recargo</strong> tienen dos reglas independientes (5 días gracia vs 61 días mora) que no están sincronizadas entre sí.</p>
+          <p>El proyecto no necesita reescritura completa. Reparar Statements desbloquea toda la cadena descendente.</p>
         </div>
       </div>
     </div>
