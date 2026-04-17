@@ -60,6 +60,21 @@
       <div class="panel">
         <h2>Navegación</h2>
         <input id="searchInput" type="text" placeholder="Buscar script..." />
+        <div class="filters-grid">
+          <select id="statusFilter" aria-label="Filtrar por estado">
+            <option value="all">Todos los estados</option>
+          </select>
+          <select id="severityFilter" aria-label="Filtrar por severidad">
+            <option value="all">Toda severidad</option>
+          </select>
+          <select id="priorityFilter" aria-label="Filtrar por prioridad">
+            <option value="all">Toda prioridad</option>
+          </select>
+          <select id="typeFilter" aria-label="Filtrar por tipo de módulo">
+            <option value="all">Todo tipo</option>
+          </select>
+        </div>
+        <button id="clearFilters" class="ghost-button" type="button">Limpiar filtros</button>
         <div id="scriptList" class="script-list">
           <div class="small"><strong>Listado visible (fallback sin JS):</strong></div>
           <ul class="tight static-script-list">
@@ -100,8 +115,24 @@
     </aside>
 
     <section class="content">
+      <section class="context-shell card" aria-label="Contexto del script seleccionado">
+        <div class="context-shell__top">
+          <div>
+            <div id="selectedBreadcrumb" class="breadcrumb">CARGOS_MORA / Script</div>
+            <h2 id="selectedTitle">Selecciona un script</h2>
+            <p id="selectedMeta" class="small">La consola contextual cambiará por archivo.</p>
+          </div>
+          <div class="context-shell__actions">
+            <button id="prevScriptBtn" class="ghost-button" type="button">Anterior</button>
+            <button id="nextScriptBtn" class="ghost-button" type="button">Siguiente</button>
+          </div>
+        </div>
+        <div id="selectedHero" class="hero-grid"></div>
+        <div id="selectedRelations" class="relations-row"></div>
+      </section>
+
       <nav class="tabs">
-        <button class="tab" data-tab="informes">Informes</button>
+        <button class="tab" data-tab="informe">Informe</button>
         <button class="tab active" data-tab="direccion">Vista Dirección</button>
         <button class="tab" data-tab="soluciones">Soluciones y Plan</button>
         <button class="tab" data-tab="resumen">Resumen Técnico</button>
@@ -110,87 +141,32 @@
         <button class="tab" data-tab="detalle">Detalle por Script</button>
       </nav>
 
-      <article id="tab-informes" class="tab-content">
-        <div id="historial-informes" class="card report-log" aria-live="polite">
-          <h2>Informes de CARGOS_MORA</h2>
-          <p class="small">
-            Esta pestaña concentra los reportes de iteración en el mismo enlace. Para ver nuevas entradas, refrescar la página.
-          </p>
-          <ol id="reportTimeline" class="report-timeline">
-            <li class="report-entry">
-              <div class="report-head">
-                <strong>Validación real Iteración 2 - bloqueada por permisos</strong>
-                <time datetime="2026-04-16T20:35:00-06:00">2026-04-16 20:35</time>
-              </div>
-              <p>
-                Se intentó ejecutar febrero manual (run84), rebuild de States (run70), rebuild de Portal (run71) y exportación contable; todas las ejecuciones fallaron con "Unable to run script function". El bloque no puede cerrarse sin validación en hojas reales.
-              </p>
-            </li>
-            <li class="report-entry">
-              <div class="report-head">
-                <strong>Iteración 2 - Statements (evidencia reforzada)</strong>
-                <time datetime="2026-04-16T10:45:00-06:00">2026-04-16 10:45</time>
-              </div>
-              <p>
-                Se ajustó la clasificación de movimientos por período en 09_V3_Statements.gs.js para evitar reclasificación indebida a saldo anterior, y se agregó función de evidencia de febrero con 4 casos obligatorios. La ejecución remota quedó bloqueada por permisos de clasp run.
-              </p>
-            </li>
-            <li class="report-entry">
-              <div class="report-head">
-                <strong>Informe base del tablero</strong>
-                <time datetime="2026-04-16T08:30:00-06:00">2026-04-16 08:30</time>
-              </div>
-              <p>
-                Se habilitó lectura completa en HTML visible (sin depender de clics) y estructura semántica para revisión externa.
-              </p>
-            </li>
-            <li class="report-entry">
-              <div class="report-head">
-                <strong>Informe de robustez de render</strong>
-                <time datetime="2026-04-16T09:10:00-06:00">2026-04-16 09:10</time>
-              </div>
-              <p>
-                Se reforzó el render de Mermaid para evitar errores en pestañas ocultas y mejorar estabilidad visual.
-              </p>
-            </li>
-          </ol>
-          <div class="note-box">
-            <p class="small"><strong>Regla operativa:</strong> cada bloque de trabajo nuevo debe agregar aquí una entrada con fecha, hora, cambio realizado y resultado observado.</p>
-          </div>
-        </div>
+      <article id="tab-informe" class="tab-content">
+        <div id="contextInforme" class="card" aria-live="polite"></div>
       </article>
 
       <article id="tab-direccion" class="tab-content active">
-        <div id="execKpis" class="card"></div>
-        <div id="execRisks" class="card"></div>
-        <div id="execNarrative" class="card"></div>
+        <div id="contextDireccion" class="card"></div>
       </article>
 
       <article id="tab-soluciones" class="tab-content">
-        <div id="solutionsPlan" class="card"></div>
+        <div id="contextSoluciones" class="card"></div>
       </article>
 
       <article id="tab-resumen" class="tab-content">
-        <div id="globalSummary" class="card"></div>
-        <div id="callsSummary" class="card"></div>
+        <div id="contextResumen" class="card"></div>
       </article>
 
       <article id="tab-flujo" class="tab-content">
-        <div class="card">
-          <h3>Mapa Macro del Flujo</h3>
-          <div id="mermaidFlow" class="mermaid"></div>
-        </div>
-        <div id="flowNotes" class="card"></div>
+        <div id="contextFlujo" class="card"></div>
       </article>
 
       <article id="tab-conflictos" class="tab-content">
-        <div id="conflictsPanel" class="card"></div>
+        <div id="contextConflictos" class="card"></div>
       </article>
 
       <article id="tab-detalle" class="tab-content">
-        <div id="scriptDetail" class="card">
-          <h3>Selecciona un script en la barra lateral</h3>
-        </div>
+        <div id="contextDetalle" class="card"></div>
       </article>
 
       <article id="external-review" class="card static-review">
@@ -353,6 +329,6 @@
     </section>
   </main>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
