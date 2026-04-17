@@ -324,12 +324,27 @@ body {
   --btn-text: #2f2b61;
   --btn-shadow-solid: #4e42a0;
   --btn-shadow-rgb: 78, 66, 160;
+  display: block;
   text-align: left;
+  text-decoration: none;
   width: 100%;
 }
 .script-btn:hover, .script-btn.active {
   border-color: #4e42a0;
   background: linear-gradient(145deg, #e4dcff 0%, #c9bcff 100%);
+}
+
+.script-static-report {
+  scroll-margin-top: 96px;
+  margin-top: 18px;
+}
+
+.report-anchor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .chip {

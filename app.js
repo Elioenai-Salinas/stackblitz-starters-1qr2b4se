@@ -30,6 +30,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     clearFilters: document.getElementById('clearFilters'),
     scriptList: document.getElementById('scriptList'),
     statsPanel: document.getElementById('statsPanel'),
+    externalScriptsReview: document.getElementById('externalScriptsReview'),
     selectedBreadcrumb: document.getElementById('selectedBreadcrumb'),
     selectedTitle: document.getElementById('selectedTitle'),
     selectedMeta: document.getElementById('selectedMeta'),
@@ -2619,7 +2620,9 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     state.selected = state.scripts[0] || null;
 
     populateFilterOptions();
+    applyHashSelection();
     renderAll();
+    syncHashWithSelected();
   }
 
   function normalizeDataStrings(obj) {
@@ -2770,6 +2773,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     renderStats();
     renderContextHeader();
     renderTabsForSelected();
+    renderExternalScriptReports();
     activateTab(state.activeTab);
   }
 
@@ -2778,14 +2782,15 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     ui.scriptList.innerHTML = '';
 
     visible.forEach(script => {
-      const btn = document.createElement('button');
-      btn.className = 'script-btn' + (state.selected && state.selected.file === script.file ? ' active' : '');
-      btn.innerHTML = `${escapeHtml(script.file)} <span class="chip ${semaforoClass(script.severity)}">${escapeHtml(script.status.toUpperCase())}</span>`;
-      btn.onclick = () => {
-        state.selected = script;
-        renderAll();
+      const link = document.createElement('a');
+      link.className = 'script-btn' + (state.selected && state.selected.file === script.file ? ' active' : '');
+      link.href = `#${buildScriptAnchor(script.file)}`;
+      link.innerHTML = `${escapeHtml(script.file)} <span class="chip ${semaforoClass(script.severity)}">${escapeHtml(script.status.toUpperCase())}</span>`;
+      link.onclick = event => {
+        event.preventDefault();
+        setSelectedScript(script, { updateHash: true, scrollToStatic: true });
       };
-      ui.scriptList.appendChild(btn);
+      ui.scriptList.appendChild(link);
     });
 
     if (!visible.length) {
@@ -2793,6 +2798,30 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     }
 
     ui.totalScripts.textContent = `Scripts: ${visible.length}/${state.scripts.length}`;
+  }
+
+  function renderExternalScriptReports() {
+    if (!ui.externalScriptsReview) return;
+    const visible = getFilteredScripts();
+    ui.externalScriptsReview.innerHTML = visible.map((script, index) => `
+      <article id="${buildScriptAnchor(script.file)}" class="detail-block script-static-report">
+        <div class="report-anchor-row">
+          <h4>Reporte Estático – ${escapeHtml(script.file)}</h4>
+          <a class="relation-pill" href="#top">Ir arriba</a>
+        </div>
+        <p class="small">Ancla estable: #${escapeHtml(buildScriptAnchor(script.file))}</p>
+        <div class="detail-stack">
+          <section class="section-card">${renderInformeTab(script)}</section>
+          <section class="section-card">${renderDireccionTab(script)}</section>
+          <section class="section-card">${renderSolucionesTab(script)}</section>
+          <section class="section-card">${renderResumenTab(script)}</section>
+          <section class="section-card">${renderFlujoTab(script, `static-${index}`)}</section>
+          <section class="section-card">${renderConflictosTab(script)}</section>
+          <section class="section-card">${renderDetalleTab(script, `static-${index}`)}</section>
+        </div>
+      </article>
+    `).join('');
+    safeMermaidRun(Array.from(ui.externalScriptsReview.querySelectorAll('.mermaid')));
   }
 
   function renderStats() {
@@ -3207,8 +3236,8 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     `;
   }
 
-  function renderFlujoTab(script) {
-    const flowId = `flow-${slugify(script.file)}`;
+  function renderFlujoTab(script, scope = 'main') {
+    const flowId = `flow-${scope}-${slugify(script.file)}`;
     const flowText = buildScriptFlow(script);
     return `
       <h3>Flujo Individual de ${escapeHtml(script.file)}</h3>
@@ -3302,9 +3331,9 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     `;
   }
 
-  function renderDetalleTab(script) {
+  function renderDetalleTab(script, scope = 'main') {
     const cotejo = getCotejoRecord(script.file);
-    const flowId = `detail-${slugify(script.file)}`;
+    const flowId = `detail-${scope}-${slugify(script.file)}`;
     return `
       <h3>Detalle Profundo por Script</h3>
       <div class="recommendation-banner">
@@ -3606,6 +3635,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
   function wireNavigation() {
     ui.prevScriptBtn.addEventListener('click', () => moveSelection(-1));
     ui.nextScriptBtn.addEventListener('click', () => moveSelection(1));
+    window.addEventListener('hashchange', () => applyHashSelection({ scrollToStatic: true }));
   }
 
   function moveSelection(delta) {
@@ -3614,13 +3644,13 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     if (currentIndex === -1) return;
     const next = visible[currentIndex + delta];
     if (!next) return;
-    state.selected = next;
-    renderAll();
+    setSelectedScript(next, { updateHash: true, scrollToStatic: false });
   }
 
   function updateFilter(key, value) {
     state.filters[key] = value;
     syncSelectedWithFilters();
+    syncHashWithSelected();
     renderAll();
   }
 
@@ -3632,6 +3662,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     ui.priorityFilter.value = 'all';
     ui.typeFilter.value = 'all';
     syncSelectedWithFilters();
+    syncHashWithSelected();
     renderAll();
   }
 
@@ -3641,6 +3672,55 @@ mermaid.initialize({ startOnLoad: false, theme: 'default' });
     const exists = visible.some(script => state.selected && script.file === state.selected.file);
     if (!exists) {
       state.selected = visible[0];
+    }
+  }
+
+  function buildScriptAnchor(file) {
+    return `script-${slugify(String(file || '').replace(/\.gs\.js$/i, ''))}`;
+  }
+
+  function findScriptByHash(hash) {
+    const normalized = String(hash || '').replace(/^#/, '');
+    if (!normalized) return null;
+    return state.scripts.find(script => buildScriptAnchor(script.file) === normalized) || null;
+  }
+
+  function syncHashWithSelected() {
+    if (!state.selected) return;
+    const nextHash = `#${buildScriptAnchor(state.selected.file)}`;
+    if (window.location.hash !== nextHash) {
+      history.replaceState(null, '', nextHash);
+    }
+  }
+
+  function setSelectedScript(script, { updateHash = false, scrollToStatic = false } = {}) {
+    if (!script) return;
+    state.selected = script;
+    renderAll();
+    if (updateHash) {
+      const nextHash = `#${buildScriptAnchor(script.file)}`;
+      if (window.location.hash !== nextHash) {
+        history.pushState(null, '', nextHash);
+      }
+    }
+    if (scrollToStatic) {
+      const target = document.getElementById(buildScriptAnchor(script.file));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+
+  function applyHashSelection({ scrollToStatic = false } = {}) {
+    const targetScript = findScriptByHash(window.location.hash);
+    if (!targetScript) return;
+    state.selected = targetScript;
+    renderAll();
+    if (scrollToStatic) {
+      const target = document.getElementById(buildScriptAnchor(targetScript.file));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
